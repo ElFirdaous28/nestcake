@@ -1,17 +1,18 @@
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-}
+// enums
+export * from './enums/user-role.enum'
+export * from './enums/request-status.enum'
+export * from './enums/proposal-status.enum'
+export * from './enums/order-status.enum'
+export * from './enums/payment-status.enum'
+export * from './enums/order-type.enum'
 
-export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  GUEST = 'guest',
-}
-
-export enum Status {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  PENDING = 'pending',
-}
+// types
+export * from './types/user.type'
+export * from './types/professional.type'
+export * from './types/request.type'
+export * from './types/proposal.type'
+export * from './types/order.type'
+export * from './types/order-item.type'
+export * from './types/payment.type'
+export * from './types/review.type'
+export * from './types/allergy.type'
