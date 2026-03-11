@@ -1,5 +1,5 @@
 {
-  "name": "@my-app/shared-types",
+  "name": "@shared-types",
   "version": "0.0.1",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -1,4 +1,4 @@
-import { UserRole } from '@my-app/shared-types';
+import { UserRole } from '@shared-types';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

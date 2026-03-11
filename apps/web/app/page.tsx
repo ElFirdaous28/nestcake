@@ -1,8 +1,9 @@
 import Image from "next/image";
-import { User, UserRole, Status } from "@my-app/shared-types";
+import { UserRole } from "@shared-types";
 
 export default function Home() {
-  const userRole = UserRole.USER;
+  const userRole = UserRole.CLIENT;
+  console.log('Current user role:', userRole);  
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
