@@ -1,16 +1,19 @@
+import { UserRole } from '@shared-types'
 import { Model } from 'mongoose'
+import * as bcrypt from 'bcryptjs';
 
 export async function seedUsers(userModel: Model<any>) {
     await userModel.deleteMany({})
-
+    // hashed password
+    const password = await bcrypt.hash('password', 10)
     const users = []
     // creat one admin user
     users.push({
         firstName: 'Admin',
         lastName: 'User',
-        email: 'admin@gamil.com',
-        password: 'password',
-        role: 'ADMIN'
+        email: 'admin@nestcake.com',
+        password,
+        role: UserRole.ADMIN
     })
 
     // creat one professional user
@@ -18,8 +21,8 @@ export async function seedUsers(userModel: Model<any>) {
         firstName: 'Professional',
         lastName: 'User',
         email: 'pro@nestcake.com',
-        password: 'password',
-        role: 'PROFESSIONAL'
+        password,
+        role: UserRole.PROFESSIONAL
     })
 
     for (let i = 1; i <= 3; i++) {
@@ -27,8 +30,8 @@ export async function seedUsers(userModel: Model<any>) {
             firstName: 'User',
             lastName: `${i}`,
             email: `user${i}@nestcake.com`,
-            password: 'password',
-            role: 'CLIENT'
+            password,
+            role: UserRole.CLIENT
         })
     }
 

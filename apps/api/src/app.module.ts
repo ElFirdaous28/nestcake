@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
@@ -12,10 +13,31 @@ import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { AllergiesModule } from './allergies/allergies.module';
+import { AuthModule } from './auth/auth.module';
+
+function normalizeMongoDbName(uri: string) {
+  try {
+    const parsed = new URL(uri);
+    const dbName = parsed.pathname.replace(/^\//, '');
+
+    if (!dbName) {
+      return uri;
+    }
+
+    parsed.pathname = `/${dbName.toLowerCase()}`;
+    return parsed.toString();
+  } catch {
+    return uri;
+  }
+}
+
+const mongoUri = normalizeMongoDbName(
+  process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/nestcake',
+);
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/nestcake'),
+    MongooseModule.forRoot(mongoUri),
     UsersModule,
     ProfessionalsModule,
     ProductsModule,
@@ -26,6 +48,7 @@ import { AllergiesModule } from './allergies/allergies.module';
     PaymentsModule,
     ReviewsModule,
     AllergiesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
