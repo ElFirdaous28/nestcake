@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -13,7 +14,19 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { AllergiesModule } from './allergies/allergies.module';
 
 @Module({
-  imports: [UsersModule, ProfessionalsModule, ProductsModule, CategoriesModule, RequestsModule, ProposalsModule, OrdersModule, PaymentsModule, ReviewsModule, AllergiesModule],
+  imports: [
+    MongooseModule.forRoot(process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/nestcake'),
+    UsersModule,
+    ProfessionalsModule,
+    ProductsModule,
+    CategoriesModule,
+    RequestsModule,
+    ProposalsModule,
+    OrdersModule,
+    PaymentsModule,
+    ReviewsModule,
+    AllergiesModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
