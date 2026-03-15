@@ -11,10 +11,14 @@ import * as bcrypt from 'bcryptjs';
 import { User } from './schemas/user.schema';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+    private readonly authService: AuthService,
+  ) {}
 
   async getMe(authUser: AuthUser) {
     const user = await this.userModel
@@ -82,6 +86,9 @@ export class UsersService {
     user.password = await bcrypt.hash(dto.newPassword, 10);
     await user.save();
 
+    // Revoke all sessions — forces re-login on all devices
+    await this.authService.revokeAllForUser(authUser.sub);
+
     return { message: 'Password changed successfully' };
   }
 
@@ -91,6 +98,9 @@ export class UsersService {
     if (!deleted) {
       throw new NotFoundException('User not found');
     }
+
+    // Clean up all refresh tokens for this user
+    await this.authService.revokeAllForUser(authUser.sub);
 
     return { message: 'Account deleted successfully' };
   }

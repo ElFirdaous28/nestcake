@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
@@ -15,8 +16,10 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { RegisterProfessionalDto } from './dto/register-professional.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { Roles } from './decorators/roles.decorator';
-import { AuthUser, UserRole } from '@shared-types';
+import { AuthUser } from '@shared-types';
+
+const ACCESS_COOKIE_MAX_AGE = 15 * 60 * 1000;          // 15 minutes
+const REFRESH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 @Controller('auth')
 export class AuthController {
@@ -28,8 +31,8 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const auth = await this.authService.registerUser(dto);
-    this.setAuthCookie(res, auth.accessToken);
-    return auth;
+    this.setTokenCookies(res, auth.accessToken, auth.refreshToken);
+    return { accessToken: auth.accessToken, user: auth.user };
   }
 
   @Post('register/professional')
@@ -38,39 +41,72 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const auth = await this.authService.registerProfessional(dto);
-    this.setAuthCookie(res, auth.accessToken);
-    return auth;
+    this.setTokenCookies(res, auth.accessToken, auth.refreshToken);
+    return { accessToken: auth.accessToken, user: auth.user };
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const auth = await this.authService.login(dto);
-    this.setAuthCookie(res, auth.accessToken);
-    return auth;
+    this.setTokenCookies(res, auth.accessToken, auth.refreshToken);
+    return { accessToken: auth.accessToken, user: auth.user };
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(
+    @Req() req: Request & { cookies?: Record<string, string> },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const rawRefreshToken = req.cookies?.refresh_token;
+    if (!rawRefreshToken) {
+      throw new UnauthorizedException('Missing refresh token');
+    }
+    const auth = await this.authService.refresh(rawRefreshToken);
+    this.setTokenCookies(res, auth.accessToken, auth.refreshToken);
+    return { accessToken: auth.accessToken, user: auth.user };
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token');
+  async logout(
+    @Req() req: Request & { cookies?: Record<string, string> },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.authService.logout(req.cookies?.refresh_token);
+    this.clearTokenCookies(res);
     return { message: 'Logged out' };
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  @Roles(UserRole.CLIENT, UserRole.PROFESSIONAL, UserRole.ADMIN)
   getMe(@Req() req: Request & { user: AuthUser }) {
     return this.authService.getMe(req.user);
   }
 
-  private setAuthCookie(res: Response, token: string) {
-    res.cookie('access_token', token, {
+  private setTokenCookies(res: Response, accessToken: string, refreshToken: string) {
+    const secure = process.env.NODE_ENV === 'production';
+
+    res.cookie('access_token', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure,
       sameSite: 'lax',
-      maxAge: Number(process.env.JWT_COOKIE_MAX_AGE_MS ?? 1000 * 60 * 60 * 24 * 7),
+      maxAge: ACCESS_COOKIE_MAX_AGE,
       path: '/',
     });
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure,
+      sameSite: 'lax',
+      maxAge: REFRESH_COOKIE_MAX_AGE,
+      path: '/api/auth',
+    });
+  }
+
+  private clearTokenCookies(res: Response) {
+    res.clearCookie('access_token', { path: '/' });
+    res.clearCookie('refresh_token', { path: '/api/auth' });
   }
 }

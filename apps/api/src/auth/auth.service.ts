@@ -4,18 +4,23 @@ import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@shared-types';
 import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
+import * as crypto from 'crypto';
 import { User } from '../users/schemas/user.schema';
 import { Professional } from '../professionals/schemas/professional.schema';
+import { RefreshToken } from './schemas/refresh-token.schema';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { RegisterProfessionalDto } from './dto/register-professional.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthUser } from '@shared-types';
+
+const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectModel(User.name) private readonly userModel: Model<User>,
         @InjectModel(Professional.name) private readonly professionalModel: Model<Professional>,
+        @InjectModel(RefreshToken.name) private readonly refreshTokenModel: Model<RefreshToken>,
         private readonly jwtService: JwtService,
     ) { }
 
@@ -51,6 +56,36 @@ export class AuthService {
         }
 
         return this.buildAuthResponse(user._id.toString(), user.email, user.role);
+    }
+
+    async refresh(rawRefreshToken: string) {
+        const tokenHash = this.hashToken(rawRefreshToken);
+        const stored = await this.refreshTokenModel.findOne({ tokenHash }).exec();
+
+        if (!stored || stored.expiresAt < new Date()) {
+            if (stored) await stored.deleteOne();
+            throw new UnauthorizedException('Invalid or expired refresh token');
+        }
+
+        const user = await this.userModel.findById(stored.userId).exec();
+        if (!user) {
+            await stored.deleteOne();
+            throw new UnauthorizedException('User not found');
+        }
+
+        // Rotate: delete old token, issue a fresh pair
+        await stored.deleteOne();
+        return this.buildAuthResponse(user._id.toString(), user.email, user.role);
+    }
+
+    async logout(rawRefreshToken: string | undefined) {
+        if (!rawRefreshToken) return;
+        const tokenHash = this.hashToken(rawRefreshToken);
+        await this.refreshTokenModel.deleteOne({ tokenHash }).exec();
+    }
+
+    async revokeAllForUser(userId: string) {
+        await this.refreshTokenModel.deleteMany({ userId }).exec();
     }
 
     async getMe(authUser: AuthUser) {
@@ -94,10 +129,22 @@ export class AuthService {
         const payload: AuthUser = { sub, email, role };
         const accessToken = await this.jwtService.signAsync(payload);
 
+        const rawRefreshToken = crypto.randomBytes(64).toString('hex');
+        const tokenHash = this.hashToken(rawRefreshToken);
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRY_DAYS);
+
+        await this.refreshTokenModel.create({ userId: sub, tokenHash, expiresAt });
+
         return {
             accessToken,
+            refreshToken: rawRefreshToken,
             user: payload,
         };
+    }
+
+    private hashToken(token: string): string {
+        return crypto.createHash('sha256').update(token).digest('hex');
     }
 
     private normalizeEmail(email: string | undefined) {
