@@ -19,7 +19,7 @@ import { AuthUser } from '@shared-types';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('register/user')
   async registerUser(
