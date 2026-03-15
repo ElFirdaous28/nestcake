@@ -14,8 +14,10 @@ import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { RegisterProfessionalDto } from './dto/register-professional.dto';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { AuthUser } from '@shared-types';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
+import { Roles } from './decorators/roles.decorator';
+import { AuthUser, UserRole } from '@shared-types';
 
 @Controller('auth')
 export class AuthController {
@@ -57,7 +59,8 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.CLIENT, UserRole.PROFESSIONAL, UserRole.ADMIN)
   getMe(@Req() req: Request & { user: AuthUser }) {
     return this.authService.getMe(req.user);
   }
