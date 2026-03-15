@@ -6,7 +6,6 @@ import { AuthService } from './auth.service';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { Professional, ProfessionalSchema } from '../professionals/schemas/professional.schema';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RolesGuard } from './guards/roles.guard';
 
 const jwtExpiresIn = (process.env.JWT_EXPIRES_IN ?? '7d') as any;
 
@@ -22,7 +21,7 @@ const jwtExpiresIn = (process.env.JWT_EXPIRES_IN ?? '7d') as any;
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAuthGuard, RolesGuard],
-  exports: [JwtAuthGuard, RolesGuard],
+  providers: [AuthService, JwtAuthGuard],
+  exports: [JwtModule, JwtAuthGuard],
 })
 export class AuthModule {}

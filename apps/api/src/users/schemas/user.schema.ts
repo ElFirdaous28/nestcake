@@ -22,6 +22,9 @@ export class User {
     @Prop()
     phone?: string
 
+    @Prop()
+    avatar?: string
+
     @Prop({ enum: UserRole, default: UserRole.CLIENT })
     role: UserRole
 }

@@ -1,26 +1,97 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { AuthUser } from '@shared-types';
+import { Model } from 'mongoose';
+import * as bcrypt from 'bcryptjs';
+import { User } from './schemas/user.schema';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
+
+  async getMe(authUser: AuthUser) {
+    const user = await this.userModel
+      .findById(authUser.sub)
+      .select('-password')
+      .lean()
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async updateMe(authUser: AuthUser, dto: UpdateProfileDto) {
+    const updateData: Partial<User> = {};
+
+    if (typeof dto.firstName === 'string') {
+      updateData.firstName = dto.firstName;
+    }
+
+    if (typeof dto.lastName === 'string') {
+      updateData.lastName = dto.lastName;
+    }
+
+    if (typeof dto.phone === 'string') {
+      updateData.phone = dto.phone;
+    }
+
+    if (typeof dto.avatar === 'string') {
+      updateData.avatar = dto.avatar;
+    }
+
+    const user = await this.userModel
+      .findByIdAndUpdate(authUser.sub, updateData, { new: true, runValidators: true })
+      .select('-password')
+      .lean()
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async changePassword(authUser: AuthUser, dto: ChangePasswordDto) {
+    const user = await this.userModel.findById(authUser.sub).exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const currentPasswordOk = await bcrypt.compare(dto.currentPassword, user.password);
+    if (!currentPasswordOk) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const samePassword = await bcrypt.compare(dto.newPassword, user.password);
+    if (samePassword) {
+      throw new BadRequestException('New password must be different from current password');
+    }
+
+    user.password = await bcrypt.hash(dto.newPassword, 10);
+    await user.save();
+
+    return { message: 'Password changed successfully' };
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+  async deleteMe(authUser: AuthUser) {
+    const deleted = await this.userModel.findByIdAndDelete(authUser.sub).lean().exec();
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    if (!deleted) {
+      throw new NotFoundException('User not found');
+    }
+
+    return { message: 'Account deleted successfully' };
   }
 }
