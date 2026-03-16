@@ -5,11 +5,13 @@ export * from './enums/proposal-status.enum'
 export * from './enums/order-status.enum'
 export * from './enums/payment-status.enum'
 export * from './enums/order-type.enum'
+export * from './enums/professional-verification-status.enum'
 
 // types
 export * from './types/user.type'
 export * from './types/professional.type'
 export * from './types/request.type'
+export * from './types/portfolio-item.type'
 export * from './types/proposal.type'
 export * from './types/order.type'
 export * from './types/order-item.type'

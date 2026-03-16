@@ -73,7 +73,7 @@ export class AuthService {
             throw new UnauthorizedException('User not found');
         }
 
-        // Rotate: delete old token, issue a fresh pair
+        // delete old token
         await stored.deleteOne();
         return this.buildAuthResponse(user._id.toString(), user.email, user.role);
     }

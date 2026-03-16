@@ -5,14 +5,20 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  MaxFileSizeValidator,
+  ParseFilePipe,
   Patch,
   Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { AuthUser } from '@shared-types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { multerDiskConfig } from '../common/upload.config';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -33,6 +39,22 @@ export class UsersController {
     @Body() dto: UpdateProfileDto,
   ) {
     return this.usersService.updateMe(req.user, dto);
+  }
+
+  @Patch('avatar')
+  @UseInterceptors(FileInterceptor('avatar', multerDiskConfig('avatars')))
+  uploadAvatar(
+    @Req() req: Request & { user: AuthUser },
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.usersService.uploadAvatar(req.user, file);
   }
 
   @Patch('password')

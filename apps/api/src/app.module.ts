@@ -1,6 +1,8 @@
 import 'dotenv/config';
+import { join } from 'path';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -38,6 +40,10 @@ const mongoUri = normalizeMongoDbName(
 @Module({
   imports: [
     MongooseModule.forRoot(mongoUri),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'public'),
+      serveStaticOptions: { index: false },
+    }),
     UsersModule,
     ProfessionalsModule,
     ProductsModule,

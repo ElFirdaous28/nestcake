@@ -18,8 +18,4 @@ export class UpdateProfileDto {
   @MaxLength(30)
   phone?: string;
 
-  @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  avatar?: string;
 }

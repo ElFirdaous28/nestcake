@@ -4,24 +4,37 @@ import * as bcrypt from 'bcryptjs';
 
 export async function seedUsers(userModel: Model<any>) {
     await userModel.deleteMany({})
-    // hashed password
+
+    // Shared hashed password for test users: "password"
     const password = await bcrypt.hash('password', 10)
-    const users = []
-    // creat one admin user
+    const users: any[] = []
+
+    // Create one admin user
     users.push({
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@nestcake.com',
         password,
+        phone: '+38760000001',
         role: UserRole.ADMIN
     })
 
-    // creat one professional user
+    // Create professionals
     users.push({
         firstName: 'Professional',
         lastName: 'User',
         email: 'pro@nestcake.com',
         password,
+        phone: '+38760000002',
+        role: UserRole.PROFESSIONAL
+    })
+
+    users.push({
+        firstName: 'Professional',
+        lastName: 'User2',
+        email: 'pro2@nestcake.com',
+        password,
+        phone: '+38760000003',
         role: UserRole.PROFESSIONAL
     })
 
@@ -31,6 +44,7 @@ export async function seedUsers(userModel: Model<any>) {
             lastName: `${i}`,
             email: `user${i}@nestcake.com`,
             password,
+            phone: `+3876000000${i + 2}`,
             role: UserRole.CLIENT
         })
     }

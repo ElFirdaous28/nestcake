@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { unlinkSync } from 'fs';
 import { InjectModel } from '@nestjs/mongoose';
 import { AuthUser } from '@shared-types';
 import { Model } from 'mongoose';
@@ -35,23 +36,9 @@ export class UsersService {
   }
 
   async updateMe(authUser: AuthUser, dto: UpdateProfileDto) {
-    const updateData: Partial<User> = {};
-
-    if (typeof dto.firstName === 'string') {
-      updateData.firstName = dto.firstName;
-    }
-
-    if (typeof dto.lastName === 'string') {
-      updateData.lastName = dto.lastName;
-    }
-
-    if (typeof dto.phone === 'string') {
-      updateData.phone = dto.phone;
-    }
-
-    if (typeof dto.avatar === 'string') {
-      updateData.avatar = dto.avatar;
-    }
+    const updateData = Object.fromEntries(
+      Object.entries(dto).filter(([, v]) => v !== undefined),
+    );
 
     const user = await this.userModel
       .findByIdAndUpdate(authUser.sub, updateData, { new: true, runValidators: true })
@@ -60,6 +47,23 @@ export class UsersService {
       .exec();
 
     if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  async uploadAvatar(authUser: AuthUser, file: Express.Multer.File) {
+    const avatarUrl = `/uploads/avatars/${file.filename}`;
+
+    const user = await this.userModel
+      .findByIdAndUpdate(authUser.sub, { avatar: avatarUrl }, { new: true, runValidators: true })
+      .select('-password')
+      .lean()
+      .exec();
+
+    if (!user) {
+      unlinkSync(file.path);
       throw new NotFoundException('User not found');
     }
 

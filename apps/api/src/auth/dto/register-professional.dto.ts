@@ -1,5 +1,28 @@
-import { Transform } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsEmail,
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
+
+class GeoPointDto {
+  @IsIn(['Point'])
+  type: 'Point';
+
+  @IsArray()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  @IsNumber({}, { each: true })
+  coordinates: [number, number];
+}
 
 export class RegisterProfessionalDto {
   @IsString()
@@ -31,7 +54,7 @@ export class RegisterProfessionalDto {
   @IsString()
   description?: string;
 
-  @IsOptional()
-  @IsString()
-  location?: string;
+  @ValidateNested()
+  @Type(() => GeoPointDto)
+  location: GeoPointDto;
 }
