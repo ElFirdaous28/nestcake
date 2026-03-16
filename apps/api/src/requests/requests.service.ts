@@ -12,15 +12,15 @@ export class RequestsService {
     return `This action returns all requests`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} request`;
   }
 
-  update(id: number, updateRequestDto: UpdateRequestDto) {
+  update(id: string, updateRequestDto: UpdateRequestDto) {
     return `This action updates a #${id} request`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} request`;
   }
 }

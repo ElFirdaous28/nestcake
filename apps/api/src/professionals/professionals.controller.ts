@@ -19,9 +19,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { multerDiskConfig } from '../common/upload.config';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { ProfessionalsService } from './professionals.service';
 import { UpdateMyProfessionalDto } from './dto/update-my-professional.dto';
 import { AddProfessionalPortfolioItemDto } from './dto/add-professional-portfolio-item.dto';
+import { UpdateProfessionalVerificationDto } from './dto/update-professional-verification.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('professionals')
@@ -74,13 +76,23 @@ export class ProfessionalsController {
   @Delete('me/portfolio/:id')
   removePortfolioItem(
     @Req() req: Request & { user: AuthUser },
-    @Param('id') portfolioItemId: string,
+    @Param('id', ParseObjectIdPipe) portfolioItemId: string,
   ) {
     return this.professionalsService.removePortfolioItem(req.user, portfolioItemId);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Patch(':id/verification')
+  updateVerification(
+    @Param('id', ParseObjectIdPipe) professionalId: string,
+    @Body() dto: UpdateProfessionalVerificationDto,
+  ) {
+    return this.professionalsService.updateVerification(professionalId, dto);
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.professionalsService.findOne(id);
   }
 }

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ProposalsService } from './proposals.service';
 import { CreateProposalDto } from './dto/create-proposal.dto';
 import { UpdateProposalDto } from './dto/update-proposal.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 
 @Controller('proposals')
 export class ProposalsController {
@@ -18,17 +19,17 @@ export class ProposalsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.proposalsService.findOne(+id);
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
+    return this.proposalsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProposalDto: UpdateProposalDto) {
-    return this.proposalsService.update(+id, updateProposalDto);
+  update(@Param('id', ParseObjectIdPipe) id: string, @Body() updateProposalDto: UpdateProposalDto) {
+    return this.proposalsService.update(id, updateProposalDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.proposalsService.remove(+id);
+  remove(@Param('id', ParseObjectIdPipe) id: string) {
+    return this.proposalsService.remove(id);
   }
 }

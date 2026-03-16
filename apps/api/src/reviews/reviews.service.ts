@@ -12,15 +12,15 @@ export class ReviewsService {
     return `This action returns all reviews`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} review`;
   }
 
-  update(id: number, updateReviewDto: UpdateReviewDto) {
+  update(id: string, updateReviewDto: UpdateReviewDto) {
     return `This action updates a #${id} review`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} review`;
   }
 }

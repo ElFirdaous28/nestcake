@@ -12,15 +12,15 @@ export class AllergiesService {
     return `This action returns all allergies`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} allergy`;
   }
 
-  update(id: number, updateAllergyDto: UpdateAllergyDto) {
+  update(id: string, updateAllergyDto: UpdateAllergyDto) {
     return `This action updates a #${id} allergy`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} allergy`;
   }
 }

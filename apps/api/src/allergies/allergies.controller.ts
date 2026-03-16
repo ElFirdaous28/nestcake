@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AllergiesService } from './allergies.service';
 import { CreateAllergyDto } from './dto/create-allergy.dto';
 import { UpdateAllergyDto } from './dto/update-allergy.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 
 @Controller('allergies')
 export class AllergiesController {
@@ -18,17 +19,17 @@ export class AllergiesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.allergiesService.findOne(+id);
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
+    return this.allergiesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAllergyDto: UpdateAllergyDto) {
-    return this.allergiesService.update(+id, updateAllergyDto);
+  update(@Param('id', ParseObjectIdPipe) id: string, @Body() updateAllergyDto: UpdateAllergyDto) {
+    return this.allergiesService.update(id, updateAllergyDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.allergiesService.remove(+id);
+  remove(@Param('id', ParseObjectIdPipe) id: string) {
+    return this.allergiesService.remove(id);
   }
 }

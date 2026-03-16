@@ -12,15 +12,15 @@ export class ProposalsService {
     return `This action returns all proposals`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} proposal`;
   }
 
-  update(id: number, updateProposalDto: UpdateProposalDto) {
+  update(id: string, updateProposalDto: UpdateProposalDto) {
     return `This action updates a #${id} proposal`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} proposal`;
   }
 }

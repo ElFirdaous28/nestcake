@@ -1,15 +1,15 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { unlinkSync } from 'fs';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuthUser } from '@shared-types';
+import { AuthUser, ProfessionalVerificationStatus } from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Professional } from './schemas/professional.schema';
 import { UpdateMyProfessionalDto } from './dto/update-my-professional.dto';
 import { AddProfessionalPortfolioItemDto } from './dto/add-professional-portfolio-item.dto';
+import { UpdateProfessionalVerificationDto } from './dto/update-professional-verification.dto';
 
 
 @Injectable()
@@ -24,10 +24,6 @@ export class ProfessionalsService {
   }
 
   async findOne(id: string) {
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid professional id');
-    }
-
     const professional = await this.professionalModel.findById(id).lean().exec();
     if (!professional) {
       throw new NotFoundException('Professional not found');
@@ -109,10 +105,6 @@ export class ProfessionalsService {
   }
 
   async removePortfolioItem(authUser: AuthUser, portfolioItemId: string) {
-    if (!Types.ObjectId.isValid(portfolioItemId)) {
-      throw new BadRequestException('Invalid portfolio item id');
-    }
-
     const updated = await this.professionalModel
       .findOneAndUpdate(
         { userId: new Types.ObjectId(authUser.sub) },
@@ -124,6 +116,29 @@ export class ProfessionalsService {
 
     if (!updated) {
       throw new NotFoundException('Professional profile not found');
+    }
+
+    return updated;
+  }
+
+  async updateVerification(
+    professionalId: string,
+    dto: UpdateProfessionalVerificationDto,
+  ) {
+    const updated = await this.professionalModel
+      .findByIdAndUpdate(
+        professionalId,
+        {
+          verificationStatus: dto.verificationStatus,
+          verified: dto.verificationStatus === ProfessionalVerificationStatus.VERIFIED,
+        },
+        { new: true, runValidators: true },
+      )
+      .lean()
+      .exec();
+
+    if (!updated) {
+      throw new NotFoundException('Professional not found');
     }
 
     return updated;
