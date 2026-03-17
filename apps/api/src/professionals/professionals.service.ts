@@ -52,7 +52,7 @@ export class ProfessionalsService {
 
     const updated = await this.professionalModel
       .findOneAndUpdate({ userId: new Types.ObjectId(authUser.sub) }, updateData, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       })
       .lean()
@@ -91,7 +91,7 @@ export class ProfessionalsService {
             portfolio: portfolioItem,
           },
         },
-        { new: true, runValidators: true },
+        { returnDocument: 'after', runValidators: true },
       )
       .lean()
       .exec();
@@ -109,7 +109,7 @@ export class ProfessionalsService {
       .findOneAndUpdate(
         { userId: new Types.ObjectId(authUser.sub) },
         { $pull: { portfolio: { _id: new Types.ObjectId(portfolioItemId) } } },
-        { new: true },
+        { returnDocument: 'after' },
       )
       .lean()
       .exec();
@@ -132,7 +132,7 @@ export class ProfessionalsService {
           verificationStatus: dto.verificationStatus,
           verified: dto.verificationStatus === ProfessionalVerificationStatus.VERIFIED,
         },
-        { new: true, runValidators: true },
+        { returnDocument: 'after', runValidators: true },
       )
       .lean()
       .exec();

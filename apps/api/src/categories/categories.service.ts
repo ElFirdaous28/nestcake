@@ -70,7 +70,7 @@ export class CategoriesService {
     }
 
     const updated = await this.categoryModel
-      .findByIdAndUpdate(id, updateData, { new: true, runValidators: true })
+      .findByIdAndUpdate(id, updateData, { returnDocument: 'after', runValidators: true })
       .lean()
       .exec();
 

@@ -6,7 +6,7 @@ export type AllergyDocument = Allergy & Document
 @Schema()
 export class Allergy {
 
-    @Prop({ required: true })
+    @Prop({ required: true, unique: true })
     name: string
 }
 
