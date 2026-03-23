@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthUser, UserRole } from '@shared-types';
 import { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -7,12 +7,11 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FindOrdersQueryDto } from './dto/find-orders-query.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly ordersService: OrdersService) { }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
@@ -24,9 +23,11 @@ export class OrdersController {
     return this.ordersService.create(req.user, createOrderDto);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Get()
-  findAll() {
-    return this.ordersService.findAll();
+  findAll(@Query() query: FindOrdersQueryDto) {
+    return this.ordersService.findAll(query);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -54,13 +55,13 @@ export class OrdersController {
     return this.ordersService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id', ParseObjectIdPipe) id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(id, updateOrderDto);
-  }
-
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.CLIENT, UserRole.ADMIN)
   @Delete(':id')
-  remove(@Param('id', ParseObjectIdPipe) id: string) {
-    return this.ordersService.remove(id);
+  remove(
+    @Req() req: Request & { user: AuthUser },
+    @Param('id', ParseObjectIdPipe) id: string,
+  ) {
+    return this.ordersService.remove(id, req.user);
   }
 }

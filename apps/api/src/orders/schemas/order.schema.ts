@@ -45,6 +45,12 @@ export class Order {
 
     @Prop({ type: [OrderItemSchema], default: [] })
     items: OrderItem[]
+
+    @Prop({ default: false })
+    isDeleted: boolean
+
+    @Prop()
+    deletedAt?: Date
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order)

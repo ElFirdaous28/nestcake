@@ -1,12 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, MethodNotAllowedException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuthUser, OrderStatus, OrderType, ProductStatus } from '@shared-types';
+import { AuthUser, OrderStatus, OrderType, ProductStatus, UserRole } from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Product } from '../products/schemas/product.schema';
 import { Professional } from '../professionals/schemas/professional.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FindOrdersQueryDto } from './dto/find-orders-query.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order } from './schemas/order.schema';
 
 @Injectable()
@@ -23,6 +22,41 @@ export class OrdersService {
       .populate('clientId', 'firstName lastName email phone avatar')
       .populate('professionalId', 'businessName verified verificationStatus')
       .populate('items.productId', 'name price isAvailable status');
+  }
+
+  private async listOrdersByFilter(filter: Record<string, unknown>, query: FindOrdersQueryDto) {
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
+    const skip = (page - 1) * limit;
+
+    const finalFilter: Record<string, unknown> = {
+      isDeleted: { $ne: true },
+      ...filter,
+    };
+    if (query.status) {
+      finalFilter.status = query.status;
+    }
+
+    const [data, total] = await Promise.all([
+      this.listBaseQuery()
+        .find(finalFilter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .exec(),
+      this.orderModel.countDocuments(finalFilter),
+    ]);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async create(authUser: AuthUser, createOrderDto: CreateOrderDto) {
@@ -83,43 +117,14 @@ export class OrdersService {
     return this.findOne(order._id.toString());
   }
 
-  findAll() {
-    return `This action returns all orders`;
+  findAll(query: FindOrdersQueryDto) {
+    return this.listOrdersByFilter({}, query);
   }
 
   async findClientOrders(authUser: AuthUser, query: FindOrdersQueryDto) {
-    const page = Math.max(1, query.page ?? 1);
-    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
-    const skip = (page - 1) * limit;
-
-    const filter: Record<string, unknown> = {
+    return this.listOrdersByFilter({
       clientId: new Types.ObjectId(authUser.sub),
-    };
-
-    if (query.status) {
-      filter.status = query.status;
-    }
-
-    const [data, total] = await Promise.all([
-      this.listBaseQuery()
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean()
-        .exec(),
-      this.orderModel.countDocuments(filter),
-    ]);
-
-    return {
-      data,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    };
+    }, query);
   }
 
   async findProfessionalOrders(authUser: AuthUser, query: FindOrdersQueryDto) {
@@ -132,43 +137,14 @@ export class OrdersService {
       throw new NotFoundException('Professional profile not found');
     }
 
-    const page = Math.max(1, query.page ?? 1);
-    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
-    const skip = (page - 1) * limit;
-
-    const filter: Record<string, unknown> = {
+    return this.listOrdersByFilter({
       professionalId: professional._id,
-    };
-
-    if (query.status) {
-      filter.status = query.status;
-    }
-
-    const [data, total] = await Promise.all([
-      this.listBaseQuery()
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean()
-        .exec(),
-      this.orderModel.countDocuments(filter),
-    ]);
-
-    return {
-      data,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    };
+    }, query);
   }
 
   findOne(id: string) {
     return this.orderModel
-      .findById(id)
+      .findOne({ _id: new Types.ObjectId(id), isDeleted: { $ne: true } })
       .populate('clientId', 'firstName lastName email phone avatar')
       .populate('professionalId', 'businessName verified verificationStatus')
       .populate('items.productId', 'name price isAvailable status')
@@ -176,11 +152,39 @@ export class OrdersService {
       .exec();
   }
 
-  update(id: string, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  update() {
+    throw new MethodNotAllowedException('Generic order update is disabled. Use dedicated order action endpoints.');
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} order`;
+  async remove(id: string, authUser: AuthUser) {
+    const order = await this.orderModel.findById(id).lean().exec();
+
+    if (!order || order.isDeleted) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (authUser.role !== UserRole.ADMIN && order.clientId.toString() !== authUser.sub) {
+      throw new BadRequestException('You can only delete your own orders');
+    }
+
+    if (
+      authUser.role !== UserRole.ADMIN &&
+      order.status !== OrderStatus.AWAITING_PAYMENT &&
+      order.status !== OrderStatus.CANCELLED
+    ) {
+      throw new BadRequestException('You can only delete orders that are awaiting payment or already cancelled');
+    }
+
+    await this.orderModel.findByIdAndUpdate(
+      id,
+      {
+        isDeleted: true,
+        deletedAt: new Date(),
+        status: OrderStatus.CANCELLED,
+      },
+      { runValidators: true },
+    );
+
+    return { message: 'Order deleted successfully' };
   }
 }
