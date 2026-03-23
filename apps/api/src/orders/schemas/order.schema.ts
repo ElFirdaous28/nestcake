@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
+import { OrderStatus, OrderType } from "@shared-types"
 import { Types, Document } from "mongoose"
 
 export type OrderDocument = Order & Document
@@ -33,14 +34,14 @@ export class Order {
     @Prop({ type: Types.ObjectId, ref: 'Proposal' })
     proposalId?: Types.ObjectId
 
-    @Prop({ required: true })
-    type: string
+    @Prop({ enum: OrderType, required: true })
+    type: OrderType
 
     @Prop({ required: true })
     totalPrice: number
 
-    @Prop({ required: true })
-    status: string
+    @Prop({ enum: OrderStatus, required: true, default: OrderStatus.AWAITING_PAYMENT })
+    status: OrderStatus
 
     @Prop({ type: [OrderItemSchema], default: [] })
     items: OrderItem[]

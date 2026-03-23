@@ -93,7 +93,7 @@ export class ProductsService {
 
     if (scope === 'client') {
       return this.findAllByFilter(
-        { status: ProductStatus.PUBLISHED, professionalVerified: true },
+        { status: ProductStatus.PUBLISHED, isAvailable: true },
         options,
       );
     }
@@ -241,11 +241,7 @@ export class ProductsService {
 
     return this.productModel.findByIdAndUpdate(
       id,
-      {
-        status,
-        professionalVerified:
-          professional.verificationStatus === ProfessionalVerificationStatus.VERIFIED,
-      },
+      { status },
       { returnDocument: 'after', runValidators: true },
     ).lean();
   }
@@ -261,10 +257,7 @@ export class ProductsService {
 
     const result = await this.productModel.updateMany(
       { professionalId: professional._id },
-      {
-        status: ProductStatus.PUBLISHED,
-        professionalVerified: true,
-      },
+      { status: ProductStatus.PUBLISHED },
     );
 
     return { message: `${result.modifiedCount} products published` };
