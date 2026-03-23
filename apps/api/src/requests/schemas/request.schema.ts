@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Types, Document } from "mongoose"
-import { RequestStatus } from "@shared-types"
+import { DeliveryType, RequestStatus } from "@shared-types"
 
 export type RequestDocument = Request & Document
 
@@ -28,8 +28,8 @@ export class Request {
     @Prop({ required: true })
     deliveryDateTime: Date
     
-    @Prop({ enum: ['delivery', 'pickup'], required: true })
-    deliveryType: 'delivery' | 'pickup';
+    @Prop({ enum: DeliveryType, required: true })
+    deliveryType: DeliveryType;
 
     @Prop()
     location?: string

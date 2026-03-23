@@ -1,5 +1,6 @@
 import { IsString, IsOptional, IsNumber, IsArray, IsDate, MinLength, MaxLength, Min, IsEnum, ValidateIf } from 'class-validator';
 import { Type } from 'class-transformer';
+import { DeliveryType } from '@shared-types';
 
 export class CreateRequestDto {
   @IsString()
@@ -25,10 +26,10 @@ export class CreateRequestDto {
   @Type(() => Date)
   deliveryDateTime: Date;
 
-  @IsEnum(['delivery', 'pickup'])
-  deliveryType: 'delivery' | 'pickup';
+  @IsEnum(DeliveryType)
+  deliveryType: DeliveryType;
 
-  @ValidateIf((dto) => dto.deliveryType === 'delivery')
+  @ValidateIf((dto) => dto.deliveryType === DeliveryType.DELIVERY)
   @IsString()
   @MinLength(5)
   @MaxLength(200)

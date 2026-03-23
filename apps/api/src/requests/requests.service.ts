@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuthUser, RequestStatus, UserRole } from '@shared-types';
+import { AuthUser, DeliveryType, RequestStatus, UserRole } from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Request, RequestDocument } from './schemas/request.schema';
 import { User } from '../users/schemas/user.schema';
@@ -46,7 +46,7 @@ export class RequestsService {
     }
 
     // Validate location for delivery type
-    if (createRequestDto.deliveryType === 'delivery' && !createRequestDto.location?.trim()) {
+    if (createRequestDto.deliveryType === DeliveryType.DELIVERY && !createRequestDto.location?.trim()) {
       throw new BadRequestException('Location is required for delivery orders');
     }
 
@@ -71,7 +71,7 @@ export class RequestsService {
       status: RequestStatus.OPEN,
     };
 
-    if (createRequestDto.deliveryType === 'delivery' && createRequestDto.location) {
+    if (createRequestDto.deliveryType === DeliveryType.DELIVERY && createRequestDto.location) {
       requestData.location = createRequestDto.location.trim();
     }
 
@@ -193,7 +193,7 @@ export class RequestsService {
     if (updateRequestDto.deliveryType !== undefined) {
       updateData.deliveryType = updateRequestDto.deliveryType;
       // If changing to dropdown delivery, location is required
-      if (updateRequestDto.deliveryType === 'delivery' && !updateRequestDto.location?.trim() && !request.location) {
+      if (updateRequestDto.deliveryType === DeliveryType.DELIVERY && !updateRequestDto.location?.trim() && !request.location) {
         throw new BadRequestException('Location is required when delivery type is set to delivery');
       }
     }
@@ -201,7 +201,7 @@ export class RequestsService {
     if (updateRequestDto.location !== undefined) {
       if (updateRequestDto.location && updateRequestDto.location.trim()) {
         updateData.location = updateRequestDto.location.trim();
-      } else if (updateRequestDto.deliveryType === 'pickup' || updateData.deliveryType === 'pickup') {
+      } else if (updateRequestDto.deliveryType === DeliveryType.PICKUP || updateData.deliveryType === DeliveryType.PICKUP) {
         updateData.location = undefined;
       }
     }
