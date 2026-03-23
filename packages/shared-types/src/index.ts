@@ -5,6 +5,8 @@ export * from './enums/proposal-status.enum'
 export * from './enums/order-status.enum'
 export * from './enums/payment-status.enum'
 export * from './enums/order-type.enum'
+export * from './enums/delivery-type.enum'
+export * from './enums/product-status.enum'
 export * from './enums/professional-verification-status.enum'
 
 // types

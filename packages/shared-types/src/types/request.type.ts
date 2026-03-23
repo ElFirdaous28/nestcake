@@ -1,4 +1,5 @@
 import { RequestStatus } from '../enums/request-status.enum'
+import { DeliveryType } from '../enums/delivery-type.enum'
 
 export type Request = {
     id: string
@@ -9,7 +10,8 @@ export type Request = {
     allergyIds: string[]
     budget?: number
     deliveryDateTime: Date
-    location: string
+    deliveryType: DeliveryType
+    location?: string
     status: RequestStatus
     createdAt: Date
 }

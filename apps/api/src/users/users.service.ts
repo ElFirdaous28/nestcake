@@ -41,7 +41,10 @@ export class UsersService {
     );
 
     const user = await this.userModel
-      .findByIdAndUpdate(authUser.sub, updateData, { new: true, runValidators: true })
+      .findByIdAndUpdate(authUser.sub, updateData, {
+        returnDocument: 'after',
+        runValidators: true,
+      })
       .select('-password')
       .lean()
       .exec();
@@ -57,7 +60,10 @@ export class UsersService {
     const avatarUrl = `/uploads/avatars/${file.filename}`;
 
     const user = await this.userModel
-      .findByIdAndUpdate(authUser.sub, { avatar: avatarUrl }, { new: true, runValidators: true })
+      .findByIdAndUpdate(authUser.sub, { avatar: avatarUrl }, {
+        returnDocument: 'after',
+        runValidators: true,
+      })
       .select('-password')
       .lean()
       .exec();
