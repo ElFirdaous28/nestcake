@@ -23,6 +23,9 @@ export class Product {
 
     @Prop({ default: true })
     isAvailable: boolean
+
+    @Prop({ enum: ['draft', 'published'], default: 'draft' })
+    status: 'draft' | 'published'
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product)
