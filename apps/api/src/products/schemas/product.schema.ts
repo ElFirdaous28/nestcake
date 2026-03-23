@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { ProductStatus } from "@shared-types";
 import { Document, Types } from "mongoose";
 
 export type ProductDocument = Product & Document
@@ -24,8 +25,8 @@ export class Product {
     @Prop({ default: true })
     isAvailable: boolean
 
-    @Prop({ enum: ['draft', 'published'], default: 'draft' })
-    status: 'draft' | 'published'
+    @Prop({ enum: ProductStatus, default: ProductStatus.DRAFT })
+    status: ProductStatus
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product)

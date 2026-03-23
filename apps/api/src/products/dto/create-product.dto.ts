@@ -1,4 +1,5 @@
 import { Transform, Type } from 'class-transformer';
+import { ProductStatus } from '@shared-types';
 import {
 	ArrayNotEmpty,
 	IsArray,
@@ -42,6 +43,6 @@ export class CreateProductDto {
 	isAvailable?: boolean;
 
 	@IsOptional()
-	@IsEnum(['draft', 'published'])
-	status?: 'draft' | 'published';
+	@IsEnum(ProductStatus)
+	status?: ProductStatus;
 }

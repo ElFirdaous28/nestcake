@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { AuthUser, UserRole } from '@shared-types';
+import { AuthUser, ProductStatus, UserRole } from '@shared-types';
 import { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -85,7 +85,7 @@ export class ProductsController {
   updateStatus(
     @Req() req: Request & { user: AuthUser },
     @Param('id', ParseObjectIdPipe) id: string,
-    @Body('status') status: 'draft' | 'published',
+    @Body('status') status: ProductStatus,
   ) {
     return this.productsService.updateProductStatus(id, req.user, status);
   }

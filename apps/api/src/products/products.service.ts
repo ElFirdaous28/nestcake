@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuthUser, ProfessionalVerificationStatus } from '@shared-types';
+import { AuthUser, ProductStatus, ProfessionalVerificationStatus } from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Category } from '../categories/schemas/category.schema';
 import { Professional } from '../professionals/schemas/professional.schema';
@@ -79,7 +79,7 @@ export class ProductsService {
       price: dto.price,
       categoryIds: categoryIds.map((id) => new Types.ObjectId(id)),
       isAvailable: dto.isAvailable ?? true,
-      status: dto.status ?? 'draft',
+      status: dto.status ?? ProductStatus.DRAFT,
       professionalId: professional._id,
     });
   }
@@ -93,7 +93,7 @@ export class ProductsService {
 
     if (scope === 'client') {
       return this.findAllByFilter(
-        { status: 'published', professionalVerified: true },
+        { status: ProductStatus.PUBLISHED, professionalVerified: true },
         options,
       );
     }
@@ -220,12 +220,12 @@ export class ProductsService {
   async updateProductStatus(
     id: string,
     authUser: AuthUser,
-    status: 'draft' | 'published',
+    status: ProductStatus,
   ) {
     const professional = await this.getProfessional(authUser);
 
     if (
-      status === 'published' &&
+      status === ProductStatus.PUBLISHED &&
       professional.verificationStatus !== ProfessionalVerificationStatus.VERIFIED
     ) {
       throw new ForbiddenException('Only verified professionals can publish products');
@@ -262,7 +262,7 @@ export class ProductsService {
     const result = await this.productModel.updateMany(
       { professionalId: professional._id },
       {
-        status: 'published',
+        status: ProductStatus.PUBLISHED,
         professionalVerified: true,
       },
     );

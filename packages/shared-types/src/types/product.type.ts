@@ -1,3 +1,5 @@
+import { ProductStatus } from '../enums/product-status.enum'
+
 export type Product = {
     id: string
     professionalId: string
@@ -6,4 +8,5 @@ export type Product = {
     price: number
     categoryIds: string[]
     isAvailable: boolean
+    status: ProductStatus
 }
