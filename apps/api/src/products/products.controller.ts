@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthUser, UserRole } from '@shared-types';
 import { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -8,6 +8,7 @@ import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { FindProductsQueryDto } from './dto/find-products-query.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -24,12 +25,34 @@ export class ProductsController {
   }
 
   @Get()
-  findAll() {
-    return this.productsService.findAll({
-      page: 1,
-      limit: 20,
-      search: '',
-      includeUnpublished: false,
+  findAllForClient(@Query() query: FindProductsQueryDto) {
+    return this.productsService.findProducts({
+      scope: 'client',
+      options: query,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PROFESSIONAL)
+  @Get('professional')
+  findAllForProfessional(
+    @Req() req: Request & { user: AuthUser },
+    @Query() query: FindProductsQueryDto,
+  ) {
+    return this.productsService.findProducts({
+      scope: 'professional',
+      authUser: req.user,
+      options: query,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('admin')
+  findAllForAdmin(@Query() query: FindProductsQueryDto) {
+    return this.productsService.findProducts({
+      scope: 'admin',
+      options: query,
     });
   }
 
