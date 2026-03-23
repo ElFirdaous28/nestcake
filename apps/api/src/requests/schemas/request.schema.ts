@@ -1,7 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Types, Document } from "mongoose"
+import { RequestStatus } from "@shared-types"
 
 export type RequestDocument = Request & Document
+
 @Schema({ timestamps: true })
 export class Request {
 
@@ -17,20 +19,26 @@ export class Request {
     @Prop({ required: true })
     description: string
 
-    @Prop({ type: [{ type: Types.ObjectId, ref: 'Allergy' }] })
+    @Prop({ type: [{ type: Types.ObjectId, ref: 'Allergy' }], default: [] })
     allergyIds: Types.ObjectId[]
 
     @Prop()
     budget?: number
-
-    @Prop()
+    
+    @Prop({ required: true })
     deliveryDateTime: Date
+    
+    @Prop({ enum: ['delivery', 'pickup'], required: true })
+    deliveryType: 'delivery' | 'pickup';
 
     @Prop()
-    location: string
+    location?: string
+
+    @Prop({ enum: RequestStatus, default: RequestStatus.OPEN })
+    status: RequestStatus
 
     @Prop()
-    status: string
+    images?: string[]
 }
 
 export const RequestSchema = SchemaFactory.createForClass(Request)

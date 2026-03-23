@@ -2,7 +2,7 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { mkdirSync } from 'fs';
 
-export type UploadFolder = 'avatars' | 'portfolio';
+export type UploadFolder = 'avatars' | 'portfolio' | 'requests';
 
 export function multerDiskConfig(folder: UploadFolder) {
   const dest = join(process.cwd(), 'public', 'uploads', folder);
