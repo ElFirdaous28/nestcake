@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
+import { ProposalStatus } from "@shared-types"
 import { Types, Document } from "mongoose"
 
 export type ProposalDocument = Proposal & Document
@@ -21,8 +22,8 @@ export class Proposal {
     @Prop()
     deliveryDateTime?: Date
 
-    @Prop()
-    status: string
+    @Prop({ enum: ProposalStatus, required: true, default: ProposalStatus.PENDING })
+    status: ProposalStatus
 }
 
 export const ProposalSchema = SchemaFactory.createForClass(Proposal)

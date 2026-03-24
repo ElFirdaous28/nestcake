@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable, MethodNotAllowedException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuthUser, OrderStatus, OrderType, ProductStatus, UserRole } from '@shared-types';
+import { AuthUser, OrderStatus, OrderType, ProductStatus, RequestStatus, UserRole } from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Product } from '../products/schemas/product.schema';
 import { Professional } from '../professionals/schemas/professional.schema';
+import { Request } from '../requests/schemas/request.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FindOrdersQueryDto } from './dto/find-orders-query.dto';
 import { Order } from './schemas/order.schema';
@@ -14,6 +15,7 @@ export class OrdersService {
     @InjectModel(Order.name) private readonly orderModel: Model<Order>,
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
     @InjectModel(Professional.name) private readonly professionalModel: Model<Professional>,
+    @InjectModel(Request.name) private readonly requestModel: Model<Request>,
   ) {}
 
   private listBaseQuery() {
@@ -22,6 +24,43 @@ export class OrdersService {
       .populate('clientId', 'firstName lastName email phone avatar')
       .populate('professionalId', 'businessName verified verificationStatus')
       .populate('items.productId', 'name price isAvailable status');
+  }
+
+  private async findActiveOrderOrThrow(id: string) {
+    const order = await this.orderModel.findById(id).lean().exec();
+
+    if (!order || order.isDeleted) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return order;
+  }
+
+  private ensureClientOwnsOrder(orderClientId: Types.ObjectId, authUser: AuthUser, action: string) {
+    if (orderClientId.toString() !== authUser.sub) {
+      throw new BadRequestException(`You can only ${action} your own orders`);
+    }
+  }
+
+  private async getProfessionalForUserOrThrow(authUser: AuthUser) {
+    const professional = await this.professionalModel
+      .findOne({ userId: new Types.ObjectId(authUser.sub) })
+      .lean()
+      .exec();
+
+    if (!professional) {
+      throw new NotFoundException('Professional profile not found');
+    }
+
+    return professional;
+  }
+
+  private async setOrderStatus(id: string, status: OrderStatus) {
+    await this.orderModel.findByIdAndUpdate(
+      id,
+      { status },
+      { runValidators: true },
+    );
   }
 
   private async listOrdersByFilter(filter: Record<string, unknown>, query: FindOrdersQueryDto) {
@@ -128,14 +167,7 @@ export class OrdersService {
   }
 
   async findProfessionalOrders(authUser: AuthUser, query: FindOrdersQueryDto) {
-    const professional = await this.professionalModel
-      .findOne({ userId: new Types.ObjectId(authUser.sub) })
-      .lean()
-      .exec();
-
-    if (!professional) {
-      throw new NotFoundException('Professional profile not found');
-    }
+    const professional = await this.getProfessionalForUserOrThrow(authUser);
 
     return this.listOrdersByFilter({
       professionalId: professional._id,
@@ -187,4 +219,57 @@ export class OrdersService {
 
     return { message: 'Order deleted successfully' };
   }
+
+    async markPaid(id: string, authUser: AuthUser) {
+      const order = await this.findActiveOrderOrThrow(id);
+
+      this.ensureClientOwnsOrder(order.clientId, authUser, 'pay');
+
+      if (order.status !== OrderStatus.AWAITING_PAYMENT) {
+        throw new BadRequestException('Only awaiting payment orders can be paid');
+      }
+
+      await this.setOrderStatus(id, OrderStatus.IN_PROGRESS);
+
+      return this.findOne(id);
+    }
+
+    async markReady(id: string, authUser: AuthUser) {
+      const professional = await this.getProfessionalForUserOrThrow(authUser);
+      const order = await this.findActiveOrderOrThrow(id);
+
+      if (order.professionalId.toString() !== professional._id.toString()) {
+        throw new BadRequestException('You can only update your own orders');
+      }
+
+      if (order.status !== OrderStatus.IN_PROGRESS) {
+        throw new BadRequestException('Only in-progress orders can be marked ready');
+      }
+
+      await this.setOrderStatus(id, OrderStatus.READY);
+
+      return this.findOne(id);
+    }
+
+    async complete(id: string, authUser: AuthUser) {
+      const order = await this.findActiveOrderOrThrow(id);
+
+      this.ensureClientOwnsOrder(order.clientId, authUser, 'complete');
+
+      if (order.status !== OrderStatus.READY) {
+        throw new BadRequestException('Only ready orders can be completed');
+      }
+
+      await this.setOrderStatus(id, OrderStatus.COMPLETED);
+
+      if (order.requestId) {
+        await this.requestModel.findByIdAndUpdate(
+          order.requestId,
+          { status: RequestStatus.CLOSED },
+          { runValidators: true },
+        );
+      }
+
+      return this.findOne(id);
+    }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthUser, UserRole } from '@shared-types';
 import { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -63,5 +63,35 @@ export class OrdersController {
     @Param('id', ParseObjectIdPipe) id: string,
   ) {
     return this.ordersService.remove(id, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.CLIENT)
+  @Patch(':id/pay')
+  markPaid(
+    @Req() req: Request & { user: AuthUser },
+    @Param('id', ParseObjectIdPipe) id: string,
+  ) {
+    return this.ordersService.markPaid(id, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PROFESSIONAL)
+  @Patch(':id/ready')
+  markReady(
+    @Req() req: Request & { user: AuthUser },
+    @Param('id', ParseObjectIdPipe) id: string,
+  ) {
+    return this.ordersService.markReady(id, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.CLIENT)
+  @Patch(':id/complete')
+  complete(
+    @Req() req: Request & { user: AuthUser },
+    @Param('id', ParseObjectIdPipe) id: string,
+  ) {
+    return this.ordersService.complete(id, req.user);
   }
 }
