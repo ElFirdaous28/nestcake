@@ -1,9 +1,10 @@
 'use client';
 
 import { useAuth } from '@/src/hooks/useAuth';
+import { LogoutButton } from '@/src/components/auth/LogoutButton';
 
 export function HomeHero() {
-  const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   return (
     <div className="overflow-hidden rounded-3xl border border-brand-line bg-linear-to-br from-brand-cream-soft via-brand-cream to-white p-8 shadow-xl">
@@ -25,13 +26,7 @@ export function HomeHero() {
             <p className="text-brand-ink">
               Signed in as <strong>{user.email}</strong> ({user.role})
             </p>
-            <button
-              type="button"
-              className="rounded-lg bg-brand-sage px-4 py-2 text-sm font-semibold text-brand-ink transition hover:opacity-90"
-              onClick={() => void logout()}
-            >
-              Logout
-            </button>
+            <LogoutButton />
           </div>
         ) : (
           <p className="text-brand-ink-soft">You are not signed in yet.</p>
