@@ -1,26 +1,121 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Colors */
+  /* Warm cream/vanilla - soft, inviting bakery feel for backgrounds */
+  --color-cream-primary: #FFFBF5;
+  --color-cream-secondary: #FFF8F0;
+
+  /* Deep chocolate brown - trust, premium quality, main text and headers */
+  --color-brown-primary: #3D2817;
+  --color-brown-secondary: #2C1810;
+
+  /* Rose gold/blush - elegant, celebratory, primary CTAs and accents */
+  --color-rose-primary: #E8A087;
+  --color-rose-secondary: #D4926F;
+
+  /* Accent Colors */
+  /* Soft pink - playful, warm for birthday events and accents */
+  --color-pink: #F4A6C1;
+  --color-pink-light: #FFB6C1;
+
+  /* Sage green - natural, fresh for verified badges and success states */
+  --color-sage: #A8B89F;
+  --color-sage-dark: #9CAF8F;
+
+  /* Gold - premium feel, luxury indicator for ratings and badges */
+  --color-gold: #D4AF37;
+
+  /* Neutral Colors */
+  /* Almost black - primary text color for readability */
+  --color-text-dark: #2C2C2C;
+
+  /* Muted brown - secondary text, descriptions */
+  --color-text-muted: #6B5344;
+
+  /* Light gray - backgrounds, subtle surfaces */
+  --color-bg-light: #F5F5F5;
+
+  /* Border color */
+  --color-border: #E0E0E0;
+
+  /* Semantic Colors */
+  /* Success state - positive actions and confirmations */
+  --color-success: #A8B89F;
+
+  /* Error/danger state - warnings and deletions */
+  --color-danger: #E85D75;
+
+  /* Info/warning state - notifications and alerts */
+  --color-warning: #F4A6C1;
+
+  /* Legacy compatibility */
+  --background: #FFFBF5;
+  --foreground: #3D2817;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--color-cream-primary);
+  --color-foreground: var(--color-brown-primary);
+  --color-brand-cream: #fffbf5;
+  --color-brand-cream-soft: #fff8f0;
+  --color-brand-ink: #3d2817;
+  --color-brand-ink-soft: #6b5344;
+  --color-brand-rose: #e8a087;
+  --color-brand-rose-soft: #f4a6c1;
+  --color-brand-line: #e0e0e0;
+  --color-brand-danger: #e85d75;
+  --color-brand-sage: #a8b89f;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Keep a light visual identity even when OS is in dark mode */
+    --color-cream-primary: #fffbf5;
+    --color-cream-secondary: #fff8f0;
+
+    --color-brown-primary: #3d2817;
+    --color-brown-secondary: #2c1810;
+
+    --color-rose-primary: #e8a087;
+    --color-rose-secondary: #d4926f;
+
+    --color-pink: #f4a6c1;
+    --color-pink-light: #ffb6c1;
+
+    --color-sage: #a8b89f;
+    --color-sage-dark: #9caf8f;
+
+    --color-gold: #d4af37;
+
+    --color-text-dark: #2c2c2c;
+    --color-text-muted: #6b5344;
+    --color-bg-light: #f5f5f5;
+    --color-border: #e0e0e0;
+
+    --color-success: #a8b89f;
+    --color-danger: #e85d75;
+    --color-warning: #f4a6c1;
+
+    --background: #fffbf5;
+    --foreground: #3d2817;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+/* Fix for Autofill background color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--background) inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
