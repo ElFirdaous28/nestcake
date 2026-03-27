@@ -59,12 +59,6 @@ export function UsersManagementClient() {
     loadUsers(0, searchQuery, role as string);
   };
 
-  const handleReset = () => {
-    setSearchQuery('');
-    setSelectedRole('');
-    loadUsers(0, '', '');
-  };
-
   const handleNextPage = () => {
     if (pagination.skip + pagination.limit < pagination.total) {
       const newSkip = pagination.skip + pagination.limit;
@@ -126,14 +120,6 @@ export function UsersManagementClient() {
               {role ? role.charAt(0).toUpperCase() + role.slice(1) : 'All'}
             </button>
           ))}
-          {(searchQuery || selectedRole) && (
-            <button
-              onClick={handleReset}
-              className="px-3 py-1 rounded-full text-sm font-medium bg-brand-line text-brand-ink-soft hover:bg-brand-line/80 transition"
-            >
-              Clear filters
-            </button>
-          )}
         </div>
       </div>
 
