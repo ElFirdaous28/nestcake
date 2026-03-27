@@ -34,12 +34,13 @@ export class UsersController {
   @Roles(UserRole.ADMIN)
   @Get()
   findAllForAdmin(
+    @Req() req: Request & { user: AuthUser },
     @Query('search') search?: string,
     @Query('role') role?: string,
     @Query('skip') skip?: string,
     @Query('limit') limit?: string,
   ) {
-    return this.usersService.findAllForAdmin({
+    return this.usersService.findAllForAdmin(req.user, {
       search,
       role,
       skip: skip ? parseInt(skip) : 0,

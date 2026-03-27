@@ -13,7 +13,6 @@ const links = [
   { href: '/admin/categories', label: 'Categories', icon: Tags },
   { href: '/admin/allergies', label: 'Allergies', icon: HeartPlus },
   { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/professionals', label: 'Professionals', icon: Users },
   { href: '/admin/reports', label: 'Reports', icon: ShieldCheck },
 ];
 

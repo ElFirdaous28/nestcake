@@ -1,30 +1,53 @@
 'use client';
 
-import { FormEvent, useEffect, useState, useCallback } from 'react';
-import { UserRole } from '@shared-types';
+import { FormEvent, useEffect, useState, useCallback, useMemo } from 'react';
+import { ProfessionalVerificationStatus, UserRole } from '@shared-types';
+import { useSearchParams } from 'next/navigation';
 import { Loader2, Search } from 'lucide-react';
 import { usersService, type User } from '@/src/services/users.service';
+import { professionalsService, type ProfessionalItem } from '@/src/services/professionals.service';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { UsersList } from './UsersList';
 
 export function UsersManagementClient() {
+  const searchParams = useSearchParams();
   const [users, setUsers] = useState<User[]>([]);
+  const [professionalByUserId, setProfessionalByUserId] = useState<Record<string, ProfessionalItem>>({});
+  const [isSavingVerificationByUserId, setIsSavingVerificationByUserId] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserRole | ''>('');
   const [pagination, setPagination] = useState({ skip: 0, limit: 50, total: 0, pages: 0 });
 
+  const initialRole = useMemo<UserRole | ''>(() => {
+    const roleParam = searchParams.get('role');
+
+    if (roleParam === UserRole.CLIENT || roleParam === UserRole.PROFESSIONAL || roleParam === UserRole.ADMIN) {
+      return roleParam;
+    }
+
+    return '';
+  }, [searchParams]);
+
   const loadUsers = useCallback(async (skip = 0, search = '', role = '') => {
     setError(null);
     setIsLoading(true);
     try {
-      const response = await usersService.getAll({
-        search: search || undefined,
-        role: role || undefined,
-        skip,
-        limit: 50,
-      });
+      const [response, professionals] = await Promise.all([
+        usersService.getAll({
+          search: search || undefined,
+          role: role || undefined,
+          skip,
+          limit: 50,
+        }),
+        professionalsService.getAll(),
+      ]);
+
+      const professionalMap = professionals.reduce<Record<string, ProfessionalItem>>((acc, item) => {
+        acc[item.userId] = item;
+        return acc;
+      }, {});
 
       setUsers(
         response.data.map((user) => ({
@@ -32,6 +55,7 @@ export function UsersManagementClient() {
           id: user._id,
         })),
       );
+      setProfessionalByUserId(professionalMap);
       setPagination(response.pagination);
     } catch (err) {
       setError(
@@ -45,9 +69,9 @@ export function UsersManagementClient() {
   }, []);
 
   useEffect(() => {
-    loadUsers(0, searchQuery, selectedRole as string);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadUsers]);
+    setSelectedRole(initialRole);
+    loadUsers(0, '', initialRole as string);
+  }, [loadUsers, initialRole]);
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -57,6 +81,34 @@ export function UsersManagementClient() {
   const handleRoleChange = async (role: UserRole | '') => {
     setSelectedRole(role);
     loadUsers(0, searchQuery, role as string);
+  };
+
+  const handleProfessionalVerificationChange = async (
+    userId: string,
+    status: ProfessionalVerificationStatus,
+  ) => {
+    const professional = professionalByUserId[userId];
+    if (!professional) {
+      return;
+    }
+
+    setError(null);
+    setIsSavingVerificationByUserId((prev) => ({ ...prev, [userId]: true }));
+
+    try {
+      const updated = await professionalsService.updateVerification(professional.id, {
+        verificationStatus: status,
+      });
+
+      setProfessionalByUserId((prev) => ({
+        ...prev,
+        [updated.userId]: updated,
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update verification status');
+    } finally {
+      setIsSavingVerificationByUserId((prev) => ({ ...prev, [userId]: false }));
+    }
   };
 
   const handleNextPage = () => {
@@ -141,7 +193,12 @@ export function UsersManagementClient() {
           <p className="text-brand-ink-soft">No users found</p>
         </div>
       ) : (
-        <UsersList users={users} />
+        <UsersList
+          users={users}
+          professionalByUserId={professionalByUserId}
+          isSavingVerificationByUserId={isSavingVerificationByUserId}
+          onChangeProfessionalVerification={handleProfessionalVerificationChange}
+        />
       )}
 
       {/* Pagination */}
