@@ -11,6 +11,7 @@ import {
   registerSchema,
   type RegisterFormValues,
 } from '@/src/lib/validation/authSchemas';
+import { AppAlert } from '@/src/components/common/AppAlert';
 
 const inputClassName =
   'w-full rounded-xl border border-brand-line bg-brand-cream-soft px-4 py-3 text-brand-ink outline-none transition focus:ring-2 focus:ring-brand-rose/30';
@@ -130,7 +131,9 @@ export function RegisterForm() {
               First name
             </label>
             <input className={inputClassName} {...register('firstName')} />
-            {errors.firstName ? <p className="mt-1 text-sm text-brand-danger">{errors.firstName.message}</p> : null}
+            <div className="mt-1">
+              <AppAlert message={errors.firstName?.message} />
+            </div>
           </div>
 
           <div>
@@ -138,7 +141,9 @@ export function RegisterForm() {
               Last name
             </label>
             <input className={inputClassName} {...register('lastName')} />
-            {errors.lastName ? <p className="mt-1 text-sm text-brand-danger">{errors.lastName.message}</p> : null}
+            <div className="mt-1">
+              <AppAlert message={errors.lastName?.message} />
+            </div>
           </div>
 
           <div className="sm:col-span-2">
@@ -146,7 +151,9 @@ export function RegisterForm() {
               Email
             </label>
             <input type="email" className={inputClassName} {...register('email')} />
-            {errors.email ? <p className="mt-1 text-sm text-brand-danger">{errors.email.message}</p> : null}
+            <div className="mt-1">
+              <AppAlert message={errors.email?.message} />
+            </div>
           </div>
 
           <div>
@@ -154,7 +161,9 @@ export function RegisterForm() {
               Password
             </label>
             <input type="password" className={inputClassName} {...register('password')} />
-            {errors.password ? <p className="mt-1 text-sm text-brand-danger">{errors.password.message}</p> : null}
+            <div className="mt-1">
+              <AppAlert message={errors.password?.message} />
+            </div>
           </div>
 
           <div>
@@ -162,7 +171,9 @@ export function RegisterForm() {
               Confirm password
             </label>
             <input type="password" className={inputClassName} {...register('confirmPassword')} />
-            {errors.confirmPassword ? <p className="mt-1 text-sm text-brand-danger">{errors.confirmPassword.message}</p> : null}
+            <div className="mt-1">
+              <AppAlert message={errors.confirmPassword?.message} />
+            </div>
           </div>
 
           <div className="sm:col-span-2">
@@ -170,7 +181,9 @@ export function RegisterForm() {
               Phone (optional)
             </label>
             <input className={inputClassName} {...register('phone')} />
-            {errors.phone ? <p className="mt-1 text-sm text-brand-danger">{errors.phone.message}</p> : null}
+            <div className="mt-1">
+              <AppAlert message={errors.phone?.message} />
+            </div>
           </div>
 
           {selectedRole === UserRole.PROFESSIONAL ? (
@@ -180,7 +193,9 @@ export function RegisterForm() {
                   Business name
                 </label>
                 <input className={inputClassName} {...register('businessName')} />
-                {errors.businessName ? <p className="mt-1 text-sm text-brand-danger">{errors.businessName.message}</p> : null}
+                <div className="mt-1">
+                  <AppAlert message={errors.businessName?.message} />
+                </div>
               </div>
 
               <div className="sm:col-span-2">
@@ -195,7 +210,9 @@ export function RegisterForm() {
                   Latitude
                 </label>
                 <input className={inputClassName} placeholder="e.g. 25.2048" {...register('latitude')} />
-                {errors.latitude ? <p className="mt-1 text-sm text-brand-danger">{errors.latitude.message}</p> : null}
+                <div className="mt-1">
+                  <AppAlert message={errors.latitude?.message} />
+                </div>
               </div>
 
               <div>
@@ -203,16 +220,16 @@ export function RegisterForm() {
                   Longitude
                 </label>
                 <input className={inputClassName} placeholder="e.g. 55.2708" {...register('longitude')} />
-                {errors.longitude ? <p className="mt-1 text-sm text-brand-danger">{errors.longitude.message}</p> : null}
+                <div className="mt-1">
+                  <AppAlert message={errors.longitude?.message} />
+                </div>
               </div>
             </>
           ) : null}
 
-          {error ? (
-            <p className="sm:col-span-2 rounded-lg border border-brand-danger bg-brand-danger/10 px-3 py-2 text-sm text-brand-danger">
-              {error}
-            </p>
-          ) : null}
+          <div className="sm:col-span-2">
+            <AppAlert message={error} />
+          </div>
 
           <button
             type="submit"

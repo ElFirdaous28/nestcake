@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import { useAuth } from '@/src/hooks/useAuth';
 import { loginSchema, type LoginFormValues } from '@/src/lib/validation/authSchemas';
+import { AppAlert } from '@/src/components/common/AppAlert';
 
 const inputClassName =
   'w-full rounded-xl border border-brand-line bg-brand-cream-soft px-4 py-3 text-brand-ink outline-none transition focus:ring-2 focus:ring-brand-rose/30';
@@ -62,11 +63,9 @@ export function LoginForm() {
               className={inputClassName}
               {...register('email')}
             />
-            {errors.email ? (
-              <p className="mt-1 text-sm text-brand-danger">
-                {errors.email.message}
-              </p>
-            ) : null}
+            <div className="mt-1">
+              <AppAlert message={errors.email?.message} />
+            </div>
           </div>
 
           <div>
@@ -79,18 +78,12 @@ export function LoginForm() {
               className={inputClassName}
               {...register('password')}
             />
-            {errors.password ? (
-              <p className="mt-1 text-sm text-brand-danger">
-                {errors.password.message}
-              </p>
-            ) : null}
+            <div className="mt-1">
+              <AppAlert message={errors.password?.message} />
+            </div>
           </div>
 
-          {error ? (
-            <p className="rounded-lg border border-brand-danger bg-brand-danger/10 px-3 py-2 text-sm text-brand-danger">
-              {error}
-            </p>
-          ) : null}
+          <AppAlert message={error} />
 
           <button
             type="submit"

@@ -27,9 +27,21 @@ export function ConfirmDialog({
     return null;
   }
 
+  const handleBackdropClick = () => {
+    if (!isConfirming) {
+      onCancel();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/45 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-brand-line bg-white p-5 shadow-xl">
+    <div
+      className="fixed inset-0 z-100 flex items-center justify-center bg-black/45 p-4"
+      onClick={handleBackdropClick}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl border border-brand-line bg-white p-5 shadow-xl"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-start gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600">
             <AlertTriangle className="h-4 w-4" />
