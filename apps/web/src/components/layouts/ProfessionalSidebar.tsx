@@ -4,9 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BriefcaseBusiness, LayoutDashboard, PiggyBank, Presentation, Menu, X } from 'lucide-react';
-import { LogoutButton } from '@/src/components/auth/LogoutButton';
 import { useAuth } from '@/src/hooks/useAuth';
 import { Logo } from '@/src/components/common/Logo';
+import { SidebarAccountSection } from '@/src/components/layouts/SidebarAccountSection';
 
 const links = [
   { href: '/professional/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -17,10 +17,6 @@ const links = [
 
 const isActivePath = (pathname: string, href: string) =>
   pathname === href || pathname.startsWith(`${href}/`);
-
-const getInitials = (email: string) => {
-  return email.substring(0, 2).toUpperCase();
-};
 
 export function ProfessionalSidebar() {
   const pathname = usePathname();
@@ -80,29 +76,12 @@ export function ProfessionalSidebar() {
         </ul>
       </nav>
 
-      <div className="px-6 py-4 border-t border-brand-line bg-brand-cream/30">
-        <div className="flex items-center gap-3">
-          {user?.avatar ? (
-            <img
-              src={user.avatar}
-              alt="Avatar"
-              className="h-10 w-10 rounded-full object-cover shrink-0"
-            />
-          ) : (
-            <div className="h-10 w-10 rounded-full bg-brand-rose flex items-center justify-center shrink-0">
-              <span className="text-xs font-bold text-white">{getInitials(user?.email ?? 'P')}</span>
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">Account</p>
-            <p className="mt-1 text-sm font-semibold text-brand-ink truncate">{user?.email ?? 'professional'}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-4 border-t border-brand-line">
-        <LogoutButton />
-      </div>
+      <SidebarAccountSection
+        email={user?.email}
+        avatar={user?.avatar}
+        profileHref="/profile"
+        fallbackInitial="P"
+      />
       </aside>
     </>
   );

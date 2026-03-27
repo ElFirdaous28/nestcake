@@ -8,7 +8,7 @@ export function Logo() {
         alt="NestCake"
         width={40}
         height={40}
-        className="w-10 h-10"
+        className="w-10 h-12"
       />
       <div className="text-lg font-bold text-brand-ink">
         <span className="font-bold">Nest</span><span className="font-normal">Cake</span>
