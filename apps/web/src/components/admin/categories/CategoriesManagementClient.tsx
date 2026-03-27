@@ -5,6 +5,7 @@ import { AlertCircle } from 'lucide-react';
 import { categoriesService, type Category } from '@/src/services/categories.service';
 import { CategoryForm } from '@/src/components/admin/categories/CategoryForm';
 import { CategoryList } from '@/src/components/admin/categories/CategoryList';
+import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
 
 type Mode = 'create' | 'edit';
 
@@ -16,6 +17,8 @@ export function CategoriesManagementClient() {
   const [name, setName] = useState('');
   const [mode, setMode] = useState<Mode>('create');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
   const loadCategories = async () => {
     try {
@@ -74,23 +77,31 @@ export function CategoriesManagementClient() {
     setName(category.name);
   };
 
-  const handleDelete = async (category: Category) => {
-    const confirmed = window.confirm(`Delete "${category.name}"?`);
-    if (!confirmed) {
+  const confirmDelete = async () => {
+    if (!deleteTarget) {
       return;
     }
 
     try {
+      setIsDeleting(true);
       setError(null);
-      await categoriesService.remove(category.id);
-      setCategories((prev) => prev.filter((item) => item.id !== category.id));
+      await categoriesService.remove(deleteTarget.id);
+      setCategories((prev) => prev.filter((item) => item.id !== deleteTarget.id));
 
-      if (editingId === category.id) {
+      if (editingId === deleteTarget.id) {
         resetForm();
       }
+
+      setDeleteTarget(null);
     } catch {
       setError('Could not delete category.');
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleDelete = (category: Category) => {
+    setDeleteTarget(category);
   };
 
   return (
@@ -131,6 +142,21 @@ export function CategoriesManagementClient() {
           />
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={Boolean(deleteTarget)}
+        title="Delete Category"
+        description={`Are you sure you want to delete "${deleteTarget?.name ?? ''}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        isConfirming={isDeleting}
+        onConfirm={() => void confirmDelete()}
+        onCancel={() => {
+          if (!isDeleting) {
+            setDeleteTarget(null);
+          }
+        }}
+      />
     </section>
   );
 }
