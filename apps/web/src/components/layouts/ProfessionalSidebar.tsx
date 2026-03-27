@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BriefcaseBusiness, LayoutDashboard, PiggyBank, Presentation } from 'lucide-react';
+import { BriefcaseBusiness, LayoutDashboard, PiggyBank, Presentation, Menu, X } from 'lucide-react';
 import { LogoutButton } from '@/src/components/auth/LogoutButton';
 import { useAuth } from '@/src/hooks/useAuth';
+import { Logo } from '@/src/components/common/Logo';
 
 const links = [
   { href: '/professional/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -16,21 +18,42 @@ const links = [
 const isActivePath = (pathname: string, href: string) =>
   pathname === href || pathname.startsWith(`${href}/`);
 
+const getInitials = (email: string) => {
+  return email.substring(0, 2).toUpperCase();
+};
+
 export function ProfessionalSidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <aside className="w-64 border-r border-brand-line bg-white min-h-screen flex flex-col">
-      <div className="p-5 border-b border-brand-line">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-ink-soft">NestCake</p>
-        <h2 className="mt-2 text-lg font-bold text-brand-ink">Professional</h2>
-      </div>
+    <>
+      {/* Mobile Hamburger */}
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-lg bg-brand-rose text-white"
+        aria-label="Toggle menu"
+      >
+        {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </button>
 
-      <div className="p-4 border-b border-brand-line">
-        <p className="text-xs text-brand-ink-soft">Signed in as</p>
-        <p className="mt-1 text-sm font-semibold text-brand-ink truncate">{user?.email ?? 'professional'}</p>
-      </div>
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 md:hidden bg-black/50"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`fixed md:static top-0 left-0 z-40 w-64 border-r border-brand-line bg-white min-h-screen flex flex-col transition-transform md:transition-none ${
+        mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
+        <div className="p-6 border-b border-brand-line bg-linear-to-br from-white to-brand-cream/50">
+          <Logo />
+          <h2 className="mt-3 text-lg font-bold text-brand-ink">Professional Portal</h2>
+        </div>
 
       <nav className="flex-1 p-3 overflow-y-auto">
         <ul className="space-y-2">
@@ -57,9 +80,30 @@ export function ProfessionalSidebar() {
         </ul>
       </nav>
 
+      <div className="px-6 py-4 border-t border-brand-line bg-brand-cream/30">
+        <div className="flex items-center gap-3">
+          {user?.avatar ? (
+            <img
+              src={user.avatar}
+              alt="Avatar"
+              className="h-10 w-10 rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-brand-rose flex items-center justify-center shrink-0">
+              <span className="text-xs font-bold text-white">{getInitials(user?.email ?? 'P')}</span>
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">Account</p>
+            <p className="mt-1 text-sm font-semibold text-brand-ink truncate">{user?.email ?? 'professional'}</p>
+          </div>
+        </div>
+      </div>
+
       <div className="p-4 border-t border-brand-line">
         <LogoutButton />
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

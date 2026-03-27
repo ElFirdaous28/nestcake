@@ -6,6 +6,7 @@ export type User = {
     lastName: string
     email: string
     phone?: string
+    avatar?: string
     role: UserRole
     createdAt: Date
 }

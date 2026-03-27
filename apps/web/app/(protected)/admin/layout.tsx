@@ -11,7 +11,7 @@ export default function AdminLayout({
     <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
       <div className="min-h-screen bg-brand-cream flex">
         <AdminSidebar />
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 pt-16 md:pt-6">
           <div className="rounded-2xl border border-brand-line bg-white p-6 shadow-sm">{children}</div>
         </main>
       </div>
