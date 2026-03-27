@@ -28,7 +28,7 @@ import { UpdateProfessionalVerificationDto } from './dto/update-professional-ver
 @UseGuards(JwtAuthGuard)
 @Controller('professionals')
 export class ProfessionalsController {
-  constructor(private readonly professionalsService: ProfessionalsService) { }
+  constructor(private readonly professionalsService: ProfessionalsService) {}
 
   @Get()
   findAll() {
@@ -60,9 +60,7 @@ export class ProfessionalsController {
     @Req() req: Request & { user: AuthUser },
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
-        ],
+        validators: [new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 })],
       }),
     )
     file: Express.Multer.File,
@@ -78,7 +76,10 @@ export class ProfessionalsController {
     @Req() req: Request & { user: AuthUser },
     @Param('id', ParseObjectIdPipe) portfolioItemId: string,
   ) {
-    return this.professionalsService.removePortfolioItem(req.user, portfolioItemId);
+    return this.professionalsService.removePortfolioItem(
+      req.user,
+      portfolioItemId,
+    );
   }
 
   @UseGuards(RolesGuard)

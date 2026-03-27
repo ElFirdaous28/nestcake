@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthUser, UserRole } from '@shared-types';
 import { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -26,7 +35,13 @@ export class ReviewsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
-  findAll(@Query() query: FindReviewsQueryDto): Promise<{ data: (import("c:/Projects/nestcake/apps/api/src/reviews/entities/review.entity").Review & { _id: import("mongoose").Types.ObjectId; } & { __v: number; })[]; summary: { averageRating: any; totalReviews: any; }; pagination: { page: number; limit: number; total: number; pages: number; }; }> {
+  findAll(@Query() query: FindReviewsQueryDto): Promise<{
+    data: (import('c:/Projects/nestcake/apps/api/src/reviews/entities/review.entity').Review & {
+      _id: import('mongoose').Types.ObjectId;
+    } & { __v: number })[];
+    summary: { averageRating: any; totalReviews: any };
+    pagination: { page: number; limit: number; total: number; pages: number };
+  }> {
     return this.reviewsService.findAll(query);
   }
 

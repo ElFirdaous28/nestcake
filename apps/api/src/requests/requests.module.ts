@@ -20,4 +20,4 @@ import { AuthModule } from 'src/auth/auth.module';
   providers: [RequestsService],
   exports: [RequestsService],
 })
-export class RequestsModule { }
+export class RequestsModule {}

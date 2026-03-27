@@ -1,32 +1,32 @@
-import { Model } from 'mongoose'
+import { Model } from 'mongoose';
 
 export async function seedProducts(
-    productModel: Model<any>,
-    professionals: any[],
-    categories: any[]
+  productModel: Model<any>,
+  professionals: any[],
+  categories: any[],
 ) {
-    await productModel.deleteMany({})
+  await productModel.deleteMany({});
 
-    const products = []
+  const products = [];
 
-    for (let i = 1; i <= 15; i++) {
-        const pro = professionals[i % professionals.length]
-        const category = categories[i % categories.length]
-        const status = i <= 10 ? 'published' : 'draft'
+  for (let i = 1; i <= 15; i++) {
+    const pro = professionals[i % professionals.length];
+    const category = categories[i % categories.length];
+    const status = i <= 10 ? 'published' : 'draft';
 
-        products.push({
-            name: `Cake ${i}`,
-            description: 'Delicious custom cake',
-            price: 20 + i,
-            professionalId: pro._id,
-            categoryIds: [category._id],
-            status
-        })
-    }
+    products.push({
+      name: `Cake ${i}`,
+      description: 'Delicious custom cake',
+      price: 20 + i,
+      professionalId: pro._id,
+      categoryIds: [category._id],
+      status,
+    });
+  }
 
-    const created = await productModel.insertMany(products)
+  const created = await productModel.insertMany(products);
 
-    console.log('Products seeded')
+  console.log('Products seeded');
 
-    return created
+  return created;
 }

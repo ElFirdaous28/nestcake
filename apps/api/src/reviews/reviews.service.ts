@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AuthUser, OrderStatus } from '@shared-types';
 import { Model, Types } from 'mongoose';
@@ -13,10 +18,14 @@ export class ReviewsService {
   constructor(
     @InjectModel(Review.name) private readonly reviewModel: Model<Review>,
     @InjectModel(Order.name) private readonly orderModel: Model<Order>,
-    @InjectModel(Professional.name) private readonly professionalModel: Model<Professional>,
+    @InjectModel(Professional.name)
+    private readonly professionalModel: Model<Professional>,
   ) {}
 
-  private async listByFilter(filter: Record<string, unknown>, query: FindReviewsQueryDto) {
+  private async listByFilter(
+    filter: Record<string, unknown>,
+    query: FindReviewsQueryDto,
+  ) {
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
     const skip = (page - 1) * limit;
@@ -71,11 +80,15 @@ export class ReviewsService {
     }
 
     if (order.clientId.toString() !== authUser.sub) {
-      throw new ForbiddenException('You can only review your own completed orders');
+      throw new ForbiddenException(
+        'You can only review your own completed orders',
+      );
     }
 
     if (order.status !== OrderStatus.COMPLETED) {
-      throw new BadRequestException('Review is only allowed after order completion');
+      throw new BadRequestException(
+        'Review is only allowed after order completion',
+      );
     }
 
     const existing = await this.reviewModel
@@ -126,6 +139,9 @@ export class ReviewsService {
   }
 
   findByProfessional(professionalId: string, query: FindReviewsQueryDto) {
-    return this.listByFilter({ professionalId: new Types.ObjectId(professionalId) }, query);
+    return this.listByFilter(
+      { professionalId: new Types.ObjectId(professionalId) },
+      query,
+    );
   }
 }

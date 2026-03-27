@@ -8,6 +8,7 @@ import {
   MaxFileSizeValidator,
   ParseFilePipe,
   Patch,
+  Query,
   Req,
   Res,
   UploadedFile,
@@ -16,24 +17,44 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
-import { AuthUser } from '@shared-types';
+import { AuthUser, UserRole } from '@shared-types';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { multerDiskConfig } from '../common/upload.config';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 
-@UseGuards(JwtAuthGuard)
-@Controller('users/me')
+@Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
-  @Get('')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get()
+  findAllForAdmin(
+    @Query('search') search?: string,
+    @Query('role') role?: string,
+    @Query('skip') skip?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.usersService.findAllForAdmin({
+      search,
+      role,
+      skip: skip ? parseInt(skip) : 0,
+      limit: limit ? parseInt(limit) : 50,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
   getMe(@Req() req: Request & { user: AuthUser }) {
     return this.usersService.getMe(req.user);
   }
 
-  @Patch('')
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
   updateMe(
     @Req() req: Request & { user: AuthUser },
     @Body() dto: UpdateProfileDto,
@@ -41,15 +62,14 @@ export class UsersController {
     return this.usersService.updateMe(req.user, dto);
   }
 
-  @Patch('avatar')
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/avatar')
   @UseInterceptors(FileInterceptor('avatar', multerDiskConfig('avatars')))
   uploadAvatar(
     @Req() req: Request & { user: AuthUser },
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
-        ],
+        validators: [new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 })],
       }),
     )
     file: Express.Multer.File,
@@ -57,7 +77,8 @@ export class UsersController {
     return this.usersService.uploadAvatar(req.user, file);
   }
 
-  @Patch('password')
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/password')
   @HttpCode(HttpStatus.OK)
   changePassword(
     @Req() req: Request & { user: AuthUser },
@@ -66,7 +87,8 @@ export class UsersController {
     return this.usersService.changePassword(req.user, dto);
   }
 
-  @Delete('')
+  @UseGuards(JwtAuthGuard)
+  @Delete('me')
   @HttpCode(HttpStatus.OK)
   async deleteMe(
     @Req() req: Request & { user: AuthUser },

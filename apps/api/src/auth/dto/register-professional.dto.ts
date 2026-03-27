@@ -34,7 +34,9 @@ export class RegisterProfessionalDto {
   lastName: string;
 
   @IsEmail()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   email: string;
 
   @IsString()

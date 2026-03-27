@@ -60,10 +60,14 @@ export class UsersService {
     const avatarUrl = `/uploads/avatars/${file.filename}`;
 
     const user = await this.userModel
-      .findByIdAndUpdate(authUser.sub, { avatar: avatarUrl }, {
-        returnDocument: 'after',
-        runValidators: true,
-      })
+      .findByIdAndUpdate(
+        authUser.sub,
+        { avatar: avatarUrl },
+        {
+          returnDocument: 'after',
+          runValidators: true,
+        },
+      )
       .select('-password')
       .lean()
       .exec();
@@ -83,14 +87,19 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    const currentPasswordOk = await bcrypt.compare(dto.currentPassword, user.password);
+    const currentPasswordOk = await bcrypt.compare(
+      dto.currentPassword,
+      user.password,
+    );
     if (!currentPasswordOk) {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
     const samePassword = await bcrypt.compare(dto.newPassword, user.password);
     if (samePassword) {
-      throw new BadRequestException('New password must be different from current password');
+      throw new BadRequestException(
+        'New password must be different from current password',
+      );
     }
 
     user.password = await bcrypt.hash(dto.newPassword, 10);
@@ -103,7 +112,10 @@ export class UsersService {
   }
 
   async deleteMe(authUser: AuthUser) {
-    const deleted = await this.userModel.findByIdAndDelete(authUser.sub).lean().exec();
+    const deleted = await this.userModel
+      .findByIdAndDelete(authUser.sub)
+      .lean()
+      .exec();
 
     if (!deleted) {
       throw new NotFoundException('User not found');
@@ -113,5 +125,49 @@ export class UsersService {
     await this.authService.revokeAllForUser(authUser.sub);
 
     return { message: 'Account deleted successfully' };
+  }
+
+  async findAllForAdmin(filters?: {
+    search?: string;
+    role?: string;
+    skip?: number;
+    limit?: number;
+  }) {
+    const { search = '', role, skip = 0, limit = 50 } = filters || {};
+
+    const query: any = {};
+
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    if (role) {
+      query.role = role;
+    }
+
+    const users = await this.userModel
+      .find(query)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(Number(skip))
+      .limit(Number(limit))
+      .lean()
+      .exec();
+
+    const total = await this.userModel.countDocuments(query);
+
+    return {
+      data: users,
+      pagination: {
+        skip: Number(skip),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    };
   }
 }

@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateAllergyDto } from './dto/create-allergy.dto';
@@ -7,13 +12,20 @@ import { Allergy } from './schemas/allergy.schema';
 
 @Injectable()
 export class AllergiesService {
-  constructor(@InjectModel(Allergy.name) private readonly allergyModel: Model<Allergy>) {}
+  constructor(
+    @InjectModel(Allergy.name) private readonly allergyModel: Model<Allergy>,
+  ) {}
 
   async create(createAllergyDto: CreateAllergyDto) {
     const normalizedName = createAllergyDto.name.trim();
 
     const exists = await this.allergyModel
-      .findOne({ name: { $regex: `^${this.escapeRegex(normalizedName)}$`, $options: 'i' } })
+      .findOne({
+        name: {
+          $regex: `^${this.escapeRegex(normalizedName)}$`,
+          $options: 'i',
+        },
+      })
       .lean()
       .exec();
 
@@ -44,7 +56,9 @@ export class AllergiesService {
 
   async update(id: string, updateAllergyDto: UpdateAllergyDto) {
     const updateData = Object.fromEntries(
-      Object.entries(updateAllergyDto).filter(([, value]) => value !== undefined),
+      Object.entries(updateAllergyDto).filter(
+        ([, value]) => value !== undefined,
+      ),
     );
 
     if (updateData.name) {
@@ -59,7 +73,10 @@ export class AllergiesService {
       const duplicate = await this.allergyModel
         .findOne({
           _id: { $ne: id },
-          name: { $regex: `^${this.escapeRegex(updateData.name)}$`, $options: 'i' },
+          name: {
+            $regex: `^${this.escapeRegex(updateData.name)}$`,
+            $options: 'i',
+          },
         })
         .lean()
         .exec();
@@ -70,7 +87,10 @@ export class AllergiesService {
     }
 
     const updated = await this.allergyModel
-      .findByIdAndUpdate(id, updateData, { returnDocument: 'after', runValidators: true })
+      .findByIdAndUpdate(id, updateData, {
+        returnDocument: 'after',
+        runValidators: true,
+      })
       .lean()
       .exec();
 

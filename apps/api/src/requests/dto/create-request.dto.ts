@@ -1,4 +1,15 @@
-import { IsString, IsOptional, IsNumber, IsArray, IsDate, MinLength, MaxLength, Min, IsEnum, ValidateIf } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  IsDate,
+  MinLength,
+  MaxLength,
+  Min,
+  IsEnum,
+  ValidateIf,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { DeliveryType } from '@shared-types';
 

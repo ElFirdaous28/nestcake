@@ -1,4 +1,9 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   AuthUser,
@@ -20,7 +25,8 @@ export class ProposalsService {
   constructor(
     @InjectModel(Proposal.name) private readonly proposalModel: Model<Proposal>,
     @InjectModel(Request.name) private readonly requestModel: Model<Request>,
-    @InjectModel(Professional.name) private readonly professionalModel: Model<Professional>,
+    @InjectModel(Professional.name)
+    private readonly professionalModel: Model<Professional>,
     @InjectModel(Order.name) private readonly orderModel: Model<Order>,
   ) {}
 
@@ -53,7 +59,9 @@ export class ProposalsService {
       .exec();
 
     if (existing && existing.status !== ProposalStatus.WITHDRAWN) {
-      throw new BadRequestException('You already submitted a proposal for this request');
+      throw new BadRequestException(
+        'You already submitted a proposal for this request',
+      );
     }
 
     return this.proposalModel.create({
@@ -101,8 +109,13 @@ export class ProposalsService {
       throw new NotFoundException('Request not found');
     }
 
-    if (authUser.role !== UserRole.ADMIN && request.clientId.toString() !== authUser.sub) {
-      throw new ForbiddenException('You can only view proposals for your own requests');
+    if (
+      authUser.role !== UserRole.ADMIN &&
+      request.clientId.toString() !== authUser.sub
+    ) {
+      throw new ForbiddenException(
+        'You can only view proposals for your own requests',
+      );
     }
 
     return this.proposalModel
@@ -114,7 +127,10 @@ export class ProposalsService {
   }
 
   async accept(authUser: AuthUser, proposalId: string) {
-    const proposal = await this.proposalModel.findById(proposalId).lean().exec();
+    const proposal = await this.proposalModel
+      .findById(proposalId)
+      .lean()
+      .exec();
 
     if (!proposal) {
       throw new NotFoundException('Proposal not found');
@@ -124,18 +140,25 @@ export class ProposalsService {
       throw new BadRequestException('Only pending proposals can be accepted');
     }
 
-    const request = await this.requestModel.findById(proposal.requestId).lean().exec();
+    const request = await this.requestModel
+      .findById(proposal.requestId)
+      .lean()
+      .exec();
 
     if (!request) {
       throw new NotFoundException('Request not found');
     }
 
     if (request.clientId.toString() !== authUser.sub) {
-      throw new ForbiddenException('You can only accept proposals on your own requests');
+      throw new ForbiddenException(
+        'You can only accept proposals on your own requests',
+      );
     }
 
     if (request.status !== RequestStatus.OPEN) {
-      throw new BadRequestException('Request is not open for accepting proposals');
+      throw new BadRequestException(
+        'Request is not open for accepting proposals',
+      );
     }
 
     const existingOrder = await this.orderModel
@@ -159,12 +182,20 @@ export class ProposalsService {
     });
 
     await Promise.all([
-      this.proposalModel.findByIdAndUpdate(proposal._id, { status: ProposalStatus.ACCEPTED }),
+      this.proposalModel.findByIdAndUpdate(proposal._id, {
+        status: ProposalStatus.ACCEPTED,
+      }),
       this.proposalModel.updateMany(
-        { requestId: request._id, _id: { $ne: proposal._id }, status: ProposalStatus.PENDING },
+        {
+          requestId: request._id,
+          _id: { $ne: proposal._id },
+          status: ProposalStatus.PENDING,
+        },
         { status: ProposalStatus.REJECTED },
       ),
-      this.requestModel.findByIdAndUpdate(request._id, { status: RequestStatus.MATCHED }),
+      this.requestModel.findByIdAndUpdate(request._id, {
+        status: RequestStatus.MATCHED,
+      }),
     ]);
 
     return this.orderModel

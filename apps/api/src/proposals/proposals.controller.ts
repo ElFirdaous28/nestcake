@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthUser, UserRole } from '@shared-types';
 import { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -32,9 +41,7 @@ export class ProposalsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.PROFESSIONAL)
   @Get('my')
-  findMy(
-    @Req() req: Request & { user: AuthUser },
-  ) {
+  findMy(@Req() req: Request & { user: AuthUser }) {
     return this.proposalsService.findMy(req.user);
   }
 

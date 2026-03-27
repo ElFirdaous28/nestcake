@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { AllergiesService } from './allergies.service';
 import { CreateAllergyDto } from './dto/create-allergy.dto';
 import { UpdateAllergyDto } from './dto/update-allergy.dto';
@@ -32,7 +41,10 @@ export class AllergiesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':id')
-  update(@Param('id', ParseObjectIdPipe) id: string, @Body() updateAllergyDto: UpdateAllergyDto) {
+  update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateAllergyDto: UpdateAllergyDto,
+  ) {
     return this.allergiesService.update(id, updateAllergyDto);
   }
 

@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -7,13 +12,20 @@ import { Category } from './schemas/category.schema';
 
 @Injectable()
 export class CategoriesService {
-  constructor(@InjectModel(Category.name) private readonly categoryModel: Model<Category>) {}
+  constructor(
+    @InjectModel(Category.name) private readonly categoryModel: Model<Category>,
+  ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
     const normalizedName = createCategoryDto.name.trim();
 
     const exists = await this.categoryModel
-      .findOne({ name: { $regex: `^${this.escapeRegex(normalizedName)}$`, $options: 'i' } })
+      .findOne({
+        name: {
+          $regex: `^${this.escapeRegex(normalizedName)}$`,
+          $options: 'i',
+        },
+      })
       .lean()
       .exec();
 
@@ -44,7 +56,9 @@ export class CategoriesService {
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     const updateData = Object.fromEntries(
-      Object.entries(updateCategoryDto).filter(([, value]) => value !== undefined),
+      Object.entries(updateCategoryDto).filter(
+        ([, value]) => value !== undefined,
+      ),
     );
 
     if (updateData.name) {
@@ -59,7 +73,10 @@ export class CategoriesService {
       const duplicate = await this.categoryModel
         .findOne({
           _id: { $ne: id },
-          name: { $regex: `^${this.escapeRegex(updateData.name)}$`, $options: 'i' },
+          name: {
+            $regex: `^${this.escapeRegex(updateData.name)}$`,
+            $options: 'i',
+          },
         })
         .lean()
         .exec();
@@ -70,7 +87,10 @@ export class CategoriesService {
     }
 
     const updated = await this.categoryModel
-      .findByIdAndUpdate(id, updateData, { returnDocument: 'after', runValidators: true })
+      .findByIdAndUpdate(id, updateData, {
+        returnDocument: 'after',
+        runValidators: true,
+      })
       .lean()
       .exec();
 
@@ -82,7 +102,10 @@ export class CategoriesService {
   }
 
   async remove(id: string) {
-    const deleted = await this.categoryModel.findByIdAndDelete(id).lean().exec();
+    const deleted = await this.categoryModel
+      .findByIdAndDelete(id)
+      .lean()
+      .exec();
 
     if (!deleted) {
       throw new NotFoundException('Category not found');

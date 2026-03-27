@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { unlinkSync } from 'fs';
 import { InjectModel } from '@nestjs/mongoose';
 import { AuthUser, ProfessionalVerificationStatus } from '@shared-types';
@@ -11,20 +8,22 @@ import { UpdateMyProfessionalDto } from './dto/update-my-professional.dto';
 import { AddProfessionalPortfolioItemDto } from './dto/add-professional-portfolio-item.dto';
 import { UpdateProfessionalVerificationDto } from './dto/update-professional-verification.dto';
 
-
 @Injectable()
 export class ProfessionalsService {
   constructor(
     @InjectModel(Professional.name)
     private readonly professionalModel: Model<Professional>,
-  ) { }
+  ) {}
 
   async findAll() {
     return this.professionalModel.find().lean().exec();
   }
 
   async findOne(id: string) {
-    const professional = await this.professionalModel.findById(id).lean().exec();
+    const professional = await this.professionalModel
+      .findById(id)
+      .lean()
+      .exec();
     if (!professional) {
       throw new NotFoundException('Professional not found');
     }
@@ -51,10 +50,14 @@ export class ProfessionalsService {
     );
 
     const updated = await this.professionalModel
-      .findOneAndUpdate({ userId: new Types.ObjectId(authUser.sub) }, updateData, {
-        returnDocument: 'after',
-        runValidators: true,
-      })
+      .findOneAndUpdate(
+        { userId: new Types.ObjectId(authUser.sub) },
+        updateData,
+        {
+          returnDocument: 'after',
+          runValidators: true,
+        },
+      )
       .lean()
       .exec();
 
@@ -71,7 +74,11 @@ export class ProfessionalsService {
     dto: AddProfessionalPortfolioItemDto,
   ) {
     const imageUrl = `/uploads/portfolio/${file.filename}`;
-    const portfolioItem: { images: string[]; title?: string; description?: string } = {
+    const portfolioItem: {
+      images: string[];
+      title?: string;
+      description?: string;
+    } = {
       images: [imageUrl],
     };
 
@@ -130,7 +137,8 @@ export class ProfessionalsService {
         professionalId,
         {
           verificationStatus: dto.verificationStatus,
-          verified: dto.verificationStatus === ProfessionalVerificationStatus.VERIFIED,
+          verified:
+            dto.verificationStatus === ProfessionalVerificationStatus.VERIFIED,
         },
         { returnDocument: 'after', runValidators: true },
       )
@@ -143,5 +151,4 @@ export class ProfessionalsService {
 
     return updated;
   }
-
 }

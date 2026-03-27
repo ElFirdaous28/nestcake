@@ -5,7 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuthUser, ProductStatus, ProfessionalVerificationStatus } from '@shared-types';
+import {
+  AuthUser,
+  ProductStatus,
+  ProfessionalVerificationStatus,
+} from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Category } from '../categories/schemas/category.schema';
 import { Professional } from '../professionals/schemas/professional.schema';
@@ -26,7 +30,8 @@ type ProductListOptions = {
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
-    @InjectModel(Professional.name) private readonly professionalModel: Model<Professional>,
+    @InjectModel(Professional.name)
+    private readonly professionalModel: Model<Professional>,
     @InjectModel(Category.name) private readonly categoryModel: Model<Category>,
   ) {}
 
@@ -45,7 +50,10 @@ export class ProductsService {
     return professional;
   }
 
-  private ensureOwnership(productProfessionalId: string, myProfessionalId: string) {
+  private ensureOwnership(
+    productProfessionalId: string,
+    myProfessionalId: string,
+  ) {
     if (productProfessionalId !== myProfessionalId) {
       throw new ForbiddenException('You can only manage your own products');
     }
@@ -195,10 +203,12 @@ export class ProductsService {
       throw new BadRequestException('No update fields provided');
     }
 
-    return this.productModel.findByIdAndUpdate(id, updateData, {
-      returnDocument: 'after',
-      runValidators: true,
-    }).lean();
+    return this.productModel
+      .findByIdAndUpdate(id, updateData, {
+        returnDocument: 'after',
+        runValidators: true,
+      })
+      .lean();
   }
 
   async remove(id: string, authUser: AuthUser) {
@@ -226,9 +236,12 @@ export class ProductsService {
 
     if (
       status === ProductStatus.PUBLISHED &&
-      professional.verificationStatus !== ProfessionalVerificationStatus.VERIFIED
+      professional.verificationStatus !==
+        ProfessionalVerificationStatus.VERIFIED
     ) {
-      throw new ForbiddenException('Only verified professionals can publish products');
+      throw new ForbiddenException(
+        'Only verified professionals can publish products',
+      );
     }
 
     const product = await this.productModel.findById(id).lean().exec();
@@ -239,20 +252,25 @@ export class ProductsService {
       professional._id.toString(),
     );
 
-    return this.productModel.findByIdAndUpdate(
-      id,
-      { status },
-      { returnDocument: 'after', runValidators: true },
-    ).lean();
+    return this.productModel
+      .findByIdAndUpdate(
+        id,
+        { status },
+        { returnDocument: 'after', runValidators: true },
+      )
+      .lean();
   }
 
   async publishAllProducts(authUser: AuthUser) {
     const professional = await this.getProfessional(authUser);
 
     if (
-      professional.verificationStatus !== ProfessionalVerificationStatus.VERIFIED
+      professional.verificationStatus !==
+      ProfessionalVerificationStatus.VERIFIED
     ) {
-      throw new ForbiddenException('Only verified professionals can publish products');
+      throw new ForbiddenException(
+        'Only verified professionals can publish products',
+      );
     }
 
     const result = await this.productModel.updateMany(

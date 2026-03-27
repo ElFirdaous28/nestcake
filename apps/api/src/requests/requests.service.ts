@@ -16,12 +16,17 @@ import { UpdateRequestDto } from './dto/update-request.dto';
 @Injectable()
 export class RequestsService {
   constructor(
-    @InjectModel(Request.name) private readonly requestModel: Model<RequestDocument>,
+    @InjectModel(Request.name)
+    private readonly requestModel: Model<RequestDocument>,
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @InjectModel(Allergy.name) private readonly allergyModel: Model<Allergy>,
   ) {}
 
-  async create(authUser: AuthUser, createRequestDto: CreateRequestDto, file?: Express.Multer.File) {
+  async create(
+    authUser: AuthUser,
+    createRequestDto: CreateRequestDto,
+    file?: Express.Multer.File,
+  ) {
     // Verify user is client
     const user = await this.userModel.findById(authUser.sub).lean().exec();
     if (!user || user.role !== UserRole.CLIENT) {
@@ -31,7 +36,9 @@ export class RequestsService {
     // Validate allergies exist
     if (createRequestDto.allergyIds?.length) {
       const count = await this.allergyModel.countDocuments({
-        _id: { $in: createRequestDto.allergyIds.map((id) => new Types.ObjectId(id)) },
+        _id: {
+          $in: createRequestDto.allergyIds.map((id) => new Types.ObjectId(id)),
+        },
       });
       if (count !== createRequestDto.allergyIds.length) {
         throw new BadRequestException('One or more allergies not found');
@@ -42,11 +49,16 @@ export class RequestsService {
     const now = new Date();
     const twentyFourHoursLater = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     if (new Date(createRequestDto.deliveryDateTime) < twentyFourHoursLater) {
-      throw new BadRequestException('Delivery date must be at least 24 hours from now');
+      throw new BadRequestException(
+        'Delivery date must be at least 24 hours from now',
+      );
     }
 
     // Validate location for delivery type
-    if (createRequestDto.deliveryType === DeliveryType.DELIVERY && !createRequestDto.location?.trim()) {
+    if (
+      createRequestDto.deliveryType === DeliveryType.DELIVERY &&
+      !createRequestDto.location?.trim()
+    ) {
       throw new BadRequestException('Location is required for delivery orders');
     }
 
@@ -66,12 +78,16 @@ export class RequestsService {
       budget: createRequestDto.budget,
       deliveryDateTime: createRequestDto.deliveryDateTime,
       deliveryType: createRequestDto.deliveryType,
-      allergyIds: createRequestDto.allergyIds?.map((id) => new Types.ObjectId(id)) || [],
+      allergyIds:
+        createRequestDto.allergyIds?.map((id) => new Types.ObjectId(id)) || [],
       images,
       status: RequestStatus.OPEN,
     };
 
-    if (createRequestDto.deliveryType === DeliveryType.DELIVERY && createRequestDto.location) {
+    if (
+      createRequestDto.deliveryType === DeliveryType.DELIVERY &&
+      createRequestDto.location
+    ) {
       requestData.location = createRequestDto.location.trim();
     }
 
@@ -128,7 +144,9 @@ export class RequestsService {
         .limit(limit)
         .lean()
         .exec(),
-      this.requestModel.countDocuments({ clientId: new Types.ObjectId(authUser.sub) }),
+      this.requestModel.countDocuments({
+        clientId: new Types.ObjectId(authUser.sub),
+      }),
     ]);
 
     return {
@@ -146,7 +164,12 @@ export class RequestsService {
     return this.populateRequest(id);
   }
 
-  async update(id: string, authUser: AuthUser, updateRequestDto: UpdateRequestDto, file?: Express.Multer.File) {
+  async update(
+    id: string,
+    authUser: AuthUser,
+    updateRequestDto: UpdateRequestDto,
+    file?: Express.Multer.File,
+  ) {
     const request = await this.requestModel.findById(id).lean().exec();
 
     if (!request) {
@@ -160,7 +183,9 @@ export class RequestsService {
 
     // Cannot update if request is not OPEN
     if (request.status !== RequestStatus.OPEN) {
-      throw new BadRequestException(`Cannot update request with status ${request.status}`);
+      throw new BadRequestException(
+        `Cannot update request with status ${request.status}`,
+      );
     }
 
     const updateData: any = {};
@@ -183,9 +208,13 @@ export class RequestsService {
 
     if (updateRequestDto.deliveryDateTime !== undefined) {
       const now = new Date();
-      const twentyFourHoursLater = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      const twentyFourHoursLater = new Date(
+        now.getTime() + 24 * 60 * 60 * 1000,
+      );
       if (new Date(updateRequestDto.deliveryDateTime) < twentyFourHoursLater) {
-        throw new BadRequestException('Delivery date must be at least 24 hours from now');
+        throw new BadRequestException(
+          'Delivery date must be at least 24 hours from now',
+        );
       }
       updateData.deliveryDateTime = updateRequestDto.deliveryDateTime;
     }
@@ -193,15 +222,24 @@ export class RequestsService {
     if (updateRequestDto.deliveryType !== undefined) {
       updateData.deliveryType = updateRequestDto.deliveryType;
       // If changing to dropdown delivery, location is required
-      if (updateRequestDto.deliveryType === DeliveryType.DELIVERY && !updateRequestDto.location?.trim() && !request.location) {
-        throw new BadRequestException('Location is required when delivery type is set to delivery');
+      if (
+        updateRequestDto.deliveryType === DeliveryType.DELIVERY &&
+        !updateRequestDto.location?.trim() &&
+        !request.location
+      ) {
+        throw new BadRequestException(
+          'Location is required when delivery type is set to delivery',
+        );
       }
     }
 
     if (updateRequestDto.location !== undefined) {
       if (updateRequestDto.location && updateRequestDto.location.trim()) {
         updateData.location = updateRequestDto.location.trim();
-      } else if (updateRequestDto.deliveryType === DeliveryType.PICKUP || updateData.deliveryType === DeliveryType.PICKUP) {
+      } else if (
+        updateRequestDto.deliveryType === DeliveryType.PICKUP ||
+        updateData.deliveryType === DeliveryType.PICKUP
+      ) {
         updateData.location = undefined;
       }
     }
@@ -209,13 +247,19 @@ export class RequestsService {
     if (updateRequestDto.allergyIds !== undefined) {
       if (updateRequestDto.allergyIds.length) {
         const count = await this.allergyModel.countDocuments({
-          _id: { $in: updateRequestDto.allergyIds.map((id) => new Types.ObjectId(id)) },
+          _id: {
+            $in: updateRequestDto.allergyIds.map(
+              (id) => new Types.ObjectId(id),
+            ),
+          },
         });
         if (count !== updateRequestDto.allergyIds.length) {
           throw new BadRequestException('One or more allergies not found');
         }
       }
-      updateData.allergyIds = updateRequestDto.allergyIds.map((id) => new Types.ObjectId(id));
+      updateData.allergyIds = updateRequestDto.allergyIds.map(
+        (id) => new Types.ObjectId(id),
+      );
     }
 
     if (file || updateRequestDto.images !== undefined) {
@@ -234,7 +278,10 @@ export class RequestsService {
     }
 
     const updated = await this.requestModel
-      .findByIdAndUpdate(id, updateData, { returnDocument: 'after', runValidators: true })
+      .findByIdAndUpdate(id, updateData, {
+        returnDocument: 'after',
+        runValidators: true,
+      })
       .exec();
 
     if (!updated) {
@@ -256,7 +303,9 @@ export class RequestsService {
     }
 
     if (request.status !== RequestStatus.OPEN) {
-      throw new BadRequestException(`Cannot delete request with status ${request.status}`);
+      throw new BadRequestException(
+        `Cannot delete request with status ${request.status}`,
+      );
     }
 
     await this.requestModel.findByIdAndDelete(id).exec();
@@ -272,7 +321,9 @@ export class RequestsService {
     }
 
     if (request.clientId.toString() !== authUser.sub) {
-      throw new ForbiddenException('You can only update status of your own requests');
+      throw new ForbiddenException(
+        'You can only update status of your own requests',
+      );
     }
 
     const allowedClientStatuses = new Set<RequestStatus>([
@@ -281,19 +332,30 @@ export class RequestsService {
     ]);
 
     if (!allowedClientStatuses.has(status)) {
-      throw new BadRequestException('Client can only set status to CANCELLED or CLOSED');
+      throw new BadRequestException(
+        'Client can only set status to CANCELLED or CLOSED',
+      );
     }
 
     if (request.status === status) {
       throw new BadRequestException(`Request is already ${status}`);
     }
 
-    if (request.status === RequestStatus.CANCELLED || request.status === RequestStatus.CLOSED) {
-      throw new BadRequestException(`Cannot change status from ${request.status}`);
+    if (
+      request.status === RequestStatus.CANCELLED ||
+      request.status === RequestStatus.CLOSED
+    ) {
+      throw new BadRequestException(
+        `Cannot change status from ${request.status}`,
+      );
     }
 
     const updated = await this.requestModel
-      .findByIdAndUpdate(id, { status }, { returnDocument: 'after', runValidators: true })
+      .findByIdAndUpdate(
+        id,
+        { status },
+        { returnDocument: 'after', runValidators: true },
+      )
       .exec();
 
     if (!updated) {

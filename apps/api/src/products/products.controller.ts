@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthUser, ProductStatus, UserRole } from '@shared-types';
 import { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -12,7 +23,7 @@ import { FindProductsQueryDto } from './dto/find-products-query.dto';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) { }
+  constructor(private readonly productsService: ProductsService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.PROFESSIONAL)
@@ -75,7 +86,10 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.PROFESSIONAL, UserRole.ADMIN)
   @Delete(':id')
-  remove(@Req() req: Request & { user: AuthUser }, @Param('id', ParseObjectIdPipe) id: string) {
+  remove(
+    @Req() req: Request & { user: AuthUser },
+    @Param('id', ParseObjectIdPipe) id: string,
+  ) {
     return this.productsService.remove(id, req.user);
   }
 

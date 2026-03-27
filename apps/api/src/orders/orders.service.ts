@@ -1,6 +1,18 @@
-import { BadRequestException, Injectable, MethodNotAllowedException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  MethodNotAllowedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuthUser, OrderStatus, OrderType, ProductStatus, RequestStatus, UserRole } from '@shared-types';
+import {
+  AuthUser,
+  OrderStatus,
+  OrderType,
+  ProductStatus,
+  RequestStatus,
+  UserRole,
+} from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Product } from '../products/schemas/product.schema';
 import { Professional } from '../professionals/schemas/professional.schema';
@@ -14,7 +26,8 @@ export class OrdersService {
   constructor(
     @InjectModel(Order.name) private readonly orderModel: Model<Order>,
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
-    @InjectModel(Professional.name) private readonly professionalModel: Model<Professional>,
+    @InjectModel(Professional.name)
+    private readonly professionalModel: Model<Professional>,
     @InjectModel(Request.name) private readonly requestModel: Model<Request>,
   ) {}
 
@@ -36,7 +49,11 @@ export class OrdersService {
     return order;
   }
 
-  private ensureClientOwnsOrder(orderClientId: Types.ObjectId, authUser: AuthUser, action: string) {
+  private ensureClientOwnsOrder(
+    orderClientId: Types.ObjectId,
+    authUser: AuthUser,
+    action: string,
+  ) {
     if (orderClientId.toString() !== authUser.sub) {
       throw new BadRequestException(`You can only ${action} your own orders`);
     }
@@ -63,7 +80,10 @@ export class OrdersService {
     );
   }
 
-  private async listOrdersByFilter(filter: Record<string, unknown>, query: FindOrdersQueryDto) {
+  private async listOrdersByFilter(
+    filter: Record<string, unknown>,
+    query: FindOrdersQueryDto,
+  ) {
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
     const skip = (page - 1) * limit;
@@ -103,7 +123,9 @@ export class OrdersService {
     const uniqueProductIds = [...new Set(productIds)];
 
     if (uniqueProductIds.length !== productIds.length) {
-      throw new BadRequestException('Duplicate products are not allowed in one order');
+      throw new BadRequestException(
+        'Duplicate products are not allowed in one order',
+      );
     }
 
     const products = await this.productModel
@@ -116,18 +138,26 @@ export class OrdersService {
       .exec();
 
     if (products.length !== uniqueProductIds.length) {
-      throw new BadRequestException('One or more products are unavailable or unpublished');
+      throw new BadRequestException(
+        'One or more products are unavailable or unpublished',
+      );
     }
 
-    const professionalIds = [...new Set(products.map((product) => product.professionalId.toString()))];
+    const professionalIds = [
+      ...new Set(products.map((product) => product.professionalId.toString())),
+    ];
 
     if (professionalIds.length !== 1) {
-      throw new BadRequestException('All order items must belong to the same professional');
+      throw new BadRequestException(
+        'All order items must belong to the same professional',
+      );
     }
 
     const professionalId = professionalIds[0];
 
-    const productById = new Map(products.map((product) => [product._id.toString(), product]));
+    const productById = new Map(
+      products.map((product) => [product._id.toString(), product]),
+    );
 
     const orderItems = createOrderDto.items.map((item) => {
       const product = productById.get(item.productId);
@@ -142,7 +172,10 @@ export class OrdersService {
       };
     });
 
-    const totalPrice = orderItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+    const totalPrice = orderItems.reduce(
+      (sum, item) => sum + item.quantity * item.unitPrice,
+      0,
+    );
 
     const order = await this.orderModel.create({
       clientId: new Types.ObjectId(authUser.sub),
@@ -161,17 +194,23 @@ export class OrdersService {
   }
 
   async findClientOrders(authUser: AuthUser, query: FindOrdersQueryDto) {
-    return this.listOrdersByFilter({
-      clientId: new Types.ObjectId(authUser.sub),
-    }, query);
+    return this.listOrdersByFilter(
+      {
+        clientId: new Types.ObjectId(authUser.sub),
+      },
+      query,
+    );
   }
 
   async findProfessionalOrders(authUser: AuthUser, query: FindOrdersQueryDto) {
     const professional = await this.getProfessionalForUserOrThrow(authUser);
 
-    return this.listOrdersByFilter({
-      professionalId: professional._id,
-    }, query);
+    return this.listOrdersByFilter(
+      {
+        professionalId: professional._id,
+      },
+      query,
+    );
   }
 
   findOne(id: string) {
@@ -185,7 +224,9 @@ export class OrdersService {
   }
 
   update() {
-    throw new MethodNotAllowedException('Generic order update is disabled. Use dedicated order action endpoints.');
+    throw new MethodNotAllowedException(
+      'Generic order update is disabled. Use dedicated order action endpoints.',
+    );
   }
 
   async remove(id: string, authUser: AuthUser) {
@@ -195,7 +236,10 @@ export class OrdersService {
       throw new NotFoundException('Order not found');
     }
 
-    if (authUser.role !== UserRole.ADMIN && order.clientId.toString() !== authUser.sub) {
+    if (
+      authUser.role !== UserRole.ADMIN &&
+      order.clientId.toString() !== authUser.sub
+    ) {
       throw new BadRequestException('You can only delete your own orders');
     }
 
@@ -204,7 +248,9 @@ export class OrdersService {
       order.status !== OrderStatus.AWAITING_PAYMENT &&
       order.status !== OrderStatus.CANCELLED
     ) {
-      throw new BadRequestException('You can only delete orders that are awaiting payment or already cancelled');
+      throw new BadRequestException(
+        'You can only delete orders that are awaiting payment or already cancelled',
+      );
     }
 
     await this.orderModel.findByIdAndUpdate(
@@ -220,56 +266,58 @@ export class OrdersService {
     return { message: 'Order deleted successfully' };
   }
 
-    async markPaid(id: string, authUser: AuthUser) {
-      const order = await this.findActiveOrderOrThrow(id);
+  async markPaid(id: string, authUser: AuthUser) {
+    const order = await this.findActiveOrderOrThrow(id);
 
-      this.ensureClientOwnsOrder(order.clientId, authUser, 'pay');
+    this.ensureClientOwnsOrder(order.clientId, authUser, 'pay');
 
-      if (order.status !== OrderStatus.AWAITING_PAYMENT) {
-        throw new BadRequestException('Only awaiting payment orders can be paid');
-      }
-
-      await this.setOrderStatus(id, OrderStatus.IN_PROGRESS);
-
-      return this.findOne(id);
+    if (order.status !== OrderStatus.AWAITING_PAYMENT) {
+      throw new BadRequestException('Only awaiting payment orders can be paid');
     }
 
-    async markReady(id: string, authUser: AuthUser) {
-      const professional = await this.getProfessionalForUserOrThrow(authUser);
-      const order = await this.findActiveOrderOrThrow(id);
+    await this.setOrderStatus(id, OrderStatus.IN_PROGRESS);
 
-      if (order.professionalId.toString() !== professional._id.toString()) {
-        throw new BadRequestException('You can only update your own orders');
-      }
+    return this.findOne(id);
+  }
 
-      if (order.status !== OrderStatus.IN_PROGRESS) {
-        throw new BadRequestException('Only in-progress orders can be marked ready');
-      }
+  async markReady(id: string, authUser: AuthUser) {
+    const professional = await this.getProfessionalForUserOrThrow(authUser);
+    const order = await this.findActiveOrderOrThrow(id);
 
-      await this.setOrderStatus(id, OrderStatus.READY);
-
-      return this.findOne(id);
+    if (order.professionalId.toString() !== professional._id.toString()) {
+      throw new BadRequestException('You can only update your own orders');
     }
 
-    async complete(id: string, authUser: AuthUser) {
-      const order = await this.findActiveOrderOrThrow(id);
-
-      this.ensureClientOwnsOrder(order.clientId, authUser, 'complete');
-
-      if (order.status !== OrderStatus.READY) {
-        throw new BadRequestException('Only ready orders can be completed');
-      }
-
-      await this.setOrderStatus(id, OrderStatus.COMPLETED);
-
-      if (order.requestId) {
-        await this.requestModel.findByIdAndUpdate(
-          order.requestId,
-          { status: RequestStatus.CLOSED },
-          { runValidators: true },
-        );
-      }
-
-      return this.findOne(id);
+    if (order.status !== OrderStatus.IN_PROGRESS) {
+      throw new BadRequestException(
+        'Only in-progress orders can be marked ready',
+      );
     }
+
+    await this.setOrderStatus(id, OrderStatus.READY);
+
+    return this.findOne(id);
+  }
+
+  async complete(id: string, authUser: AuthUser) {
+    const order = await this.findActiveOrderOrThrow(id);
+
+    this.ensureClientOwnsOrder(order.clientId, authUser, 'complete');
+
+    if (order.status !== OrderStatus.READY) {
+      throw new BadRequestException('Only ready orders can be completed');
+    }
+
+    await this.setOrderStatus(id, OrderStatus.COMPLETED);
+
+    if (order.requestId) {
+      await this.requestModel.findByIdAndUpdate(
+        order.requestId,
+        { status: RequestStatus.CLOSED },
+        { runValidators: true },
+      );
+    }
+
+    return this.findOne(id);
+  }
 }

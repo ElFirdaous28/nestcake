@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
 import { Order, OrderSchema } from '../orders/schemas/order.schema';
-import { Professional, ProfessionalSchema } from '../professionals/schemas/professional.schema';
+import {
+  Professional,
+  ProfessionalSchema,
+} from '../professionals/schemas/professional.schema';
 import { ReviewsService } from './reviews.service';
 import { ReviewsController } from './reviews.controller';
 import { Review, ReviewSchema } from './entities/review.entity';

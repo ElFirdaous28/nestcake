@@ -18,12 +18,12 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthUser } from '@shared-types';
 
-const ACCESS_COOKIE_MAX_AGE = 15 * 60 * 1000;          // 15 minutes
+const ACCESS_COOKIE_MAX_AGE = 15 * 60 * 1000; // 15 minutes
 const REFRESH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('register/user')
   async registerUser(
@@ -47,7 +47,10 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const auth = await this.authService.login(dto);
     this.setTokenCookies(res, auth.accessToken, auth.refreshToken);
     return { accessToken: auth.accessToken, user: auth.user };
@@ -85,7 +88,11 @@ export class AuthController {
     return this.authService.getMe(req.user);
   }
 
-  private setTokenCookies(res: Response, accessToken: string, refreshToken: string) {
+  private setTokenCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+  ) {
     const secure = process.env.NODE_ENV === 'production';
 
     res.cookie('access_token', accessToken, {
