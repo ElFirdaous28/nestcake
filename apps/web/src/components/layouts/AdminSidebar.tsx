@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ShieldCheck, Users, Menu, X } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, Users, Menu, X, Tags } from 'lucide-react';
 import { useAuth } from '@/src/hooks/useAuth';
 import { Logo } from '@/src/components/common/Logo';
 import { SidebarAccountSection } from '@/src/components/layouts/SidebarAccountSection';
 
 const links = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/categories', label: 'Categories', icon: Tags },
   { href: '/admin/professionals', label: 'Professionals', icon: Users },
   { href: '/admin/reports', label: 'Reports', icon: ShieldCheck },
 ];
