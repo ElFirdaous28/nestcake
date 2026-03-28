@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   BriefcaseBusiness,
+  CircleUserRound,
   LayoutDashboard,
   Package,
-  PiggyBank,
   Presentation,
+  Star,
   Menu,
   X,
 } from 'lucide-react';
@@ -20,7 +21,9 @@ const links = [
   { href: '/professional/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/professional/products', label: 'Products', icon: Package },
   { href: '/professional/proposals', label: 'Proposals', icon: Presentation },
+  { href: '/professional/reviews', label: 'Reviews', icon: Star },
   { href: '/professional/portfolio', label: 'Portfolio', icon: BriefcaseBusiness },
+  { href: '/professional/profile', label: 'Profile', icon: CircleUserRound },
 ];
 
 const isActivePath = (pathname: string | null, href: string) => {
@@ -89,7 +92,7 @@ export function ProfessionalSidebar() {
       <SidebarAccountSection
         email={user?.email}
         avatar={user?.avatar}
-        profileHref="/profile"
+        profileHref="/professional/profile"
         fallbackInitial="P"
       />
       </aside>

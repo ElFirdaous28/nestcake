@@ -1,7 +1,5 @@
-import React from 'react'
+import { ProfessionalPortfolioManager } from '@/src/components/professional/ProfessionalPortfolioManager';
 
-export default function page() {
-  return (
-    <div>page</div>
-  )
+export default function ProfessionalPortfolioRoutePage() {
+  return <ProfessionalPortfolioManager />;
 }
