@@ -9,6 +9,7 @@ import {
   AuthUser,
   ProductStatus,
   ProfessionalVerificationStatus,
+  UserRole,
 } from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Category } from '../categories/schemas/category.schema';
@@ -33,7 +34,7 @@ export class ProductsService {
     @InjectModel(Professional.name)
     private readonly professionalModel: Model<Professional>,
     @InjectModel(Category.name) private readonly categoryModel: Model<Category>,
-  ) {}
+  ) { }
 
   // ---------- Helpers ----------
 
@@ -212,15 +213,18 @@ export class ProductsService {
   }
 
   async remove(id: string, authUser: AuthUser) {
-    const professional = await this.getProfessional(authUser);
 
     const product = await this.productModel.findById(id).lean().exec();
     if (!product) throw new NotFoundException('Product not found');
+    
+    if (authUser.role === UserRole.PROFESSIONAL) {
+      const professional = await this.getProfessional(authUser);
 
-    this.ensureOwnership(
-      product.professionalId.toString(),
-      professional._id.toString(),
-    );
+      this.ensureOwnership(
+        product.professionalId.toString(),
+        professional._id.toString(),
+      );
+    }
 
     await this.productModel.findByIdAndDelete(id);
 
@@ -237,7 +241,7 @@ export class ProductsService {
     if (
       status === ProductStatus.PUBLISHED &&
       professional.verificationStatus !==
-        ProfessionalVerificationStatus.VERIFIED
+      ProfessionalVerificationStatus.VERIFIED
     ) {
       throw new ForbiddenException(
         'Only verified professionals can publish products',
