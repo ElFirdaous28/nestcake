@@ -18,6 +18,7 @@ export async function seedProducts(
       name: `Cake ${i}`,
       description: 'Delicious custom cake',
       price: 20 + i,
+      image: '/uploads/products/seed-placeholder.jpg',
       professionalId: pro._id,
       categoryIds: [category._id],
       status,

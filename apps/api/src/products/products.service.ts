@@ -76,16 +76,23 @@ export class ProductsService {
 
   // ---------- CRUD ----------
 
-  async create(authUser: AuthUser, dto: CreateProductDto) {
+  async create(
+    authUser: AuthUser,
+    dto: CreateProductDto,
+    file: Express.Multer.File,
+  ) {
     const professional = await this.getProfessional(authUser);
 
     const categoryIds = this.normalizeCategoryIds(dto.categoryIds);
     await this.ensureCategoriesExist(categoryIds);
 
+    const imageUrl = `/uploads/products/${file.filename}`;
+
     return this.productModel.create({
       name: dto.name.trim(),
       description: dto.description?.trim() || undefined,
       price: dto.price,
+      image: imageUrl,
       categoryIds: categoryIds.map((id) => new Types.ObjectId(id)),
       isAvailable: dto.isAvailable ?? true,
       status: dto.status ?? ProductStatus.DRAFT,
@@ -174,7 +181,12 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: string, authUser: AuthUser, dto: UpdateProductDto) {
+  async update(
+    id: string,
+    authUser: AuthUser,
+    dto: UpdateProductDto,
+    file?: Express.Multer.File,
+  ) {
     const professional = await this.getProfessional(authUser);
 
     const product = await this.productModel.findById(id).lean().exec();
@@ -198,6 +210,10 @@ export class ProductsService {
       const ids = this.normalizeCategoryIds(updateData.categoryIds as string[]);
       await this.ensureCategoriesExist(ids);
       updateData.categoryIds = ids.map((id) => new Types.ObjectId(id));
+    }
+
+    if (file) {
+      updateData.image = `/uploads/products/${file.filename}`;
     }
 
     if (!Object.keys(updateData).length) {

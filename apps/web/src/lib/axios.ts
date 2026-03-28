@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getUserFriendlyErrorMessage } from '@/src/lib/error-message';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -15,5 +16,13 @@ apiClient.interceptors.request.use((config) => {
     }
     return config;
 });
+
+apiClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const sanitized = new Error(getUserFriendlyErrorMessage(error));
+        return Promise.reject(sanitized);
+    },
+);
 
 export default apiClient;

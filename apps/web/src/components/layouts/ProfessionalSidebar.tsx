@@ -3,20 +3,30 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BriefcaseBusiness, LayoutDashboard, PiggyBank, Presentation, Menu, X } from 'lucide-react';
+import {
+  BriefcaseBusiness,
+  LayoutDashboard,
+  Package,
+  PiggyBank,
+  Presentation,
+  Menu,
+  X,
+} from 'lucide-react';
 import { useAuth } from '@/src/hooks/useAuth';
 import { Logo } from '@/src/components/common/Logo';
 import { SidebarAccountSection } from '@/src/components/layouts/SidebarAccountSection';
 
 const links = [
   { href: '/professional/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/professional/products', label: 'Products', icon: Package },
   { href: '/professional/proposals', label: 'Proposals', icon: Presentation },
   { href: '/professional/portfolio', label: 'Portfolio', icon: BriefcaseBusiness },
-  { href: '/professional/earnings', label: 'Earnings', icon: PiggyBank },
 ];
 
-const isActivePath = (pathname: string, href: string) =>
-  pathname === href || pathname.startsWith(`${href}/`);
+const isActivePath = (pathname: string | null, href: string) => {
+  const safePath = pathname ?? '';
+  return safePath === href || safePath.startsWith(`${href}/`);
+};
 
 export function ProfessionalSidebar() {
   const pathname = usePathname();

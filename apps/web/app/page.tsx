@@ -9,6 +9,12 @@ export default function Home() {
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link
+            href="/products"
+            className="rounded-xl border border-brand-line px-6 py-3 text-center text-sm font-semibold text-brand-ink transition hover:opacity-90"
+          >
+            Browse Products
+          </Link>
+          <Link
             href="/register"
             className="rounded-xl bg-brand-rose px-6 py-3 text-center text-sm font-semibold text-brand-ink transition hover:opacity-90"
           >

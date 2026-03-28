@@ -14,11 +14,12 @@ const links = [
   { href: '/admin/allergies', label: 'Allergies', icon: HeartPlus },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/reports', label: 'Reports', icon: ShieldCheck },
 ];
 
-const isActivePath = (pathname: string, href: string) =>
-  pathname === href || pathname.startsWith(`${href}/`);
+const isActivePath = (pathname: string | null, href: string) => {
+  const safePath = pathname ?? '';
+  return safePath === href || safePath.startsWith(`${href}/`);
+};
 
 export function AdminSidebar() {
   const pathname = usePathname();

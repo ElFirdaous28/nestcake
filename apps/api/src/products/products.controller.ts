@@ -3,19 +3,25 @@ import {
   Controller,
   Delete,
   Get,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Patch,
   Post,
   Query,
   Req,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthUser, ProductStatus, UserRole } from '@shared-types';
 import { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
+import { multerDiskConfig } from '../common/upload.config';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -27,12 +33,19 @@ export class ProductsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.PROFESSIONAL)
+  @UseInterceptors(FileInterceptor('image', multerDiskConfig('products')))
   @Post()
   create(
     @Req() req: Request & { user: AuthUser },
     @Body() createProductDto: CreateProductDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 })],
+      }),
+    )
+    file: Express.Multer.File,
   ) {
-    return this.productsService.create(req.user, createProductDto);
+    return this.productsService.create(req.user, createProductDto, file);
   }
 
   @Get()
@@ -74,13 +87,15 @@ export class ProductsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.PROFESSIONAL)
+  @UseInterceptors(FileInterceptor('image', multerDiskConfig('products')))
   @Patch(':id')
   update(
     @Req() req: Request & { user: AuthUser },
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
+    @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.productsService.update(id, req.user, updateProductDto);
+    return this.productsService.update(id, req.user, updateProductDto, file);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -12,14 +12,13 @@ const PROTECTED_PREFIXES = [
   '/requests',
   '/portfolio',
   '/proposals',
-  '/earnings',
   '/reports',
   '/professionals',
 ];
 
 const ROLE_PREFIXES = {
   CLIENT: ['/favorites', '/orders', '/requests'],
-  PROFESSIONAL: ['/portfolio', '/proposals', '/earnings'],
+  PROFESSIONAL: ['/portfolio', '/proposals'],
   ADMIN: ['/reports', '/professionals'],
 } as const;
 

@@ -9,6 +9,7 @@ import {
 	type RegisterUserPayload,
 	clearAccessToken,
 } from '@/src/services/auth.service';
+import { getUserFriendlyErrorMessage } from '@/src/lib/error-message';
 
 type AuthContextValue = {
 	user: AuthUser | null;
@@ -24,25 +25,8 @@ type AuthContextValue = {
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const getErrorMessage = (error: unknown): string => {
-	if (
-		typeof error === 'object' &&
-		error !== null &&
-		'response' in error &&
-		typeof error.response === 'object' &&
-		error.response !== null &&
-		'data' in error.response &&
-		typeof error.response.data === 'object' &&
-		error.response.data !== null &&
-		'message' in error.response.data
-	) {
-		const message = error.response.data.message;
-		if (typeof message === 'string') return message;
-		if (Array.isArray(message) && message.length > 0) return String(message[0]);
-	}
-
-	return 'Something went wrong. Please try again.';
-};
+const getErrorMessage = (error: unknown): string =>
+	getUserFriendlyErrorMessage(error);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<AuthUser | null>(null);

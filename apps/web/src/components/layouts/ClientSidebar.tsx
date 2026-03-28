@@ -3,20 +3,31 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Heart, LayoutDashboard, ListChecks, ShoppingBag, Menu, X } from 'lucide-react';
+import {
+  Heart,
+  LayoutDashboard,
+  ListChecks,
+  Menu,
+  Package,
+  ShoppingBag,
+  X,
+} from 'lucide-react';
 import { useAuth } from '@/src/hooks/useAuth';
 import { Logo } from '@/src/components/common/Logo';
 import { SidebarAccountSection } from '@/src/components/layouts/SidebarAccountSection';
 
 const links = [
   { href: '/client/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/products', label: 'Products', icon: Package },
   { href: '/client/requests', label: 'Requests', icon: ListChecks },
   { href: '/client/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/client/favorites', label: 'Favorites', icon: Heart },
 ];
 
-const isActivePath = (pathname: string, href: string) =>
-  pathname === href || pathname.startsWith(`${href}/`);
+const isActivePath = (pathname: string | null, href: string) => {
+  const safePath = pathname ?? '';
+  return safePath === href || safePath.startsWith(`${href}/`);
+};
 
 export function ClientSidebar() {
   const pathname = usePathname();
