@@ -34,7 +34,7 @@ export class ProductsService {
     @InjectModel(Professional.name)
     private readonly professionalModel: Model<Professional>,
     @InjectModel(Category.name) private readonly categoryModel: Model<Category>,
-  ) { }
+  ) {}
 
   // ---------- Helpers ----------
 
@@ -229,10 +229,9 @@ export class ProductsService {
   }
 
   async remove(id: string, authUser: AuthUser) {
-
     const product = await this.productModel.findById(id).lean().exec();
     if (!product) throw new NotFoundException('Product not found');
-    
+
     if (authUser.role === UserRole.PROFESSIONAL) {
       const professional = await this.getProfessional(authUser);
 
@@ -257,7 +256,7 @@ export class ProductsService {
     if (
       status === ProductStatus.PUBLISHED &&
       professional.verificationStatus !==
-      ProfessionalVerificationStatus.VERIFIED
+        ProfessionalVerificationStatus.VERIFIED
     ) {
       throw new ForbiddenException(
         'Only verified professionals can publish products',

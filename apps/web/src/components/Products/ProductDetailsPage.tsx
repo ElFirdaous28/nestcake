@@ -1,19 +1,88 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { OrderStatus, ProductStatus, UserRole } from '@shared-types';
 import { Loader2 } from 'lucide-react';
+import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
+import { useAuth } from '@/src/hooks/useAuth';
+import { ordersService } from '@/src/services/orders.service';
 import { productsService, type ProductItem } from '@/src/services/products.service';
 
 type ProductDetailsPageProps = {
   productId: string;
 };
 
+const directOrderSchema = z.object({
+  productId: z.string().trim().min(1, 'Product id is required.'),
+  quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1.').max(50, 'Quantity cannot exceed 50.'),
+});
+
 export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [product, setProduct] = useState<ProductItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [quantity, setQuantity] = useState('1');
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const isClient = user?.role === UserRole.CLIENT;
+
+  const createDirectOrder = async () => {
+    if (!product) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      router.push(`/login?next=${encodeURIComponent(`/products/${product.id}`)}`);
+      return;
+    }
+
+    if (!isClient) {
+      setError('Only clients can place direct orders.');
+      return;
+    }
+
+    const parsed = directOrderSchema.safeParse({
+      productId: product.id,
+      quantity,
+    });
+
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Please check quantity and try again.');
+      return;
+    }
+
+    setIsCreatingOrder(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const createdOrder = await ordersService.create({
+        items: [
+          {
+            productId: parsed.data.productId,
+            quantity: parsed.data.quantity,
+          },
+        ],
+      });
+
+      if (createdOrder.status !== OrderStatus.AWAITING_PAYMENT) {
+        setSuccess('Order placed successfully.');
+        return;
+      }
+
+      setSuccess('Direct order created. Please complete payment from your Orders page.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create direct order');
+    } finally {
+      setIsCreatingOrder(false);
+    }
+  };
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -51,6 +120,7 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
         </Link>
 
         <AppAlert message={error} />
+        <AppAlert message={success} variant="success" />
 
         {!product ? (
           <div className="rounded-xl border border-dashed border-brand-line bg-white py-14 text-center text-brand-ink-soft">
@@ -84,9 +154,44 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
                   {product.status}
                 </span>
               </div>
+
+              <div className="space-y-3 rounded-xl border border-brand-line bg-brand-cream-soft p-4">
+                <p className="text-sm font-semibold text-brand-ink">Direct order</p>
+
+                <label className="block space-y-1">
+                  <span className="text-xs font-semibold uppercase tracking-widest text-brand-ink-soft">Quantity</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    step="1"
+                    value={quantity}
+                    onChange={(event) => setQuantity(event.target.value)}
+                    className="w-full max-w-28 rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
+                  />
+                </label>
+
+                {!isAuthLoading && !isAuthenticated ? (
+                  <p className="text-xs text-brand-ink-soft">Sign in as a client to place a direct order.</p>
+                ) : null}
+
+                {!isAuthLoading && isAuthenticated && !isClient ? (
+                  <p className="text-xs text-brand-ink-soft">Only client accounts can place direct orders.</p>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={() => void createDirectOrder()}
+                  disabled={isCreatingOrder || isAuthLoading || !product.isAvailable || product.status !== ProductStatus.PUBLISHED || (isAuthenticated && !isClient)}
+                  className="rounded-lg bg-brand-rose px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-rose/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isCreatingOrder ? 'Creating order...' : 'Order Now'}
+                </button>
+              </div>
             </div>
           </article>
         )}
+
       </section>
     </main>
   );

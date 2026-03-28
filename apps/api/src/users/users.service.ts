@@ -127,12 +127,15 @@ export class UsersService {
     return { message: 'Account deleted successfully' };
   }
 
-  async findAllForAdmin(authUser: AuthUser, filters?: {
-    search?: string;
-    role?: string;
-    skip?: number;
-    limit?: number;
-  }) {
+  async findAllForAdmin(
+    authUser: AuthUser,
+    filters?: {
+      search?: string;
+      role?: string;
+      skip?: number;
+      limit?: number;
+    },
+  ) {
     const { search = '', role, skip = 0, limit = 50 } = filters || {};
     // exept the current login admin user
     const query: any = { _id: { $ne: authUser.sub } };

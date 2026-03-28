@@ -1,7 +1,5 @@
-import React from 'react'
+import { ProfessionalProposalsPage } from '@/src/components/professional/ProfessionalProposalsPage';
 
-export default function page() {
-  return (
-    <div>page</div>
-  )
+export default function ProfessionalProposalsRoutePage() {
+  return <ProfessionalProposalsPage />;
 }

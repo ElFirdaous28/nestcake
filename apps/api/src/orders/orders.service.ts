@@ -177,6 +177,64 @@ export class OrdersService {
       0,
     );
 
+    const existingAwaitingPaymentOrder = await this.orderModel
+      .findOne({
+        clientId: new Types.ObjectId(authUser.sub),
+        professionalId: new Types.ObjectId(professionalId),
+        type: OrderType.DIRECT,
+        status: OrderStatus.AWAITING_PAYMENT,
+        isDeleted: { $ne: true },
+      })
+      .lean()
+      .exec();
+
+    if (existingAwaitingPaymentOrder) {
+      const mergedItemsByProductId = new Map(
+        existingAwaitingPaymentOrder.items.map((item) => [
+          item.productId.toString(),
+          {
+            productId: item.productId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+          },
+        ]),
+      );
+
+      for (const newItem of orderItems) {
+        const key = newItem.productId.toString();
+        const existingItem = mergedItemsByProductId.get(key);
+
+        if (existingItem) {
+          existingItem.quantity += newItem.quantity;
+          existingItem.unitPrice = newItem.unitPrice;
+          continue;
+        }
+
+        mergedItemsByProductId.set(key, {
+          productId: newItem.productId,
+          quantity: newItem.quantity,
+          unitPrice: newItem.unitPrice,
+        });
+      }
+
+      const mergedItems = [...mergedItemsByProductId.values()];
+      const mergedTotalPrice = mergedItems.reduce(
+        (sum, item) => sum + item.quantity * item.unitPrice,
+        0,
+      );
+
+      await this.orderModel.findByIdAndUpdate(
+        existingAwaitingPaymentOrder._id,
+        {
+          items: mergedItems,
+          totalPrice: mergedTotalPrice,
+        },
+        { runValidators: true },
+      );
+
+      return this.findOne(existingAwaitingPaymentOrder._id.toString());
+    }
+
     const order = await this.orderModel.create({
       clientId: new Types.ObjectId(authUser.sub),
       professionalId: new Types.ObjectId(professionalId),
@@ -266,6 +324,62 @@ export class OrdersService {
     return { message: 'Order deleted successfully' };
   }
 
+  async removeItem(id: string, productId: string, authUser: AuthUser) {
+    const order = await this.findActiveOrderOrThrow(id);
+
+    this.ensureClientOwnsOrder(order.clientId, authUser, 'update');
+
+    if (order.type !== OrderType.DIRECT) {
+      throw new BadRequestException('You can only remove items from direct orders');
+    }
+
+    if (order.status !== OrderStatus.AWAITING_PAYMENT) {
+      throw new BadRequestException(
+        'You can only remove items from orders awaiting payment',
+      );
+    }
+
+    const remainingItems = order.items.filter(
+      (item) => item.productId.toString() !== productId,
+    );
+
+    if (remainingItems.length === order.items.length) {
+      throw new NotFoundException('Item not found in this order');
+    }
+
+    if (remainingItems.length === 0) {
+      await this.orderModel.findByIdAndUpdate(
+        id,
+        {
+          isDeleted: true,
+          deletedAt: new Date(),
+          status: OrderStatus.CANCELLED,
+          items: [],
+          totalPrice: 0,
+        },
+        { runValidators: true },
+      );
+
+      return { message: 'Order cancelled because all items were removed' };
+    }
+
+    const nextTotalPrice = remainingItems.reduce(
+      (sum, item) => sum + item.quantity * item.unitPrice,
+      0,
+    );
+
+    await this.orderModel.findByIdAndUpdate(
+      id,
+      {
+        items: remainingItems,
+        totalPrice: nextTotalPrice,
+      },
+      { runValidators: true },
+    );
+
+    return this.findOne(id);
+  }
+
   async markPaid(id: string, authUser: AuthUser) {
     const order = await this.findActiveOrderOrThrow(id);
 
@@ -295,6 +409,38 @@ export class OrdersService {
     }
 
     await this.setOrderStatus(id, OrderStatus.READY);
+
+    return this.findOne(id);
+  }
+
+  async reject(id: string, authUser: AuthUser) {
+    const professional = await this.getProfessionalForUserOrThrow(authUser);
+    const order = await this.findActiveOrderOrThrow(id);
+
+    if (order.professionalId.toString() !== professional._id.toString()) {
+      throw new BadRequestException('You can only update your own orders');
+    }
+
+    if (order.type !== OrderType.DIRECT) {
+      throw new BadRequestException('Only direct orders can be rejected');
+    }
+
+    if (
+      order.status !== OrderStatus.AWAITING_PAYMENT &&
+      order.status !== OrderStatus.IN_PROGRESS
+    ) {
+      throw new BadRequestException(
+        'Only awaiting payment or in-progress orders can be rejected',
+      );
+    }
+
+    await this.orderModel.findByIdAndUpdate(
+      id,
+      {
+        status: OrderStatus.CANCELLED,
+      },
+      { runValidators: true },
+    );
 
     return this.findOne(id);
   }

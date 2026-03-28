@@ -4,10 +4,15 @@ import { FormEvent, useEffect, useState, useCallback, useMemo } from 'react';
 import { ProfessionalVerificationStatus, UserRole } from '@shared-types';
 import { useSearchParams } from 'next/navigation';
 import { Loader2, Search } from 'lucide-react';
+import { z } from 'zod';
 import { usersService, type User } from '@/src/services/users.service';
 import { professionalsService, type ProfessionalItem } from '@/src/services/professionals.service';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { UsersList } from './UsersList';
+
+const usersSearchFormSchema = z.object({
+  searchQuery: z.string().trim().max(100, 'Search query must be 100 characters or less.'),
+});
 
 export function UsersManagementClient() {
   const searchParams = useSearchParams();
@@ -75,7 +80,14 @@ export function UsersManagementClient() {
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    loadUsers(0, searchQuery, selectedRole as string);
+
+    const parsed = usersSearchFormSchema.safeParse({ searchQuery });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
+      return;
+    }
+
+    loadUsers(0, parsed.data.searchQuery, selectedRole as string);
   };
 
   const handleRoleChange = async (role: UserRole | '') => {

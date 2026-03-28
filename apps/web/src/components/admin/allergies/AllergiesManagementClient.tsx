@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { z } from 'zod';
 import { allergiesService, type Allergy } from '@/src/services/allergies.service';
 import { AllergyForm } from '@/src/components/admin/allergies/AllergyForm';
 import { AllergyList } from '@/src/components/admin/allergies/AllergyList';
@@ -8,6 +9,10 @@ import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
 import { AppAlert } from '@/src/components/common/AppAlert';
 
 type Mode = 'create' | 'edit';
+
+const allergyFormSchema = z.object({
+  name: z.string().trim().min(1, 'Allergy name is required.').max(80, 'Allergy name must be 80 characters or less.'),
+});
 
 export function AllergiesManagementClient() {
   const [allergies, setAllergies] = useState<Allergy[]>([]);
@@ -46,20 +51,24 @@ export function AllergiesManagementClient() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const trimmedName = name.trim();
-    if (!trimmedName) {
+    const parsed = allergyFormSchema.safeParse({ name });
+
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Please check allergy name.');
       return;
     }
+
+    const values = parsed.data;
 
     try {
       setIsSaving(true);
       setError(null);
 
       if (mode === 'create') {
-        const created = await allergiesService.create({ name: trimmedName });
+        const created = await allergiesService.create({ name: values.name });
         setAllergies((prev) => [created, ...prev]);
       } else if (editingId) {
-        const updated = await allergiesService.update(editingId, { name: trimmedName });
+        const updated = await allergiesService.update(editingId, { name: values.name });
         setAllergies((prev) => prev.map((item) => (item.id === editingId ? updated : item)));
       }
 

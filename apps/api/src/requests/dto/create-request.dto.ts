@@ -29,6 +29,7 @@ export class CreateRequestDto {
   eventType?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   budget?: number;

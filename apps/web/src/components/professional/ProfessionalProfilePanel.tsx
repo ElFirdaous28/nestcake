@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { ProfessionalVerificationStatus } from '@shared-types';
 import { Loader2, MapPin, Pencil, Star } from 'lucide-react';
+import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ReviewsList } from '@/src/components/reviews/ReviewsList';
 import {
@@ -10,6 +11,14 @@ import {
   type ProfessionalItem,
 } from '@/src/services/professionals.service';
 import { reviewsService, type ReviewItem } from '@/src/services/reviews.service';
+
+const profileFormSchema = z.object({
+  businessName: z.string().trim().min(1, 'Business name is required.'),
+  description: z.string().trim().max(2000, 'Description must be 2000 characters or less').optional(),
+  address: z.string().trim().min(1, 'Address is required.').max(200, 'Address must be 200 characters or less'),
+  longitude: z.coerce.number(),
+  latitude: z.coerce.number(),
+});
 
 const statusLabelMap: Record<ProfessionalVerificationStatus, string> = {
   [ProfessionalVerificationStatus.PENDING]: 'Pending verification',
@@ -89,23 +98,20 @@ export function ProfessionalProfilePanel() {
       return;
     }
 
-    const parsedLongitude = Number(longitude);
-    const parsedLatitude = Number(latitude);
+    const parsed = profileFormSchema.safeParse({
+      businessName,
+      description,
+      address,
+      longitude,
+      latitude,
+    });
 
-    if (!businessName.trim()) {
-      setError('Business name is required.');
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Please check profile details.');
       return;
     }
 
-    if (!address.trim()) {
-      setError('Address is required.');
-      return;
-    }
-
-    if (!Number.isFinite(parsedLongitude) || !Number.isFinite(parsedLatitude)) {
-      setError('Latitude and longitude must be valid numbers.');
-      return;
-    }
+    const values = parsed.data;
 
     setIsSaving(true);
     setError(null);
@@ -113,12 +119,12 @@ export function ProfessionalProfilePanel() {
 
     try {
       const updated = await professionalsService.updateMe({
-        businessName: businessName.trim(),
-        description: description.trim() || undefined,
-        address: address.trim(),
+        businessName: values.businessName,
+        description: values.description || undefined,
+        address: values.address,
         location: {
           type: 'Point',
-          coordinates: [parsedLongitude, parsedLatitude],
+          coordinates: [values.longitude, values.latitude],
         },
       });
 

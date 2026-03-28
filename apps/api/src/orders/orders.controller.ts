@@ -78,6 +78,17 @@ export class OrdersController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
+  @Delete(':id/items/:productId')
+  removeItem(
+    @Req() req: Request & { user: AuthUser },
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('productId', ParseObjectIdPipe) productId: string,
+  ) {
+    return this.ordersService.removeItem(id, productId, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.CLIENT)
   @Patch(':id/pay')
   markPaid(
     @Req() req: Request & { user: AuthUser },
@@ -94,6 +105,16 @@ export class OrdersController {
     @Param('id', ParseObjectIdPipe) id: string,
   ) {
     return this.ordersService.markReady(id, req.user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PROFESSIONAL)
+  @Patch(':id/reject')
+  reject(
+    @Req() req: Request & { user: AuthUser },
+    @Param('id', ParseObjectIdPipe) id: string,
+  ) {
+    return this.ordersService.reject(id, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

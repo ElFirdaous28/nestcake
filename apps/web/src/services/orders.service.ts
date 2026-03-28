@@ -70,6 +70,13 @@ export type OrdersResponse = {
 	};
 };
 
+export type CreateDirectOrderPayload = {
+	items: {
+		productId: string;
+		quantity: number;
+	}[];
+};
+
 const getApiOrigin = () => {
 	const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 	return apiUrl.replace(/\/api\/?$/, '');
@@ -151,6 +158,11 @@ const fetchOrders = async (
 };
 
 export const ordersService = {
+	async create(payload: CreateDirectOrderPayload): Promise<OrderRecord> {
+		const { data } = await apiClient.post<OrderApi>('/orders', payload);
+		return normalizeOrder(data);
+	},
+
 	async getForClient(params?: {
 		page?: number;
 		limit?: number;
@@ -182,7 +194,16 @@ export const ordersService = {
 		return normalizeOrder(data);
 	},
 
+	async reject(orderId: string): Promise<OrderRecord> {
+		const { data } = await apiClient.patch<OrderApi>(`/orders/${orderId}/reject`);
+		return normalizeOrder(data);
+	},
+
 	async remove(orderId: string) {
 		await apiClient.delete(`/orders/${orderId}`);
+	},
+
+	async removeItem(orderId: string, productId: string) {
+		await apiClient.delete(`/orders/${orderId}/items/${productId}`);
 	},
 };

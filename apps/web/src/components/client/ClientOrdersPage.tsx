@@ -1,13 +1,20 @@
 'use client';
 
 import { FormEvent, useCallback, useEffect, useState } from 'react';
-import { OrderStatus } from '@shared-types';
+import { OrderStatus, OrderType } from '@shared-types';
 import { Loader2, Star } from 'lucide-react';
+import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ordersService, type OrderRecord } from '@/src/services/orders.service';
 import { reviewsService } from '@/src/services/reviews.service';
 
 const PAGE_SIZE = 10;
+
+const reviewFormSchema = z.object({
+  orderId: z.string().trim().min(1, 'Order id is required'),
+  rating: z.number().int().min(1, 'Rating must be at least 1').max(5, 'Rating cannot exceed 5'),
+  comment: z.string().trim().max(1000, 'Comment must be 1000 characters or less').optional(),
+});
 
 const orderStatusOptions: { value: OrderStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All statuses' },
@@ -58,6 +65,22 @@ const productLabel = (productId: OrderRecord['items'][number]['productId']) => {
   return productId.name?.trim() || 'Product';
 };
 
+const productIdValue = (productId: OrderRecord['items'][number]['productId']) => {
+  if (typeof productId === 'string') {
+    return productId;
+  }
+
+  return productId._id;
+};
+
+const workflowHintByStatus: Record<OrderStatus, string> = {
+  [OrderStatus.AWAITING_PAYMENT]: 'Step 4: Pay 100% into escrow to start production.',
+  [OrderStatus.IN_PROGRESS]: 'Step 5: Professional is preparing your order.',
+  [OrderStatus.READY]: 'Step 6: Confirm reception to release payment to the professional.',
+  [OrderStatus.COMPLETED]: 'Completed. Optional: leave a review, we will keep reminding you.',
+  [OrderStatus.CANCELLED]: 'This order was cancelled.',
+};
+
 export function ClientOrdersPage() {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [pagination, setPagination] = useState({
@@ -68,6 +91,7 @@ export function ClientOrdersPage() {
   });
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
   const [loadingOrderId, setLoadingOrderId] = useState<string | null>(null);
+  const [loadingItemKey, setLoadingItemKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewOrder, setReviewOrder] = useState<OrderRecord | null>(null);
@@ -141,6 +165,23 @@ export function ClientOrdersPage() {
     setReviewOrder(null);
   };
 
+  const handleRemoveItem = async (orderId: string, productId: string) => {
+    const itemKey = `${orderId}:${productId}`;
+    setLoadingItemKey(itemKey);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await ordersService.removeItem(orderId, productId);
+      setSuccess('Item removed from order.');
+      await loadOrders(pagination.page, statusFilter);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove item');
+    } finally {
+      setLoadingItemKey(null);
+    }
+  };
+
   const handleSubmitReview = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -148,15 +189,28 @@ export function ClientOrdersPage() {
       return;
     }
 
+    const parsed = reviewFormSchema.safeParse({
+      orderId: reviewOrder.id,
+      rating,
+      comment,
+    });
+
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Please check your review details.');
+      return;
+    }
+
+    const values = parsed.data;
+
     setIsReviewSubmitting(true);
     setError(null);
     setSuccess(null);
 
     try {
       await reviewsService.create({
-        orderId: reviewOrder.id,
-        rating,
-        comment: comment.trim() || undefined,
+        orderId: values.orderId,
+        rating: values.rating,
+        comment: values.comment || undefined,
       });
 
       setSuccess('Review submitted successfully.');
@@ -173,11 +227,18 @@ export function ClientOrdersPage() {
     <section className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold text-brand-ink">My Orders</h1>
-        <p className="text-sm text-brand-ink-soft">Track progress and leave reviews for completed orders.</p>
+        <p className="text-sm text-brand-ink-soft">Track escrow payment, production, delivery readiness, and completion.</p>
       </header>
 
       <AppAlert message={error} />
       <AppAlert message={success} variant="success" />
+
+      <article className="rounded-xl border border-brand-line bg-brand-cream-soft p-4 text-sm text-brand-ink-soft">
+        <p className="font-semibold text-brand-ink">Workflow steps</p>
+        <p className="mt-1">
+          1) Accept proposal creates order, 2) Pay 100% escrow, 3) Professional marks READY, 4) Confirm reception to release payment.
+        </p>
+      </article>
 
       <div className="rounded-xl border border-brand-line bg-brand-cream-soft p-4">
         <label className="space-y-1">
@@ -214,6 +275,10 @@ export function ClientOrdersPage() {
             const canPay = order.status === OrderStatus.AWAITING_PAYMENT;
             const canComplete = order.status === OrderStatus.READY;
             const canReview = order.status === OrderStatus.COMPLETED;
+            const canCancelOrder = order.status === OrderStatus.AWAITING_PAYMENT;
+            const canRemoveItems =
+              order.status === OrderStatus.AWAITING_PAYMENT &&
+              order.type === OrderType.DIRECT;
 
             return (
               <article key={order.id} className="rounded-xl border border-brand-line bg-white p-4">
@@ -228,12 +293,33 @@ export function ClientOrdersPage() {
                   </span>
                 </div>
 
-                <div className="mt-3 space-y-1">
-                  {order.items.map((item, index) => (
-                    <p key={`${order.id}-item-${index}`} className="text-sm text-brand-ink-soft">
-                      {item.quantity} x {productLabel(item.productId)}
-                    </p>
-                  ))}
+                <div className="mt-3 space-y-2">
+                  {order.items.map((item, index) => {
+                    const currentProductId = productIdValue(item.productId);
+                    const isRemovingItem =
+                      loadingItemKey === `${order.id}:${currentProductId}`;
+
+                    return (
+                      <div key={`${order.id}-item-${index}`} className="flex items-center justify-between gap-2">
+                        <p className="text-sm text-brand-ink-soft">
+                          {item.quantity} x {productLabel(item.productId)}
+                        </p>
+
+                        {canRemoveItems ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              void handleRemoveItem(order.id, currentProductId)
+                            }
+                            disabled={isRemovingItem || isRowLoading}
+                            className="rounded-lg border border-brand-line px-2.5 py-1 text-xs font-semibold text-brand-ink-soft transition hover:bg-brand-cream-soft disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {isRemovingItem ? 'Removing...' : 'Remove item'}
+                          </button>
+                        ) : null}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
@@ -243,22 +329,34 @@ export function ClientOrdersPage() {
                     {canPay ? (
                       <button
                         type="button"
-                        onClick={() => void runOrderAction(order.id, ordersService.markPaid, 'Order marked as paid.')}
+                        onClick={() =>
+                          void runOrderAction(
+                            order.id,
+                            ordersService.markPaid,
+                            'Escrow payment received. Order is now IN_PROGRESS.',
+                          )
+                        }
                         disabled={isRowLoading}
                         className="rounded-lg border border-brand-line px-3 py-1.5 text-xs font-semibold text-brand-ink-soft transition hover:bg-brand-cream-soft disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {isRowLoading ? 'Processing...' : 'Mark Paid'}
+                        {isRowLoading ? 'Processing...' : 'Pay 100% (Escrow)'}
                       </button>
                     ) : null}
 
                     {canComplete ? (
                       <button
                         type="button"
-                        onClick={() => void runOrderAction(order.id, ordersService.markCompleted, 'Order completed successfully.')}
+                        onClick={() =>
+                          void runOrderAction(
+                            order.id,
+                            ordersService.markCompleted,
+                            'Reception confirmed. Payment released and order completed.',
+                          )
+                        }
                         disabled={isRowLoading}
                         className="rounded-lg bg-brand-sage px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {isRowLoading ? 'Processing...' : 'Mark Completed'}
+                        {isRowLoading ? 'Processing...' : 'Confirm Reception'}
                       </button>
                     ) : null}
 
@@ -269,11 +367,30 @@ export function ClientOrdersPage() {
                         className="inline-flex items-center gap-1.5 rounded-lg bg-brand-rose px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-rose/90"
                       >
                         <Star className="h-3.5 w-3.5" />
-                        Leave Review
+                        Leave Review (Optional)
+                      </button>
+                    ) : null}
+
+                    {canCancelOrder ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void runOrderAction(
+                            order.id,
+                            ordersService.remove,
+                            'Order cancelled successfully.',
+                          )
+                        }
+                        disabled={isRowLoading}
+                        className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isRowLoading ? 'Cancelling...' : 'Cancel Order'}
                       </button>
                     ) : null}
                   </div>
                 </div>
+
+                <p className="mt-2 text-xs text-brand-ink-soft">{workflowHintByStatus[order.status]}</p>
               </article>
             );
           })}

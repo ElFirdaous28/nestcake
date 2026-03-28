@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { ProductStatus } from '@shared-types';
 import { Loader2, Pencil, Plus, RefreshCcw, Trash2 } from 'lucide-react';
+import { z } from 'zod';
 import { ProductCard } from '@/src/components/Products/ProductCard';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
@@ -25,6 +26,29 @@ type ProductCatalogClientProps = {
 };
 
 const PAGE_SIZE = 12;
+
+const productFormSchema = z.object({
+  name: z.string().trim().min(1, 'Product name is required.'),
+  descriptionText: z.string().trim().optional(),
+  price: z.coerce.number().min(0, 'Price must be a valid non-negative number.'),
+  selectedCategoryIds: z.array(z.string().trim()).min(1, 'Please select at least one category.'),
+  isAvailable: z.boolean(),
+  status: z.nativeEnum(ProductStatus),
+  imageFile: z.instanceof(File).optional(),
+  isEditing: z.boolean(),
+}).superRefine((values, ctx) => {
+  if (!values.isEditing && !values.imageFile) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Please upload a product image.',
+      path: ['imageFile'],
+    });
+  }
+});
+
+const productSearchSchema = z.object({
+  query: z.string().trim().max(120, 'Search query must be 120 characters or less.'),
+});
 
 const getProductsByScope = (scope: ProductCatalogScope, params: {
   page?: number;
@@ -160,28 +184,23 @@ export function ProductCatalogClient({
   const handleSubmitProduct = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const normalizedName = name.trim();
-    const normalizedPrice = Number(price);
+    const parsed = productFormSchema.safeParse({
+      name,
+      descriptionText,
+      price,
+      selectedCategoryIds,
+      isAvailable,
+      status,
+      imageFile: imageFile ?? undefined,
+      isEditing: Boolean(editingProduct),
+    });
 
-    if (!normalizedName) {
-      setError('Product name is required.');
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Please check product details.');
       return;
     }
 
-    if (!Number.isFinite(normalizedPrice) || normalizedPrice < 0) {
-      setError('Price must be a valid non-negative number.');
-      return;
-    }
-
-    if (selectedCategoryIds.length === 0) {
-      setError('Please select at least one category.');
-      return;
-    }
-
-    if (!editingProduct && !imageFile) {
-      setError('Please upload a product image.');
-      return;
-    }
+    const values = parsed.data;
 
     setIsSubmitting(true);
     setError(null);
@@ -189,23 +208,23 @@ export function ProductCatalogClient({
     try {
       if (editingProduct) {
         await productsService.update(editingProduct.id, {
-          name: normalizedName,
-          description: descriptionText.trim() || undefined,
-          price: normalizedPrice,
-          categoryIds: selectedCategoryIds,
-          isAvailable,
-          status,
-          imageFile: imageFile ?? undefined,
+          name: values.name,
+          description: values.descriptionText || undefined,
+          price: values.price,
+          categoryIds: values.selectedCategoryIds,
+          isAvailable: values.isAvailable,
+          status: values.status,
+          imageFile: values.imageFile,
         });
       } else {
         await productsService.create({
-          name: normalizedName,
-          description: descriptionText.trim() || undefined,
-          price: normalizedPrice,
-          categoryIds: selectedCategoryIds,
-          isAvailable,
-          status,
-          imageFile: imageFile as File,
+          name: values.name,
+          description: values.descriptionText || undefined,
+          price: values.price,
+          categoryIds: values.selectedCategoryIds,
+          isAvailable: values.isAvailable,
+          status: values.status,
+          imageFile: values.imageFile as File,
         });
       }
 
@@ -261,7 +280,14 @@ export function ProductCatalogClient({
 
   const onSubmitSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const query = search.trim();
+
+    const parsed = productSearchSchema.safeParse({ query: search });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
+      return;
+    }
+
+    const query = parsed.data.query;
     setPage(1);
     void loadProducts(1, query);
   };

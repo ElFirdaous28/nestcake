@@ -1,7 +1,5 @@
-import React from 'react'
+import { ClientRequestsPage } from '@/src/components/client/ClientRequestsPage';
 
-export default function page() {
-  return (
-    <div>page</div>
-  )
+export default function ClientRequestsRoutePage() {
+  return <ClientRequestsPage />;
 }

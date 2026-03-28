@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
+import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
 import {
@@ -16,6 +17,12 @@ type PortfolioDeleteTarget = {
 
 const FALLBACK_IMAGE =
   'data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22400%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f3ede4%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial,sans-serif%22 font-size=%2222%22 fill=%22%236b5344%22%3ENo image%3C/text%3E%3C/svg%3E';
+
+const portfolioFormSchema = z.object({
+  title: z.string().trim().max(120, 'Title must be 120 characters or less').optional(),
+  description: z.string().trim().max(500, 'Description must be 500 characters or less').optional(),
+  imageFile: z.instanceof(File, { message: 'Please select an image for the portfolio item.' }),
+});
 
 export function ProfessionalPortfolioManager() {
   const [professional, setProfessional] = useState<ProfessionalItem | null>(null);
@@ -58,10 +65,18 @@ export function ProfessionalPortfolioManager() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!imageFile) {
-      setError('Please select an image for the portfolio item.');
+    const parsed = portfolioFormSchema.safeParse({
+      title,
+      description,
+      imageFile,
+    });
+
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? 'Please check portfolio item details.');
       return;
     }
+
+    const values = parsed.data;
 
     setIsSubmitting(true);
     setError(null);
@@ -69,9 +84,9 @@ export function ProfessionalPortfolioManager() {
 
     try {
       const updated = await professionalsService.addPortfolioItem({
-        imageFile,
-        title: title.trim() || undefined,
-        description: description.trim() || undefined,
+        imageFile: values.imageFile,
+        title: values.title || undefined,
+        description: values.description || undefined,
       });
 
       setProfessional(updated);

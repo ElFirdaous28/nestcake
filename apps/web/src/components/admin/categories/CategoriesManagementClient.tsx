@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { z } from 'zod';
 import { categoriesService, type Category } from '@/src/services/categories.service';
 import { CategoryForm } from '@/src/components/admin/categories/CategoryForm';
 import { CategoryList } from '@/src/components/admin/categories/CategoryList';
@@ -8,6 +9,10 @@ import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
 import { AppAlert } from '@/src/components/common/AppAlert';
 
 type Mode = 'create' | 'edit';
+
+const categoryFormSchema = z.object({
+    name: z.string().trim().min(1, 'Category name is required.').max(80, 'Category name must be 80 characters or less.'),
+});
 
 export function CategoriesManagementClient() {
     const [categories, setCategories] = useState<Category[]>([]);
@@ -46,20 +51,24 @@ export function CategoriesManagementClient() {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        const trimmedName = name.trim();
-        if (!trimmedName) {
+        const parsed = categoryFormSchema.safeParse({ name });
+
+        if (!parsed.success) {
+            setError(parsed.error.issues[0]?.message ?? 'Please check category name.');
             return;
         }
+
+        const values = parsed.data;
 
         try {
             setIsSaving(true);
             setError(null);
 
             if (mode === 'create') {
-                const created = await categoriesService.create({ name: trimmedName });
+                const created = await categoriesService.create({ name: values.name });
                 setCategories((prev) => [created, ...prev]);
             } else if (editingId) {
-                const updated = await categoriesService.update(editingId, { name: trimmedName });
+                const updated = await categoriesService.update(editingId, { name: values.name });
                 setCategories((prev) => prev.map((item) => (item.id === editingId ? updated : item)));
             }
 
