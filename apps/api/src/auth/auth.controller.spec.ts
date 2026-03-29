@@ -89,6 +89,21 @@ describe('AuthController', () => {
         });
     });
 
+    it('registerUser: should propagate error if service fails', async () => {
+        const dto = { email: 'fail@test.com' } as any;
+        const res = createResponse();
+
+        authServiceMock.registerUser.mockRejectedValue(
+            new Error('DB error'),
+        );
+
+        await expect(
+            controller.registerUser(dto, res as any),
+        ).rejects.toThrow('DB error');
+
+        expect(res.cookie).not.toHaveBeenCalled();
+    });
+
     // ---------------- REGISTER PRO ----------------
     it('registerProfessional: should behave like registerUser', async () => {
         const dto = { email: 'pro@test.com' } as any;
@@ -107,6 +122,21 @@ describe('AuthController', () => {
         });
     });
 
+    it('registerProfessional: should throw if service fails', async () => {
+        const dto = {} as any;
+        const res = createResponse();
+
+        authServiceMock.registerProfessional.mockRejectedValue(
+            new Error('fail'),
+        );
+
+        await expect(
+            controller.registerProfessional(dto, res as any),
+        ).rejects.toThrow('fail');
+
+        expect(res.cookie).not.toHaveBeenCalled();
+    });
+
     // ---------------- LOGIN ----------------
     it('login: should authenticate and set cookies', async () => {
         const dto = { email: 'user@test.com', password: '123' } as any;
@@ -120,6 +150,21 @@ describe('AuthController', () => {
         expectCookiesSet(res);
 
         expect(result.user).toEqual(authResult.user);
+    });
+
+    it('login: should throw on invalid credentials', async () => {
+        const dto = { email: 'wrong@test.com', password: 'bad' } as any;
+        const res = createResponse();
+
+        authServiceMock.login.mockRejectedValue(
+            new UnauthorizedException('Invalid credentials'),
+        );
+
+        await expect(
+            controller.login(dto, res as any),
+        ).rejects.toThrow(UnauthorizedException);
+
+        expect(res.cookie).not.toHaveBeenCalled();
     });
 
     // ---------------- REFRESH ----------------
@@ -148,6 +193,21 @@ describe('AuthController', () => {
         expect(result.accessToken).toBe(authResult.accessToken);
     });
 
+    it('refresh: should throw if refresh token is invalid', async () => {
+        const req = { cookies: { refresh_token: 'bad-token' } };
+        const res = createResponse();
+
+        authServiceMock.refresh.mockRejectedValue(
+            new UnauthorizedException('Invalid token'),
+        );
+
+        await expect(
+            controller.refresh(req as any, res as any),
+        ).rejects.toThrow(UnauthorizedException);
+
+        expect(res.cookie).not.toHaveBeenCalled();
+    });
+
     // ---------------- LOGOUT ----------------
     it('logout: should clear cookies', async () => {
         const req = { cookies: { refresh_token: 'token' } };
@@ -164,6 +224,19 @@ describe('AuthController', () => {
         });
     });
 
+    it('logout: should propagate error if service fails', async () => {
+        const req = { cookies: { refresh_token: 'token' } };
+        const res = createResponse();
+
+        authServiceMock.logout.mockRejectedValue(new Error('fail'));
+
+        await expect(
+            controller.logout(req as any, res as any),
+        ).rejects.toThrow('fail');
+
+        expect(res.clearCookie).not.toHaveBeenCalled();
+    });
+
     // ---------------- GET ME ----------------
     it('getMe: should return current user', async () => {
         const req = { user: { sub: 'id' } };
@@ -175,5 +248,17 @@ describe('AuthController', () => {
 
         expect(authServiceMock.getMe).toHaveBeenCalledWith(req.user);
         expect(result).toEqual(user);
+    });
+
+    it('getMe: should throw if service fails', async () => {
+        const req = { user: { sub: 'id' } };
+
+        authServiceMock.getMe.mockRejectedValue(
+            new Error('User not found'),
+        );
+
+        await expect(controller.getMe(req as any)).rejects.toThrow(
+            'User not found',
+        );
     });
 });
