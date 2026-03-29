@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { OrderStatus, ProductStatus, UserRole } from '@shared-types';
 import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { useAuth } from '@/src/hooks/useAuth';
@@ -29,6 +30,11 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const {
+    setError: setFormError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<z.infer<typeof directOrderSchema>>();
 
   const isClient = user?.role === UserRole.CLIENT;
 
@@ -53,10 +59,21 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check quantity and try again.');
+      clearErrors();
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0];
+        if (typeof field === 'string') {
+          setFormError(field as keyof z.infer<typeof directOrderSchema>, {
+            type: 'manual',
+            message: issue.message,
+          });
+        }
+      }
+      setError(null);
       return;
     }
 
+    clearErrors();
     setIsCreatingOrder(true);
     setError(null);
     setSuccess(null);
@@ -166,9 +183,13 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
                     max="50"
                     step="1"
                     value={quantity}
-                    onChange={(event) => setQuantity(event.target.value)}
+                    onChange={(event) => {
+                      setQuantity(event.target.value);
+                      clearErrors('quantity');
+                    }}
                     className="w-full max-w-28 rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                   />
+                  <AppAlert message={errors.quantity?.message} />
                 </label>
 
                 {!isAuthLoading && !isAuthenticated ? (

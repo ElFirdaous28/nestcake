@@ -2,6 +2,7 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
@@ -34,6 +35,11 @@ export function ProfessionalPortfolioManager() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const {
+    setError: setFormError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<z.infer<typeof portfolioFormSchema>>();
   const [deleteTarget, setDeleteTarget] = useState<PortfolioDeleteTarget | null>(null);
 
   const loadProfile = useCallback(async () => {
@@ -60,6 +66,7 @@ export function ProfessionalPortfolioManager() {
     setTitle('');
     setDescription('');
     setImageFile(null);
+    clearErrors();
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -72,13 +79,24 @@ export function ProfessionalPortfolioManager() {
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check portfolio item details.');
+      clearErrors();
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0];
+        if (typeof field === 'string') {
+          setFormError(field as keyof z.infer<typeof portfolioFormSchema>, {
+            type: 'manual',
+            message: issue.message,
+          });
+        }
+      }
+      setError(null);
       return;
     }
 
     const values = parsed.data;
 
     setIsSubmitting(true);
+    clearErrors();
     setError(null);
     setSuccess(null);
 
@@ -152,31 +170,42 @@ export function ProfessionalPortfolioManager() {
             <input
               type="file"
               accept="image/*"
-              onChange={(event) => setImageFile(event.target.files?.[0] ?? null)}
+              onChange={(event) => {
+                setImageFile(event.target.files?.[0] ?? null);
+                clearErrors('imageFile');
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm"
-              required
             />
+            <AppAlert message={errors.imageFile?.message} />
           </label>
 
           <label className="space-y-1 sm:col-span-2">
             <span className="text-sm font-medium text-brand-ink">Title (optional)</span>
             <input
               value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              onChange={(event) => {
+                setTitle(event.target.value);
+                clearErrors('title');
+              }}
               maxLength={120}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
             />
+            <AppAlert message={errors.title?.message} />
           </label>
 
           <label className="space-y-1 sm:col-span-2">
             <span className="text-sm font-medium text-brand-ink">Description (optional)</span>
             <textarea
               value={description}
-              onChange={(event) => setDescription(event.target.value)}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                clearErrors('description');
+              }}
               rows={3}
               maxLength={500}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
             />
+            <AppAlert message={errors.description?.message} />
           </label>
         </div>
 

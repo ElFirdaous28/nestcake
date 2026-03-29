@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { allergiesService, type Allergy } from '@/src/services/allergies.service';
 import { AllergyForm } from '@/src/components/admin/allergies/AllergyForm';
@@ -24,6 +25,11 @@ export function AllergiesManagementClient() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Allergy | null>(null);
+  const {
+    setError: setFormError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<z.infer<typeof allergyFormSchema>>();
 
   const loadAllergies = async () => {
     try {
@@ -44,6 +50,7 @@ export function AllergiesManagementClient() {
 
   const resetForm = () => {
     setName('');
+    clearErrors();
     setMode('create');
     setEditingId(null);
   };
@@ -54,7 +61,12 @@ export function AllergiesManagementClient() {
     const parsed = allergyFormSchema.safeParse({ name });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check allergy name.');
+      clearErrors();
+      setFormError('name', {
+        type: 'manual',
+        message: parsed.error.flatten().fieldErrors.name?.[0] ?? 'Please check allergy name.',
+      });
+      setError(null);
       return;
     }
 
@@ -62,6 +74,7 @@ export function AllergiesManagementClient() {
 
     try {
       setIsSaving(true);
+      clearErrors();
       setError(null);
 
       if (mode === 'create') {
@@ -84,6 +97,7 @@ export function AllergiesManagementClient() {
     setMode('edit');
     setEditingId(allergy.id);
     setName(allergy.name);
+    clearErrors();
   };
 
   const confirmDelete = async () => {
@@ -127,8 +141,12 @@ export function AllergiesManagementClient() {
           <AllergyForm
             mode={mode}
             name={name}
+            nameError={errors.name?.message}
             isSaving={isSaving}
-            onNameChange={setName}
+            onNameChange={(value) => {
+              setName(value);
+              clearErrors('name');
+            }}
             onSubmit={handleSubmit}
             onCancelEdit={resetForm}
           />

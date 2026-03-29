@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { OrderStatus, OrderType } from '@shared-types';
 import { Loader2, Star } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ordersService, type OrderRecord } from '@/src/services/orders.service';
@@ -100,6 +101,11 @@ export function ClientOrdersPage() {
   const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const {
+    setError: setFormError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<z.infer<typeof reviewFormSchema>>();
 
   const loadOrders = useCallback(
     async (page = 1, status: OrderStatus | 'all' = statusFilter) => {
@@ -152,6 +158,7 @@ export function ClientOrdersPage() {
     setReviewOrder(order);
     setRating(5);
     setComment('');
+    clearErrors();
     setError(null);
     setIsReviewModalOpen(true);
   };
@@ -163,6 +170,7 @@ export function ClientOrdersPage() {
 
     setIsReviewModalOpen(false);
     setReviewOrder(null);
+    clearErrors();
   };
 
   const handleRemoveItem = async (orderId: string, productId: string) => {
@@ -196,13 +204,24 @@ export function ClientOrdersPage() {
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check your review details.');
+      clearErrors();
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0];
+        if (typeof field === 'string') {
+          setFormError(field as keyof z.infer<typeof reviewFormSchema>, {
+            type: 'manual',
+            message: issue.message,
+          });
+        }
+      }
+      setError(null);
       return;
     }
 
     const values = parsed.data;
 
     setIsReviewSubmitting(true);
+    clearErrors();
     setError(null);
     setSuccess(null);
 
@@ -442,7 +461,10 @@ export function ClientOrdersPage() {
                 <span className="text-sm font-medium text-brand-ink">Rating</span>
                 <select
                   value={rating}
-                  onChange={(event) => setRating(Number(event.target.value))}
+                  onChange={(event) => {
+                    setRating(Number(event.target.value));
+                    clearErrors('rating');
+                  }}
                   className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                 >
                   {[5, 4, 3, 2, 1].map((value) => (
@@ -451,17 +473,22 @@ export function ClientOrdersPage() {
                     </option>
                   ))}
                 </select>
+                <AppAlert message={errors.rating?.message} />
               </label>
 
               <label className="space-y-1">
                 <span className="text-sm font-medium text-brand-ink">Comment (optional)</span>
                 <textarea
                   value={comment}
-                  onChange={(event) => setComment(event.target.value)}
+                  onChange={(event) => {
+                    setComment(event.target.value);
+                    clearErrors('comment');
+                  }}
                   rows={4}
                   maxLength={1000}
                   className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                 />
+                <AppAlert message={errors.comment?.message} />
               </label>
 
               <div className="flex justify-end gap-2">

@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { categoriesService, type Category } from '@/src/services/categories.service';
 import { CategoryForm } from '@/src/components/admin/categories/CategoryForm';
@@ -24,6 +25,11 @@ export function CategoriesManagementClient() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+    const {
+        setError: setFormError,
+        clearErrors,
+        formState: { errors },
+    } = useForm<z.infer<typeof categoryFormSchema>>();
 
     const loadCategories = async () => {
         try {
@@ -44,6 +50,7 @@ export function CategoriesManagementClient() {
 
     const resetForm = () => {
         setName('');
+        clearErrors();
         setMode('create');
         setEditingId(null);
     };
@@ -54,7 +61,12 @@ export function CategoriesManagementClient() {
         const parsed = categoryFormSchema.safeParse({ name });
 
         if (!parsed.success) {
-            setError(parsed.error.issues[0]?.message ?? 'Please check category name.');
+            clearErrors();
+            setFormError('name', {
+                type: 'manual',
+                message: parsed.error.flatten().fieldErrors.name?.[0] ?? 'Please check category name.',
+            });
+            setError(null);
             return;
         }
 
@@ -62,6 +74,7 @@ export function CategoriesManagementClient() {
 
         try {
             setIsSaving(true);
+            clearErrors();
             setError(null);
 
             if (mode === 'create') {
@@ -84,6 +97,7 @@ export function CategoriesManagementClient() {
         setMode('edit');
         setEditingId(category.id);
         setName(category.name);
+        clearErrors();
     };
 
     const confirmDelete = async () => {
@@ -128,8 +142,12 @@ export function CategoriesManagementClient() {
                     <CategoryForm
                         mode={mode}
                         name={name}
+                        nameError={errors.name?.message}
                         isSaving={isSaving}
-                        onNameChange={setName}
+                        onNameChange={(value) => {
+                            setName(value);
+                            clearErrors('name');
+                        }}
                         onSubmit={handleSubmit}
                         onCancelEdit={resetForm}
                     />

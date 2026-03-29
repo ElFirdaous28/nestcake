@@ -1,11 +1,13 @@
 import { FormEvent } from 'react';
 import { Loader2, Pencil, Plus, X } from 'lucide-react';
+import { AppAlert } from '@/src/components/common/AppAlert';
 
 type Mode = 'create' | 'edit';
 
 type AllergyFormProps = {
   mode: Mode;
   name: string;
+  nameError?: string;
   isSaving: boolean;
   onNameChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -15,6 +17,7 @@ type AllergyFormProps = {
 export function AllergyForm({
   mode,
   name,
+  nameError,
   isSaving,
   onNameChange,
   onSubmit,
@@ -44,6 +47,7 @@ export function AllergyForm({
             maxLength={80}
             required
           />
+          <AppAlert message={nameError} />
         </div>
 
         <div className="flex flex-col gap-2">

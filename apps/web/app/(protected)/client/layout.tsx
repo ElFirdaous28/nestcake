@@ -11,7 +11,7 @@ export default function ClientLayout({
     <ProtectedRoute allowedRoles={[UserRole.CLIENT]}>
       <div className="min-h-screen bg-brand-cream flex">
         <ClientSidebar />
-        <main className="flex-1 p-6 pt-16 md:pt-6">
+        <main className="flex-1 p-6 pt-16 md:pt-6 mt-12">
           <div className="mt-16 rounded-2xl border border-brand-line bg-white p-6 shadow-sm md:mt-0">{children}</div>
         </main>
       </div>

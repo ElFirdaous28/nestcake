@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { ProfessionalVerificationStatus } from '@shared-types';
 import { Loader2, MapPin, Pencil, Star } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ReviewsList } from '@/src/components/reviews/ReviewsList';
@@ -54,6 +55,11 @@ export function ProfessionalProfilePanel() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const {
+    setError: setFormError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<z.infer<typeof profileFormSchema>>();
 
   const syncForm = (item: ProfessionalItem) => {
     setBusinessName(item.businessName ?? '');
@@ -107,13 +113,24 @@ export function ProfessionalProfilePanel() {
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check profile details.');
+      clearErrors();
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0];
+        if (typeof field === 'string') {
+          setFormError(field as keyof z.infer<typeof profileFormSchema>, {
+            type: 'manual',
+            message: issue.message,
+          });
+        }
+      }
+      setError(null);
       return;
     }
 
     const values = parsed.data;
 
     setIsSaving(true);
+    clearErrors();
     setError(null);
     setSuccess(null);
 
@@ -207,52 +224,68 @@ export function ProfessionalProfilePanel() {
             <span className="text-sm font-medium text-brand-ink">Business name</span>
             <input
               value={businessName}
-              onChange={(event) => setBusinessName(event.target.value)}
+              onChange={(event) => {
+                setBusinessName(event.target.value);
+                clearErrors('businessName');
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-              required
             />
+            <AppAlert message={errors.businessName?.message} />
           </label>
 
           <label className="space-y-1 sm:col-span-2">
             <span className="text-sm font-medium text-brand-ink">Description</span>
             <textarea
               value={description}
-              onChange={(event) => setDescription(event.target.value)}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                clearErrors('description');
+              }}
               rows={4}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
             />
+            <AppAlert message={errors.description?.message} />
           </label>
 
           <label className="space-y-1 sm:col-span-2">
             <span className="text-sm font-medium text-brand-ink">Address</span>
             <input
               value={address}
-              onChange={(event) => setAddress(event.target.value)}
+              onChange={(event) => {
+                setAddress(event.target.value);
+                clearErrors('address');
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-              required
             />
+            <AppAlert message={errors.address?.message} />
           </label>
 
           <label className="space-y-1">
             <span className="text-sm font-medium text-brand-ink">Longitude</span>
             <input
               value={longitude}
-              onChange={(event) => setLongitude(event.target.value)}
+              onChange={(event) => {
+                setLongitude(event.target.value);
+                clearErrors('longitude');
+              }}
               inputMode="decimal"
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-              required
             />
+            <AppAlert message={errors.longitude?.message} />
           </label>
 
           <label className="space-y-1">
             <span className="text-sm font-medium text-brand-ink">Latitude</span>
             <input
               value={latitude}
-              onChange={(event) => setLatitude(event.target.value)}
+              onChange={(event) => {
+                setLatitude(event.target.value);
+                clearErrors('latitude');
+              }}
               inputMode="decimal"
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-              required
             />
+            <AppAlert message={errors.latitude?.message} />
           </label>
         </div>
 

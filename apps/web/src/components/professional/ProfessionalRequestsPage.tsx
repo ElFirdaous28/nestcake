@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { DeliveryType } from '@shared-types';
 import { Loader2, Send } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ProfessionalFiltersBar } from '@/src/components/professional/ProfessionalFiltersBar';
@@ -81,6 +82,11 @@ export function ProfessionalRequestsPage() {
   const [proposalPrice, setProposalPrice] = useState('');
   const [proposalMessage, setProposalMessage] = useState('');
   const [proposalDateTime, setProposalDateTime] = useState('');
+  const {
+    setError: setFormError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<z.infer<typeof proposalFormSchema>>();
 
   const loadRequests = useCallback(async (query = '') => {
     setIsLoading(true);
@@ -140,6 +146,7 @@ export function ProfessionalRequestsPage() {
     setProposalPrice('');
     setProposalMessage('');
     setProposalDateTime('');
+    clearErrors();
     setError(null);
   };
 
@@ -152,6 +159,7 @@ export function ProfessionalRequestsPage() {
     setProposalPrice('');
     setProposalMessage('');
     setProposalDateTime('');
+    clearErrors();
   };
 
   const handleSubmitProposal = async (event: FormEvent<HTMLFormElement>) => {
@@ -169,13 +177,24 @@ export function ProfessionalRequestsPage() {
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check proposal details.');
+      clearErrors();
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0];
+        if (typeof field === 'string') {
+          setFormError(field as keyof z.infer<typeof proposalFormSchema>, {
+            type: 'manual',
+            message: issue.message,
+          });
+        }
+      }
+      setError(null);
       return;
     }
 
     const values = parsed.data;
 
     setLoadingRequestId(proposalRequestId);
+    clearErrors();
     setError(null);
     setSuccess(null);
 
@@ -294,10 +313,13 @@ export function ProfessionalRequestsPage() {
                     min="0"
                     step="0.01"
                     value={proposalPrice}
-                    onChange={(event) => setProposalPrice(event.target.value)}
+                    onChange={(event) => {
+                      setProposalPrice(event.target.value);
+                      clearErrors('price');
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-                    required
                   />
+                  <AppAlert message={errors.price?.message} />
                 </label>
 
                 <label className="space-y-1">
@@ -305,9 +327,13 @@ export function ProfessionalRequestsPage() {
                   <input
                     type="datetime-local"
                     value={proposalDateTime}
-                    onChange={(event) => setProposalDateTime(event.target.value)}
+                    onChange={(event) => {
+                      setProposalDateTime(event.target.value);
+                      clearErrors('deliveryDateTime');
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                   />
+                  <AppAlert message={errors.deliveryDateTime?.message} />
                 </label>
 
                 <label className="space-y-1 sm:col-span-2">
@@ -315,9 +341,13 @@ export function ProfessionalRequestsPage() {
                   <textarea
                     rows={3}
                     value={proposalMessage}
-                    onChange={(event) => setProposalMessage(event.target.value)}
+                    onChange={(event) => {
+                      setProposalMessage(event.target.value);
+                      clearErrors('message');
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                   />
+                  <AppAlert message={errors.message?.message} />
                 </label>
               </div>
 

@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { ProductStatus } from '@shared-types';
 import { Loader2, Pencil, Plus, RefreshCcw, Trash2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { ProductCard } from '@/src/components/Products/ProductCard';
 import { AppAlert } from '@/src/components/common/AppAlert';
@@ -90,6 +91,11 @@ export function ProductCatalogClient({
   const [isDeleting, setIsDeleting] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const {
+    setError: setFormError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<z.infer<typeof productFormSchema>>();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ProductItem | null>(null);
@@ -150,6 +156,7 @@ export function ProductCatalogClient({
     setIsAvailable(true);
     setStatus(ProductStatus.DRAFT);
     setImageFile(null);
+    clearErrors();
   };
 
   const openCreateForm = () => {
@@ -196,13 +203,24 @@ export function ProductCatalogClient({
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check product details.');
+      clearErrors();
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0];
+        if (typeof field === 'string') {
+          setFormError(field as keyof z.infer<typeof productFormSchema>, {
+            type: 'manual',
+            message: issue.message,
+          });
+        }
+      }
+      setError(null);
       return;
     }
 
     const values = parsed.data;
 
     setIsSubmitting(true);
+    clearErrors();
     setError(null);
 
     try {
@@ -427,20 +445,27 @@ export function ProductCatalogClient({
                   <span className="text-sm font-medium text-brand-ink">Name</span>
                   <input
                     value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    onChange={(event) => {
+                      setName(event.target.value);
+                      clearErrors('name');
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-                    required
                   />
+                  <AppAlert message={errors.name?.message} />
                 </label>
 
                 <label className="space-y-1 sm:col-span-2">
                   <span className="text-sm font-medium text-brand-ink">Description</span>
                   <textarea
                     value={descriptionText}
-                    onChange={(event) => setDescriptionText(event.target.value)}
+                    onChange={(event) => {
+                      setDescriptionText(event.target.value);
+                      clearErrors('descriptionText');
+                    }}
                     rows={3}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                   />
+                  <AppAlert message={errors.descriptionText?.message} />
                 </label>
 
                 <label className="space-y-1">
@@ -450,10 +475,13 @@ export function ProductCatalogClient({
                     min="0"
                     step="0.01"
                     value={price}
-                    onChange={(event) => setPrice(event.target.value)}
+                    onChange={(event) => {
+                      setPrice(event.target.value);
+                      clearErrors('price');
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-                    required
                   />
+                  <AppAlert message={errors.price?.message} />
                 </label>
 
                 <label className="space-y-1">
@@ -475,10 +503,14 @@ export function ProductCatalogClient({
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(event) => setImageFile(event.target.files?.[0] ?? null)}
+                    onChange={(event) => {
+                      setImageFile(event.target.files?.[0] ?? null);
+                      clearErrors('imageFile');
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm"
                     required={!editingProduct}
                   />
+                  <AppAlert message={errors.imageFile?.message} />
                 </label>
 
                 <label className="flex items-center gap-2 sm:col-span-2">
@@ -506,7 +538,10 @@ export function ProductCatalogClient({
                         <input
                           type="checkbox"
                           checked={selectedCategoryIds.includes(category.id)}
-                          onChange={() => toggleCategory(category.id)}
+                          onChange={() => {
+                            toggleCategory(category.id);
+                            clearErrors('selectedCategoryIds');
+                          }}
                           className="h-4 w-4 rounded border-brand-line"
                         />
                         <span className="text-sm text-brand-ink">{category.name}</span>
@@ -514,6 +549,7 @@ export function ProductCatalogClient({
                     ))}
                   </div>
                 )}
+                <AppAlert message={errors.selectedCategoryIds?.message} />
               </div>
 
               <div className="flex justify-end gap-2">

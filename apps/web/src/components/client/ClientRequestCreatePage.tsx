@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { DeliveryType } from '@shared-types';
 import { Plus } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
+import { allergiesService, type Allergy } from '@/src/services/allergies.service';
 import { requestsService } from '@/src/services/requests.service';
 
 const requestCreateSchema = z
@@ -17,6 +19,7 @@ const requestCreateSchema = z
     deliveryDateTime: z.string().trim().min(1, 'Delivery date and time is required'),
     deliveryType: z.nativeEnum(DeliveryType),
     location: z.string().trim().optional(),
+    allergyIds: z.array(z.string().trim()).optional(),
   })
   .superRefine((values, ctx) => {
     if (values.deliveryType === DeliveryType.DELIVERY && !values.location) {
@@ -47,10 +50,37 @@ export function ClientRequestCreatePage() {
   const [deliveryDateTime, setDeliveryDateTime] = useState('');
   const [deliveryType, setDeliveryType] = useState<DeliveryType>(DeliveryType.PICKUP);
   const [location, setLocation] = useState('');
+  const [allergies, setAllergies] = useState<Allergy[]>([]);
+  const [selectedAllergyIds, setSelectedAllergyIds] = useState<string[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const {
+    setError: setFormError,
+    clearErrors,
+    formState: { errors },
+  } = useForm<z.infer<typeof requestCreateSchema>>();
+
+  useEffect(() => {
+    const loadAllergies = async () => {
+      try {
+        const data = await allergiesService.getAll();
+        setAllergies(data);
+      } catch {
+        setAllergies([]);
+      }
+    };
+
+    void loadAllergies();
+  }, []);
+
+  const toggleAllergy = (id: string) => {
+    setSelectedAllergyIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+    clearErrors('allergyIds');
+  };
 
   const resetForm = () => {
     setTitle('');
@@ -60,7 +90,9 @@ export function ClientRequestCreatePage() {
     setDeliveryDateTime('');
     setDeliveryType(DeliveryType.PICKUP);
     setLocation('');
+    setSelectedAllergyIds([]);
     setImageFile(null);
+    clearErrors();
   };
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
@@ -74,10 +106,21 @@ export function ClientRequestCreatePage() {
       deliveryDateTime,
       deliveryType,
       location,
+      allergyIds: selectedAllergyIds,
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check request details.');
+      clearErrors();
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0];
+        if (typeof field === 'string') {
+          setFormError(field as keyof z.infer<typeof requestCreateSchema>, {
+            type: 'manual',
+            message: issue.message,
+          });
+        }
+      }
+      setError(null);
       return;
     }
 
@@ -88,6 +131,7 @@ export function ClientRequestCreatePage() {
         : undefined;
 
     setIsSubmitting(true);
+    clearErrors();
     setError(null);
     setSuccess(null);
 
@@ -102,6 +146,7 @@ export function ClientRequestCreatePage() {
         deliveryDateTime: new Date(values.deliveryDateTime).toISOString(),
         deliveryType: values.deliveryType,
         location: values.deliveryType === DeliveryType.DELIVERY ? values.location : undefined,
+        allergyIds: values.allergyIds && values.allergyIds.length > 0 ? values.allergyIds : undefined,
         imageFile: imageFile ?? undefined,
       });
 
@@ -141,30 +186,40 @@ export function ClientRequestCreatePage() {
             <span className="text-sm font-medium text-brand-ink">Title</span>
             <input
               value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              onChange={(event) => {
+                setTitle(event.target.value);
+                clearErrors('title');
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-              required
             />
+            <AppAlert message={errors.title?.message} />
           </label>
 
           <label className="space-y-1 sm:col-span-2">
             <span className="text-sm font-medium text-brand-ink">Description</span>
             <textarea
               value={description}
-              onChange={(event) => setDescription(event.target.value)}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                clearErrors('description');
+              }}
               rows={4}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-              required
             />
+            <AppAlert message={errors.description?.message} />
           </label>
 
           <label className="space-y-1">
             <span className="text-sm font-medium text-brand-ink">Event type (optional)</span>
             <input
               value={eventType}
-              onChange={(event) => setEventType(event.target.value)}
+              onChange={(event) => {
+                setEventType(event.target.value);
+                clearErrors('eventType');
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
             />
+            <AppAlert message={errors.eventType?.message} />
           </label>
 
           <label className="space-y-1">
@@ -174,9 +229,13 @@ export function ClientRequestCreatePage() {
               min="0"
               step="0.01"
               value={budget}
-              onChange={(event) => setBudget(event.target.value)}
+              onChange={(event) => {
+                setBudget(event.target.value);
+                clearErrors('budget');
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
             />
+            <AppAlert message={errors.budget?.message} />
           </label>
 
           <label className="space-y-1">
@@ -184,22 +243,29 @@ export function ClientRequestCreatePage() {
             <input
               type="datetime-local"
               value={deliveryDateTime}
-              onChange={(event) => setDeliveryDateTime(event.target.value)}
+              onChange={(event) => {
+                setDeliveryDateTime(event.target.value);
+                clearErrors('deliveryDateTime');
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-              required
             />
+            <AppAlert message={errors.deliveryDateTime?.message} />
           </label>
 
           <label className="space-y-1">
             <span className="text-sm font-medium text-brand-ink">Delivery type</span>
             <select
               value={deliveryType}
-              onChange={(event) => setDeliveryType(event.target.value as DeliveryType)}
+              onChange={(event) => {
+                setDeliveryType(event.target.value as DeliveryType);
+                clearErrors(['deliveryType', 'location']);
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
             >
               <option value={DeliveryType.PICKUP}>Pickup</option>
               <option value={DeliveryType.DELIVERY}>Delivery</option>
             </select>
+            <AppAlert message={errors.deliveryType?.message} />
           </label>
 
           {deliveryType === DeliveryType.DELIVERY ? (
@@ -207,10 +273,13 @@ export function ClientRequestCreatePage() {
               <span className="text-sm font-medium text-brand-ink">Delivery address</span>
               <input
                 value={location}
-                onChange={(event) => setLocation(event.target.value)}
+                onChange={(event) => {
+                  setLocation(event.target.value);
+                  clearErrors('location');
+                }}
                 className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
-                required
               />
+              <AppAlert message={errors.location?.message} />
             </label>
           ) : null}
 
@@ -223,6 +292,31 @@ export function ClientRequestCreatePage() {
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm"
             />
           </label>
+
+          <div className="space-y-2 sm:col-span-2">
+            <p className="text-sm font-medium text-brand-ink">Allergies (optional)</p>
+            {allergies.length === 0 ? (
+              <p className="text-sm text-brand-ink-soft">No allergy labels available.</p>
+            ) : (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {allergies.map((allergy) => (
+                  <label
+                    key={allergy.id}
+                    className="flex items-center gap-2 rounded-lg border border-brand-line px-3 py-2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedAllergyIds.includes(allergy.id)}
+                      onChange={() => toggleAllergy(allergy.id)}
+                      className="h-4 w-4 rounded border-brand-line"
+                    />
+                    <span className="text-sm text-brand-ink">{allergy.name}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+            <AppAlert message={errors.allergyIds?.message} />
+          </div>
         </div>
 
         <div className="mt-5 flex justify-end">
