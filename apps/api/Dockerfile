@@ -12,12 +12,13 @@ COPY packages ./packages
 # copy only api app
 COPY apps/api ./apps/api
 
-# move into api
-WORKDIR /app/apps/api
-
 RUN pnpm install --frozen-lockfile
 
-RUN pnpm build
+RUN pnpm --filter @shared-types build
+RUN pnpm --filter api build
+
+# move into api
+WORKDIR /app/apps/api
 
 EXPOSE 3001
 
