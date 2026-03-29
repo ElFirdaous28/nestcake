@@ -43,13 +43,4 @@ import { ConfigModule } from '@nestjs/config';
   providers: [AppService],
 })
 
-export class AppModule {
-  constructor() {
-    // This will run when the app starts
-    console.log('--- Environment Check ---');
-    console.log('NODE_ENV:', process.env.NODE_ENV || 'not set');
-    console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Connected to URI' : 'Using Default Localhost');
-    console.log('Actual URI being used:', process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/nestcake');
-    console.log('-------------------------');
-  }
-}
+export class AppModule {}

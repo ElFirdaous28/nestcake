@@ -5,7 +5,6 @@ import { Injectable } from '@nestjs/common';
 export class AppService {
   getHello(): string {
     const role: UserRole = UserRole.ADMIN;
-    console.log(`User role is: ${role}`);
     return 'Hello World!';
   }
 
