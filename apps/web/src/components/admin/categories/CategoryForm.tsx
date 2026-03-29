@@ -6,6 +6,7 @@ type Mode = 'create' | 'edit';
 type CategoryFormProps = {
   mode: Mode;
   name: string;
+  nameError?: string;
   isSaving: boolean;
   onNameChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -15,6 +16,7 @@ type CategoryFormProps = {
 export function CategoryForm({
   mode,
   name,
+  nameError,
   isSaving,
   onNameChange,
   onSubmit,
@@ -44,6 +46,7 @@ export function CategoryForm({
             maxLength={80}
             required
           />
+          {nameError ? <p className="text-xs text-brand-danger">{nameError}</p> : null}
         </div>
 
         <div className="flex flex-col gap-2">

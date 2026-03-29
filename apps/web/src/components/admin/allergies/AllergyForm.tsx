@@ -6,6 +6,7 @@ type Mode = 'create' | 'edit';
 type AllergyFormProps = {
   mode: Mode;
   name: string;
+  nameError?: string;
   isSaving: boolean;
   onNameChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -15,6 +16,7 @@ type AllergyFormProps = {
 export function AllergyForm({
   mode,
   name,
+  nameError,
   isSaving,
   onNameChange,
   onSubmit,
@@ -44,6 +46,7 @@ export function AllergyForm({
             maxLength={80}
             required
           />
+          {nameError ? <p className="text-xs text-brand-danger">{nameError}</p> : null}
         </div>
 
         <div className="flex flex-col gap-2">

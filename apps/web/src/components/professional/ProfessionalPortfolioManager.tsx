@@ -33,6 +33,7 @@ export function ProfessionalPortfolioManager() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PortfolioDeleteTarget | null>(null);
 
@@ -72,9 +73,18 @@ export function ProfessionalPortfolioManager() {
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check portfolio item details.');
+      const errors = parsed.error.issues.reduce<Record<string, string>>((acc, issue) => {
+        const path = issue.path[0];
+        if (typeof path === 'string' && !acc[path]) {
+          acc[path] = issue.message;
+        }
+        return acc;
+      }, {});
+      setFieldErrors(errors);
       return;
     }
+
+    setFieldErrors({});
 
     const values = parsed.data;
 
@@ -152,31 +162,43 @@ export function ProfessionalPortfolioManager() {
             <input
               type="file"
               accept="image/*"
-              onChange={(event) => setImageFile(event.target.files?.[0] ?? null)}
+              onChange={(event) => {
+                setImageFile(event.target.files?.[0] ?? null);
+                setFieldErrors((prev) => ({ ...prev, imageFile: '' }));
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm"
               required
             />
+            {fieldErrors.imageFile ? <p className="text-xs text-brand-danger">{fieldErrors.imageFile}</p> : null}
           </label>
 
           <label className="space-y-1 sm:col-span-2">
             <span className="text-sm font-medium text-brand-ink">Title (optional)</span>
             <input
               value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              onChange={(event) => {
+                setTitle(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, title: '' }));
+              }}
               maxLength={120}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
             />
+            {fieldErrors.title ? <p className="text-xs text-brand-danger">{fieldErrors.title}</p> : null}
           </label>
 
           <label className="space-y-1 sm:col-span-2">
             <span className="text-sm font-medium text-brand-ink">Description (optional)</span>
             <textarea
               value={description}
-              onChange={(event) => setDescription(event.target.value)}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, description: '' }));
+              }}
               rows={3}
               maxLength={500}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
             />
+            {fieldErrors.description ? <p className="text-xs text-brand-danger">{fieldErrors.description}</p> : null}
           </label>
         </div>
 

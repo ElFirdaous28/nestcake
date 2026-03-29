@@ -29,6 +29,7 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<'quantity', string>>>({});
 
   const isClient = user?.role === UserRole.CLIENT;
 
@@ -47,13 +48,18 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
       return;
     }
 
+    setFieldErrors({});
     const parsed = directOrderSchema.safeParse({
       productId: product.id,
       quantity,
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check quantity and try again.');
+      const quantityIssue = parsed.error.issues.find((issue) => issue.path[0] === 'quantity');
+      setFieldErrors({
+        quantity: quantityIssue?.message,
+      });
+      setError(quantityIssue ? null : (parsed.error.issues[0]?.message ?? 'Please check quantity and try again.'));
       return;
     }
 
@@ -166,9 +172,17 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
                     max="50"
                     step="1"
                     value={quantity}
-                    onChange={(event) => setQuantity(event.target.value)}
+                    onChange={(event) => {
+                      setQuantity(event.target.value);
+                      if (fieldErrors.quantity) {
+                        setFieldErrors((prev) => ({ ...prev, quantity: undefined }));
+                      }
+                    }}
                     className="w-full max-w-28 rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                   />
+                  {fieldErrors.quantity ? (
+                    <p className="text-xs text-red-600">{fieldErrors.quantity}</p>
+                  ) : null}
                 </label>
 
                 {!isAuthLoading && !isAuthenticated ? (

@@ -50,6 +50,7 @@ export function ClientRequestCreatePage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState<string | null>(null);
 
   const resetForm = () => {
@@ -77,9 +78,18 @@ export function ClientRequestCreatePage() {
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check request details.');
+      const errors = parsed.error.issues.reduce<Record<string, string>>((acc, issue) => {
+        const path = issue.path[0];
+        if (typeof path === 'string' && !acc[path]) {
+          acc[path] = issue.message;
+        }
+        return acc;
+      }, {});
+      setFieldErrors(errors);
       return;
     }
+
+    setFieldErrors({});
 
     const values = parsed.data;
     const normalizedBudget =
@@ -141,21 +151,29 @@ export function ClientRequestCreatePage() {
             <span className="text-sm font-medium text-brand-ink">Title</span>
             <input
               value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              onChange={(event) => {
+                setTitle(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, title: '' }));
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
               required
             />
+            {fieldErrors.title ? <p className="text-xs text-brand-danger">{fieldErrors.title}</p> : null}
           </label>
 
           <label className="space-y-1 sm:col-span-2">
             <span className="text-sm font-medium text-brand-ink">Description</span>
             <textarea
               value={description}
-              onChange={(event) => setDescription(event.target.value)}
+              onChange={(event) => {
+                setDescription(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, description: '' }));
+              }}
               rows={4}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
               required
             />
+            {fieldErrors.description ? <p className="text-xs text-brand-danger">{fieldErrors.description}</p> : null}
           </label>
 
           <label className="space-y-1">
@@ -174,9 +192,13 @@ export function ClientRequestCreatePage() {
               min="0"
               step="0.01"
               value={budget}
-              onChange={(event) => setBudget(event.target.value)}
+              onChange={(event) => {
+                setBudget(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, budget: '' }));
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
             />
+            {fieldErrors.budget ? <p className="text-xs text-brand-danger">{fieldErrors.budget}</p> : null}
           </label>
 
           <label className="space-y-1">
@@ -184,17 +206,24 @@ export function ClientRequestCreatePage() {
             <input
               type="datetime-local"
               value={deliveryDateTime}
-              onChange={(event) => setDeliveryDateTime(event.target.value)}
+              onChange={(event) => {
+                setDeliveryDateTime(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, deliveryDateTime: '' }));
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
               required
             />
+            {fieldErrors.deliveryDateTime ? <p className="text-xs text-brand-danger">{fieldErrors.deliveryDateTime}</p> : null}
           </label>
 
           <label className="space-y-1">
             <span className="text-sm font-medium text-brand-ink">Delivery type</span>
             <select
               value={deliveryType}
-              onChange={(event) => setDeliveryType(event.target.value as DeliveryType)}
+              onChange={(event) => {
+                setDeliveryType(event.target.value as DeliveryType);
+                setFieldErrors((prev) => ({ ...prev, deliveryType: '', location: '' }));
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
             >
               <option value={DeliveryType.PICKUP}>Pickup</option>
@@ -207,10 +236,14 @@ export function ClientRequestCreatePage() {
               <span className="text-sm font-medium text-brand-ink">Delivery address</span>
               <input
                 value={location}
-                onChange={(event) => setLocation(event.target.value)}
+                onChange={(event) => {
+                  setLocation(event.target.value);
+                  setFieldErrors((prev) => ({ ...prev, location: '' }));
+                }}
                 className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                 required
               />
+              {fieldErrors.location ? <p className="text-xs text-brand-danger">{fieldErrors.location}</p> : null}
             </label>
           ) : null}
 

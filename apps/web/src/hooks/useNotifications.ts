@@ -1,6 +1,6 @@
 import { useSocket } from '@/src/contexts/SocketContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/src/lib/api';
+import { apiClient } from '../lib/axios';
 
 export function useNotifications() {
   const { notifications: socketNotifications, unreadCount, markAsRead } = useSocket();
@@ -10,7 +10,7 @@ export function useNotifications() {
     queryKey: ['notifications'],
     queryFn: async () => {
       try {
-        const response = await api.get('/notifications');
+        const response = await apiClient.get('/notifications');
         return response.data;
       } catch (err) {
         console.error('Error fetching notifications:', err);
@@ -22,7 +22,7 @@ export function useNotifications() {
 
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
-      const response = await api.put(`/notifications/${notificationId}/read`);
+      const response = await apiClient.put(`/notifications/${notificationId}/read`);
       return response.data;
     },
     onSuccess: (_, notificationId) => {
@@ -33,7 +33,7 @@ export function useNotifications() {
 
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.put('/notifications/read-all');
+      const response = await apiClient.put('/notifications/read-all');
       return response.data;
     },
     onSuccess: () => {
@@ -43,7 +43,7 @@ export function useNotifications() {
 
   const deleteNotificationMutation = useMutation({
     mutationFn: async (notificationId: string) => {
-      const response = await api.delete(`/notifications/${notificationId}`);
+      const response = await apiClient.delete(`/notifications/${notificationId}`);
       return response.data;
     },
     onSuccess: () => {
@@ -53,7 +53,7 @@ export function useNotifications() {
 
   const deleteAllNotificationsMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.delete('/notifications');
+      const response = await apiClient.delete('/notifications');
       return response.data;
     },
     onSuccess: () => {
@@ -91,7 +91,7 @@ export function useUnreadCount() {
     queryKey: ['unread-count'],
     queryFn: async () => {
       try {
-        const response = await api.get('/notifications/unread-count');
+        const response = await apiClient.get('/notifications/unread-count');
         return response.data;
       } catch (err) {
         return unreadCount;

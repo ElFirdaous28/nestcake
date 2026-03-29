@@ -19,6 +19,7 @@ export function AllergiesManagementClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string }>({});
   const [name, setName] = useState('');
   const [mode, setMode] = useState<Mode>('create');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -44,6 +45,7 @@ export function AllergiesManagementClient() {
 
   const resetForm = () => {
     setName('');
+    setFieldErrors({});
     setMode('create');
     setEditingId(null);
   };
@@ -54,7 +56,8 @@ export function AllergiesManagementClient() {
     const parsed = allergyFormSchema.safeParse({ name });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check allergy name.');
+      const issue = parsed.error.issues[0];
+      setFieldErrors({ name: issue?.message ?? 'Please check allergy name.' });
       return;
     }
 
@@ -63,6 +66,7 @@ export function AllergiesManagementClient() {
     try {
       setIsSaving(true);
       setError(null);
+      setFieldErrors({});
 
       if (mode === 'create') {
         const created = await allergiesService.create({ name: values.name });
@@ -127,8 +131,12 @@ export function AllergiesManagementClient() {
           <AllergyForm
             mode={mode}
             name={name}
+            nameError={fieldErrors.name}
             isSaving={isSaving}
-            onNameChange={setName}
+            onNameChange={(value) => {
+              setName(value);
+              setFieldErrors((prev) => ({ ...prev, name: undefined }));
+            }}
             onSubmit={handleSubmit}
             onCancelEdit={resetForm}
           />

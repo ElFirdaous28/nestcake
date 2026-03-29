@@ -99,6 +99,7 @@ export function ClientOrdersPage() {
   const [comment, setComment] = useState('');
   const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reviewFieldErrors, setReviewFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState<string | null>(null);
 
   const loadOrders = useCallback(
@@ -196,9 +197,18 @@ export function ClientOrdersPage() {
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check your review details.');
+      const errors = parsed.error.issues.reduce<Record<string, string>>((acc, issue) => {
+        const path = issue.path[0];
+        if (typeof path === 'string' && !acc[path]) {
+          acc[path] = issue.message;
+        }
+        return acc;
+      }, {});
+      setReviewFieldErrors(errors);
       return;
     }
+
+    setReviewFieldErrors({});
 
     const values = parsed.data;
 
@@ -442,7 +452,10 @@ export function ClientOrdersPage() {
                 <span className="text-sm font-medium text-brand-ink">Rating</span>
                 <select
                   value={rating}
-                  onChange={(event) => setRating(Number(event.target.value))}
+                  onChange={(event) => {
+                    setRating(Number(event.target.value));
+                    setReviewFieldErrors((prev) => ({ ...prev, rating: '' }));
+                  }}
                   className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                 >
                   {[5, 4, 3, 2, 1].map((value) => (
@@ -451,17 +464,22 @@ export function ClientOrdersPage() {
                     </option>
                   ))}
                 </select>
+                {reviewFieldErrors.rating ? <p className="text-xs text-brand-danger">{reviewFieldErrors.rating}</p> : null}
               </label>
 
               <label className="space-y-1">
                 <span className="text-sm font-medium text-brand-ink">Comment (optional)</span>
                 <textarea
                   value={comment}
-                  onChange={(event) => setComment(event.target.value)}
+                  onChange={(event) => {
+                    setComment(event.target.value);
+                    setReviewFieldErrors((prev) => ({ ...prev, comment: '' }));
+                  }}
                   rows={4}
                   maxLength={1000}
                   className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                 />
+                {reviewFieldErrors.comment ? <p className="text-xs text-brand-danger">{reviewFieldErrors.comment}</p> : null}
               </label>
 
               <div className="flex justify-end gap-2">

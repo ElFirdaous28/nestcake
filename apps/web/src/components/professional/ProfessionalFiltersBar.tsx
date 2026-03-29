@@ -11,6 +11,7 @@ type FilterOption = {
 type ProfessionalFiltersBarProps = {
   searchQuery: string;
   searchPlaceholder: string;
+  searchError?: string;
   onSearchQueryChange: (value: string) => void;
   onSearchSubmit: (event: FormEvent<HTMLFormElement>) => void;
   primaryFilterLabel: string;
@@ -26,6 +27,7 @@ type ProfessionalFiltersBarProps = {
 export function ProfessionalFiltersBar({
   searchQuery,
   searchPlaceholder,
+  searchError,
   onSearchQueryChange,
   onSearchSubmit,
   primaryFilterLabel,
@@ -79,7 +81,8 @@ export function ProfessionalFiltersBar({
       </div>
 
       <form onSubmit={onSearchSubmit} className="flex flex-1 gap-3">
-        <div className="relative flex-1">
+        <div className="flex-1">
+          <div className="relative">
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-brand-ink-soft" />
           <input
             type="text"
@@ -88,6 +91,8 @@ export function ProfessionalFiltersBar({
             onChange={(event) => onSearchQueryChange(event.target.value)}
             className="w-full rounded-lg border border-brand-line py-2 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
           />
+          </div>
+          {searchError ? <p className="mt-1 text-xs text-brand-danger">{searchError}</p> : null}
         </div>
         <button
           type="submit"

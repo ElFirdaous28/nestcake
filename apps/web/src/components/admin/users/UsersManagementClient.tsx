@@ -21,6 +21,7 @@ export function UsersManagementClient() {
   const [isSavingVerificationByUserId, setIsSavingVerificationByUserId] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ searchQuery?: string }>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserRole | ''>('');
   const [pagination, setPagination] = useState({ skip: 0, limit: 50, total: 0, pages: 0 });
@@ -83,10 +84,12 @@ export function UsersManagementClient() {
 
     const parsed = usersSearchFormSchema.safeParse({ searchQuery });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
+      const issue = parsed.error.issues[0];
+      setFieldErrors({ searchQuery: issue?.message ?? 'Invalid search query.' });
       return;
     }
 
+    setFieldErrors({});
     loadUsers(0, parsed.data.searchQuery, selectedRole as string);
   };
 
@@ -157,9 +160,15 @@ export function UsersManagementClient() {
               type="text"
               placeholder="Search by name or email..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setFieldErrors((prev) => ({ ...prev, searchQuery: undefined }));
+              }}
               className="w-full pl-10 pr-4 py-2 border border-brand-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-rose focus:border-transparent"
             />
+            {fieldErrors.searchQuery ? (
+              <p className="mt-1 text-xs text-brand-danger">{fieldErrors.searchQuery}</p>
+            ) : null}
           </div>
           <button
             type="submit"

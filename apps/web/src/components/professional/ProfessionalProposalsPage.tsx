@@ -72,6 +72,7 @@ export function ProfessionalProposalsPage() {
   const [loadingOrderId, setLoadingOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState('');
 
   const [search, setSearch] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
@@ -151,10 +152,11 @@ export function ProfessionalProposalsPage() {
 
     const parsed = searchSchema.safeParse({ query: search });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
+      setSearchError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
       return;
     }
 
+    setSearchError('');
     setAppliedSearch(parsed.data.query);
   };
 
@@ -183,8 +185,14 @@ export function ProfessionalProposalsPage() {
 
       <ProfessionalFiltersBar
         searchQuery={search}
+        searchError={searchError}
         searchPlaceholder="Search by request title, description, or message"
-        onSearchQueryChange={setSearch}
+        onSearchQueryChange={(value) => {
+          setSearch(value);
+          if (searchError) {
+            setSearchError('');
+          }
+        }}
         onSearchSubmit={onSubmitSearch}
         primaryFilterLabel="Proposal status"
         primaryFilterValue={statusFilter}

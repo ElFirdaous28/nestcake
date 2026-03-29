@@ -70,6 +70,8 @@ export function ProfessionalRequestsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState('');
+  const [proposalFieldErrors, setProposalFieldErrors] = useState<Record<string, string>>({});
 
   const [search, setSearch] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
@@ -128,10 +130,11 @@ export function ProfessionalRequestsPage() {
 
     const parsed = searchSchema.safeParse({ query: search });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
+      setSearchError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
       return;
     }
 
+    setSearchError('');
     setAppliedSearch(parsed.data.query);
   };
 
@@ -169,9 +172,18 @@ export function ProfessionalRequestsPage() {
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check proposal details.');
+      const errors = parsed.error.issues.reduce<Record<string, string>>((acc, issue) => {
+        const path = issue.path[0];
+        if (typeof path === 'string' && !acc[path]) {
+          acc[path] = issue.message;
+        }
+        return acc;
+      }, {});
+      setProposalFieldErrors(errors);
       return;
     }
+
+    setProposalFieldErrors({});
 
     const values = parsed.data;
 
@@ -208,8 +220,14 @@ export function ProfessionalRequestsPage() {
 
       <ProfessionalFiltersBar
         searchQuery={search}
+        searchError={searchError}
         searchPlaceholder="Search request title or description"
-        onSearchQueryChange={setSearch}
+        onSearchQueryChange={(value) => {
+          setSearch(value);
+          if (searchError) {
+            setSearchError('');
+          }
+        }}
         onSearchSubmit={onSubmitSearch}
         primaryFilterLabel="Delivery"
         primaryFilterValue={deliveryFilter}
@@ -294,10 +312,14 @@ export function ProfessionalRequestsPage() {
                     min="0"
                     step="0.01"
                     value={proposalPrice}
-                    onChange={(event) => setProposalPrice(event.target.value)}
+                    onChange={(event) => {
+                      setProposalPrice(event.target.value);
+                      setProposalFieldErrors((prev) => ({ ...prev, price: '' }));
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                     required
                   />
+                  {proposalFieldErrors.price ? <p className="text-xs text-brand-danger">{proposalFieldErrors.price}</p> : null}
                 </label>
 
                 <label className="space-y-1">
@@ -305,9 +327,13 @@ export function ProfessionalRequestsPage() {
                   <input
                     type="datetime-local"
                     value={proposalDateTime}
-                    onChange={(event) => setProposalDateTime(event.target.value)}
+                    onChange={(event) => {
+                      setProposalDateTime(event.target.value);
+                      setProposalFieldErrors((prev) => ({ ...prev, deliveryDateTime: '' }));
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                   />
+                  {proposalFieldErrors.deliveryDateTime ? <p className="text-xs text-brand-danger">{proposalFieldErrors.deliveryDateTime}</p> : null}
                 </label>
 
                 <label className="space-y-1 sm:col-span-2">
@@ -315,9 +341,13 @@ export function ProfessionalRequestsPage() {
                   <textarea
                     rows={3}
                     value={proposalMessage}
-                    onChange={(event) => setProposalMessage(event.target.value)}
+                    onChange={(event) => {
+                      setProposalMessage(event.target.value);
+                      setProposalFieldErrors((prev) => ({ ...prev, message: '' }));
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                   />
+                  {proposalFieldErrors.message ? <p className="text-xs text-brand-danger">{proposalFieldErrors.message}</p> : null}
                 </label>
               </div>
 

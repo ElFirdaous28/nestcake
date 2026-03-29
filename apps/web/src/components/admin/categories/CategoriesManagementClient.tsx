@@ -19,6 +19,7 @@ export function CategoriesManagementClient() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [fieldErrors, setFieldErrors] = useState<{ name?: string }>({});
     const [name, setName] = useState('');
     const [mode, setMode] = useState<Mode>('create');
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -44,6 +45,7 @@ export function CategoriesManagementClient() {
 
     const resetForm = () => {
         setName('');
+        setFieldErrors({});
         setMode('create');
         setEditingId(null);
     };
@@ -54,7 +56,8 @@ export function CategoriesManagementClient() {
         const parsed = categoryFormSchema.safeParse({ name });
 
         if (!parsed.success) {
-            setError(parsed.error.issues[0]?.message ?? 'Please check category name.');
+            const issue = parsed.error.issues[0];
+            setFieldErrors({ name: issue?.message ?? 'Please check category name.' });
             return;
         }
 
@@ -63,6 +66,7 @@ export function CategoriesManagementClient() {
         try {
             setIsSaving(true);
             setError(null);
+            setFieldErrors({});
 
             if (mode === 'create') {
                 const created = await categoriesService.create({ name: values.name });
@@ -128,8 +132,12 @@ export function CategoriesManagementClient() {
                     <CategoryForm
                         mode={mode}
                         name={name}
+                        nameError={fieldErrors.name}
                         isSaving={isSaving}
-                        onNameChange={setName}
+                        onNameChange={(value) => {
+                            setName(value);
+                            setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                        }}
                         onSubmit={handleSubmit}
                         onCancelEdit={resetForm}
                     />

@@ -6,6 +6,7 @@ import { Search } from 'lucide-react';
 
 type ProductsFilterSectionProps = {
   searchQuery: string;
+  searchError?: string;
   statusFilter: ProductStatus | 'all';
   availabilityFilter: 'all' | 'available' | 'unavailable';
   searchPlaceholder?: string;
@@ -23,6 +24,7 @@ const prettyLabel = (value: string) => value.charAt(0).toUpperCase() + value.sli
 
 export function ProductsFilterSection({
   searchQuery,
+  searchError,
   statusFilter,
   availabilityFilter,
   searchPlaceholder = 'Search by product name or description...',
@@ -78,7 +80,8 @@ export function ProductsFilterSection({
       )}
 
       <form onSubmit={onSearchSubmit} className="flex flex-1 gap-3">
-        <div className="relative flex-1">
+        <div className="flex-1">
+          <div className="relative">
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-brand-ink-soft" />
           <input
             type="text"
@@ -87,6 +90,8 @@ export function ProductsFilterSection({
             onChange={(event) => onSearchQueryChange(event.target.value)}
             className="w-full rounded-lg border border-brand-line py-2 pr-4 pl-10 focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
           />
+          </div>
+          {searchError ? <p className="mt-1 text-xs text-brand-danger">{searchError}</p> : null}
         </div>
         <button
           type="submit"

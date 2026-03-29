@@ -90,6 +90,8 @@ export function ProductCatalogClient({
   const [isDeleting, setIsDeleting] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState<string>('');
+  const [productFieldErrors, setProductFieldErrors] = useState<Record<string, string>>({});
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ProductItem | null>(null);
@@ -150,6 +152,7 @@ export function ProductCatalogClient({
     setIsAvailable(true);
     setStatus(ProductStatus.DRAFT);
     setImageFile(null);
+    setProductFieldErrors({});
   };
 
   const openCreateForm = () => {
@@ -196,9 +199,18 @@ export function ProductCatalogClient({
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check product details.');
+      const errors = parsed.error.issues.reduce<Record<string, string>>((acc, issue) => {
+        const path = issue.path[0];
+        if (typeof path === 'string' && !acc[path]) {
+          acc[path] = issue.message;
+        }
+        return acc;
+      }, {});
+      setProductFieldErrors(errors);
       return;
     }
+
+    setProductFieldErrors({});
 
     const values = parsed.data;
 
@@ -283,10 +295,11 @@ export function ProductCatalogClient({
 
     const parsed = productSearchSchema.safeParse({ query: search });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
+      setSearchError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
       return;
     }
 
+    setSearchError('');
     const query = parsed.data.query;
     setPage(1);
     void loadProducts(1, query);
@@ -319,12 +332,18 @@ export function ProductCatalogClient({
 
       <ProductsFilterSection
         searchQuery={search}
+        searchError={searchError}
         statusFilter={statusFilter}
         availabilityFilter={availabilityFilter}
         searchPlaceholder={searchPlaceholder}
         showStatusFilter={false}
         showAvailabilityFilter={false}
-        onSearchQueryChange={setSearch}
+        onSearchQueryChange={(value) => {
+          setSearch(value);
+          if (searchError) {
+            setSearchError('');
+          }
+        }}
         onStatusFilterChange={setStatusFilter}
         onAvailabilityFilterChange={setAvailabilityFilter}
         onSearchSubmit={onSubmitSearch}
@@ -427,10 +446,14 @@ export function ProductCatalogClient({
                   <span className="text-sm font-medium text-brand-ink">Name</span>
                   <input
                     value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    onChange={(event) => {
+                      setName(event.target.value);
+                      setProductFieldErrors((prev) => ({ ...prev, name: '' }));
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                     required
                   />
+                  {productFieldErrors.name ? <p className="text-xs text-brand-danger">{productFieldErrors.name}</p> : null}
                 </label>
 
                 <label className="space-y-1 sm:col-span-2">
@@ -450,10 +473,14 @@ export function ProductCatalogClient({
                     min="0"
                     step="0.01"
                     value={price}
-                    onChange={(event) => setPrice(event.target.value)}
+                    onChange={(event) => {
+                      setPrice(event.target.value);
+                      setProductFieldErrors((prev) => ({ ...prev, price: '' }));
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
                     required
                   />
+                  {productFieldErrors.price ? <p className="text-xs text-brand-danger">{productFieldErrors.price}</p> : null}
                 </label>
 
                 <label className="space-y-1">
@@ -475,10 +502,14 @@ export function ProductCatalogClient({
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(event) => setImageFile(event.target.files?.[0] ?? null)}
+                    onChange={(event) => {
+                      setImageFile(event.target.files?.[0] ?? null);
+                      setProductFieldErrors((prev) => ({ ...prev, imageFile: '' }));
+                    }}
                     className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm"
                     required={!editingProduct}
                   />
+                  {productFieldErrors.imageFile ? <p className="text-xs text-brand-danger">{productFieldErrors.imageFile}</p> : null}
                 </label>
 
                 <label className="flex items-center gap-2 sm:col-span-2">
@@ -494,6 +525,9 @@ export function ProductCatalogClient({
 
               <div className="space-y-2">
                 <p className="text-sm font-medium text-brand-ink">Categories</p>
+                {productFieldErrors.selectedCategoryIds ? (
+                  <p className="text-xs text-brand-danger">{productFieldErrors.selectedCategoryIds}</p>
+                ) : null}
                 {categories.length === 0 ? (
                   <p className="text-sm text-brand-ink-soft">No categories found.</p>
                 ) : (

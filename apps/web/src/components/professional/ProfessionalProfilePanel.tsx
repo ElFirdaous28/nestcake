@@ -53,6 +53,7 @@ export function ProfessionalProfilePanel() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState<string | null>(null);
 
   const syncForm = (item: ProfessionalItem) => {
@@ -107,9 +108,18 @@ export function ProfessionalProfilePanel() {
     });
 
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Please check profile details.');
+      const errors = parsed.error.issues.reduce<Record<string, string>>((acc, issue) => {
+        const path = issue.path[0];
+        if (typeof path === 'string' && !acc[path]) {
+          acc[path] = issue.message;
+        }
+        return acc;
+      }, {});
+      setFieldErrors(errors);
       return;
     }
+
+    setFieldErrors({});
 
     const values = parsed.data;
 
@@ -207,10 +217,14 @@ export function ProfessionalProfilePanel() {
             <span className="text-sm font-medium text-brand-ink">Business name</span>
             <input
               value={businessName}
-              onChange={(event) => setBusinessName(event.target.value)}
+              onChange={(event) => {
+                setBusinessName(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, businessName: '' }));
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
               required
             />
+            {fieldErrors.businessName ? <p className="text-xs text-brand-danger">{fieldErrors.businessName}</p> : null}
           </label>
 
           <label className="space-y-1 sm:col-span-2">
@@ -227,32 +241,44 @@ export function ProfessionalProfilePanel() {
             <span className="text-sm font-medium text-brand-ink">Address</span>
             <input
               value={address}
-              onChange={(event) => setAddress(event.target.value)}
+              onChange={(event) => {
+                setAddress(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, address: '' }));
+              }}
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
               required
             />
+            {fieldErrors.address ? <p className="text-xs text-brand-danger">{fieldErrors.address}</p> : null}
           </label>
 
           <label className="space-y-1">
             <span className="text-sm font-medium text-brand-ink">Longitude</span>
             <input
               value={longitude}
-              onChange={(event) => setLongitude(event.target.value)}
+              onChange={(event) => {
+                setLongitude(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, longitude: '' }));
+              }}
               inputMode="decimal"
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
               required
             />
+            {fieldErrors.longitude ? <p className="text-xs text-brand-danger">{fieldErrors.longitude}</p> : null}
           </label>
 
           <label className="space-y-1">
             <span className="text-sm font-medium text-brand-ink">Latitude</span>
             <input
               value={latitude}
-              onChange={(event) => setLatitude(event.target.value)}
+              onChange={(event) => {
+                setLatitude(event.target.value);
+                setFieldErrors((prev) => ({ ...prev, latitude: '' }));
+              }}
               inputMode="decimal"
               className="w-full rounded-lg border border-brand-line px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-brand-rose focus:outline-none"
               required
             />
+            {fieldErrors.latitude ? <p className="text-xs text-brand-danger">{fieldErrors.latitude}</p> : null}
           </label>
         </div>
 

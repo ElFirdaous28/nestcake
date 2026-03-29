@@ -63,6 +63,7 @@ export function ProfessionalOrdersPage() {
   const [loadingOrderId, setLoadingOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState('');
 
   const [search, setSearch] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
@@ -130,10 +131,11 @@ export function ProfessionalOrdersPage() {
 
     const parsed = searchSchema.safeParse({ query: search });
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
+      setSearchError(parsed.error.issues[0]?.message ?? 'Invalid search query.');
       return;
     }
 
+    setSearchError('');
     setAppliedSearch(parsed.data.query);
   };
 
@@ -166,8 +168,14 @@ export function ProfessionalOrdersPage() {
 
       <ProfessionalFiltersBar
         searchQuery={search}
+        searchError={searchError}
         searchPlaceholder="Search by order id or product"
-        onSearchQueryChange={setSearch}
+        onSearchQueryChange={(value) => {
+          setSearch(value);
+          if (searchError) {
+            setSearchError('');
+          }
+        }}
         onSearchSubmit={onSubmitSearch}
         primaryFilterLabel="Order status"
         primaryFilterValue={statusFilter}
