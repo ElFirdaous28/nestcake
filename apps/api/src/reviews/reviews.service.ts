@@ -11,7 +11,7 @@ import { Order } from '../orders/schemas/order.schema';
 import { Professional } from '../professionals/schemas/professional.schema';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { FindReviewsQueryDto } from './dto/find-reviews-query.dto';
-import { Review } from './entities/review.entity';
+import { Review } from './schemas/review.schema';
 
 @Injectable()
 export class ReviewsService {

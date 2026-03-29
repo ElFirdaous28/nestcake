@@ -8,7 +8,7 @@ import {
 } from '../professionals/schemas/professional.schema';
 import { ReviewsService } from './reviews.service';
 import { ReviewsController } from './reviews.controller';
-import { Review, ReviewSchema } from './entities/review.entity';
+import { Review, ReviewSchema } from './schemas/review.schema';
 
 @Module({
   imports: [

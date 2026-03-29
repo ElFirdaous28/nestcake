@@ -1,0 +1,22 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "3001:3001"
+    env_file:
+      - apps/api/.env
+    volumes:
+      - ./apps/api/public/uploads:/app/apps/api/public/uploads
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - apps/web/.env
+    depends_on:
+      - api
