@@ -4,18 +4,23 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 
+# copy root files
 COPY pnpm-workspace.yaml ./
 COPY package.json ./
 COPY pnpm-lock.yaml ./
 COPY packages ./packages
 
+# copy web app
 COPY apps/web ./apps/web
 
-WORKDIR /app/apps/web
-
+# install from ROOT
 RUN pnpm install --frozen-lockfile
 
-RUN pnpm build
+# build only web
+RUN pnpm --filter web build
+
+# move to web
+WORKDIR /app/apps/web
 
 EXPOSE 3000
 
