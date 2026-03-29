@@ -16,11 +16,27 @@ import { UserRole } from '@shared-types';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('allergies')
 @Controller('allergies')
 export class AllergiesController {
   constructor(private readonly allergiesService: AllergiesService) {}
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create allergy (admin only)' })
+  @ApiBody({
+    type: CreateAllergyDto,
+    examples: {
+      default: { value: { name: 'Peanut' } },
+    },
+  })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Post()
@@ -28,16 +44,28 @@ export class AllergiesController {
     return this.allergiesService.create(createAllergyDto);
   }
 
+  @ApiOperation({ summary: 'List allergies' })
   @Get()
   findAll() {
     return this.allergiesService.findAll();
   }
 
+  @ApiOperation({ summary: 'Get allergy by id' })
+  @ApiParam({ name: 'id', example: '65f0c7e8f9697f3c69312345' })
   @Get(':id')
   findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.allergiesService.findOne(id);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update allergy (admin only)' })
+  @ApiParam({ name: 'id', example: '65f0c7e8f9697f3c69312345' })
+  @ApiBody({
+    type: UpdateAllergyDto,
+    examples: {
+      default: { value: { name: 'Dairy' } },
+    },
+  })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Patch(':id')
@@ -48,6 +76,9 @@ export class AllergiesController {
     return this.allergiesService.update(id, updateAllergyDto);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete allergy (admin only)' })
+  @ApiParam({ name: 'id', example: '65f0c7e8f9697f3c69312345' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Delete(':id')

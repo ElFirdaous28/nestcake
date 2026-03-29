@@ -25,11 +25,26 @@ import { multerDiskConfig } from '../common/upload.config';
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List users for admin' })
+  @ApiQuery({ name: 'search', required: false, example: 'john' })
+  @ApiQuery({ name: 'role', required: false, example: 'CLIENT' })
+  @ApiQuery({ name: 'skip', required: false, example: '0' })
+  @ApiQuery({ name: 'limit', required: false, example: '50' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Get()
@@ -48,12 +63,28 @@ export class UsersController {
     });
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user profile' })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getMe(@Req() req: Request & { user: AuthUser }) {
     return this.usersService.getMe(req.user);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiBody({
+    type: UpdateProfileDto,
+    examples: {
+      default: {
+        value: {
+          firstName: 'Jane',
+          lastName: 'Doe',
+          phone: '+15551234567',
+        },
+      },
+    },
+  })
   @UseGuards(JwtAuthGuard)
   @Patch('me')
   updateMe(
@@ -63,6 +94,18 @@ export class UsersController {
     return this.usersService.updateMe(req.user, dto);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Upload profile avatar' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['avatar'],
+      properties: {
+        avatar: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   @UseGuards(JwtAuthGuard)
   @Patch('me/avatar')
   @UseInterceptors(FileInterceptor('avatar', multerDiskConfig('avatars')))
@@ -78,6 +121,19 @@ export class UsersController {
     return this.usersService.uploadAvatar(req.user, file);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Change current user password' })
+  @ApiBody({
+    type: ChangePasswordDto,
+    examples: {
+      default: {
+        value: {
+          currentPassword: 'oldPass123',
+          newPassword: 'newPass1234',
+        },
+      },
+    },
+  })
   @UseGuards(JwtAuthGuard)
   @Patch('me/password')
   @HttpCode(HttpStatus.OK)
@@ -88,6 +144,8 @@ export class UsersController {
     return this.usersService.changePassword(req.user, dto);
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete current user account' })
   @UseGuards(JwtAuthGuard)
   @Delete('me')
   @HttpCode(HttpStatus.OK)
