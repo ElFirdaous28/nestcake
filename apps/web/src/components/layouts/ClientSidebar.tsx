@@ -54,7 +54,7 @@ export function ClientSidebar() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed md:static top-0 left-0 z-40 w-64 border-r border-brand-line bg-white min-h-screen flex flex-col transition-transform md:transition-none ${
+      <aside className={`fixed top-0 left-0 z-40 h-screen w-64 border-r border-brand-line bg-white flex flex-col overflow-hidden transition-transform md:sticky md:top-0 md:h-screen md:transition-none ${
         mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}>
         <div className="p-6 border-b border-brand-line bg-linear-to-br from-white to-brand-cream/50">
@@ -62,7 +62,7 @@ export function ClientSidebar() {
           <h2 className="mt-3 text-lg font-bold text-brand-ink">Client Portal</h2>
         </div>
 
-      <nav className="flex-1 p-3 overflow-y-auto">
+      <nav className="flex-1 min-h-0 overflow-y-auto p-3">
         <ul className="space-y-2">
           {links.map((link) => {
             const Icon = link.icon;
