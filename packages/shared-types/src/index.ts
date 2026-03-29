@@ -8,6 +8,7 @@ export * from './enums/order-type.enum'
 export * from './enums/delivery-type.enum'
 export * from './enums/product-status.enum'
 export * from './enums/professional-verification-status.enum'
+export * from './enums/notification-type.enum'
 
 // types
 export * from './types/user.type'
@@ -21,3 +22,4 @@ export * from './types/payment.type'
 export * from './types/review.type'
 export * from './types/allergy.type'
 export * from './types/auth-user.type'
+export * from './types/notification.type'

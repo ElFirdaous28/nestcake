@@ -12,11 +12,14 @@ import {
   ProposalStatus,
   RequestStatus,
   UserRole,
+  NotificationType,
 } from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Order } from '../orders/schemas/order.schema';
 import { Professional } from '../professionals/schemas/professional.schema';
 import { Request } from '../requests/schemas/request.schema';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
 import { CreateProposalDto } from './dto/create-proposal.dto';
 import { Proposal } from './schemas/proposal.schema';
 
@@ -28,6 +31,8 @@ export class ProposalsService {
     @InjectModel(Professional.name)
     private readonly professionalModel: Model<Professional>,
     @InjectModel(Order.name) private readonly orderModel: Model<Order>,
+    private readonly notificationsService: NotificationsService,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   async create(authUser: AuthUser, createProposalDto: CreateProposalDto) {
@@ -64,7 +69,7 @@ export class ProposalsService {
       );
     }
 
-    return this.proposalModel.create({
+    const proposal = await this.proposalModel.create({
       requestId: request._id,
       professionalId: professional._id,
       price: createProposalDto.price,
@@ -72,6 +77,26 @@ export class ProposalsService {
       deliveryDateTime: createProposalDto.deliveryDateTime,
       status: ProposalStatus.PENDING,
     });
+
+    // Send notification to client that a professional has proposed
+    const notification = await this.notificationsService.create({
+      userId: request.clientId,
+      type: NotificationType.NEW_PROPOSAL,
+      title: 'New Proposal Received',
+      message: `${professional.businessName} responded to your request`,
+      data: { 
+        proposalId: proposal._id.toString(), 
+        professionalName: professional.businessName,
+        price: proposal.price,
+      },
+    });
+
+    await this.notificationsGateway.sendNotificationToUser(
+      request.clientId.toString(),
+      notification,
+    );
+
+    return proposal;
   }
 
   findAllForAdmin() {
@@ -197,6 +222,31 @@ export class ProposalsService {
         status: RequestStatus.MATCHED,
       }),
     ]);
+
+    // Send notification to professional that their proposal was accepted
+    const professional = await this.professionalModel
+      .findById(proposal.professionalId)
+      .lean()
+      .exec();
+
+    if (professional) {
+      const notification = await this.notificationsService.create({
+        userId: proposal.professionalId,
+        type: NotificationType.ORDER_ACCEPTED,
+        title: 'Proposal Accepted!',
+        message: `Your proposal worth $${proposal.price.toFixed(2)} has been accepted`,
+        data: { 
+          orderId: order._id.toString(),
+          proposalId: proposal._id.toString(),
+          price: proposal.price,
+        },
+      });
+
+      await this.notificationsGateway.sendNotificationToUser(
+        proposal.professionalId.toString(),
+        notification,
+      );
+    }
 
     return this.orderModel
       .findById(order._id)

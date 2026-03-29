@@ -15,6 +15,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { AllergiesModule } from './allergies/allergies.module';
 import { AuthModule } from './auth/auth.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -38,6 +39,7 @@ import { ConfigModule } from '@nestjs/config';
     ReviewsModule,
     AllergiesModule,
     AuthModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

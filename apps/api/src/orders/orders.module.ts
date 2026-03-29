@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
 import {
   Professional,
@@ -20,6 +21,7 @@ import { Order, OrderSchema } from './schemas/order.schema';
       { name: Request.name, schema: RequestSchema },
     ]),
     AuthModule,
+    NotificationsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

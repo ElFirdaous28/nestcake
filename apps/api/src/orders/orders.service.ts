@@ -12,11 +12,14 @@ import {
   ProductStatus,
   RequestStatus,
   UserRole,
+  NotificationType,
 } from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Product } from '../products/schemas/product.schema';
 import { Professional } from '../professionals/schemas/professional.schema';
 import { Request } from '../requests/schemas/request.schema';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FindOrdersQueryDto } from './dto/find-orders-query.dto';
 import { Order } from './schemas/order.schema';
@@ -29,6 +32,8 @@ export class OrdersService {
     @InjectModel(Professional.name)
     private readonly professionalModel: Model<Professional>,
     @InjectModel(Request.name) private readonly requestModel: Model<Request>,
+    private readonly notificationsService: NotificationsService,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   private listBaseQuery() {
@@ -244,6 +249,17 @@ export class OrdersService {
       items: orderItems,
     });
 
+    // Send notification to professional
+    const notification = await this.notificationsService.create({
+      userId: new Types.ObjectId(professionalId),
+      type: NotificationType.ORDER_ACCEPTED,
+      title: 'New Order Received',
+      message: `You have a new order for $${totalPrice.toFixed(2)}`,
+      data: { orderId: order._id.toString(), totalPrice },
+    });
+
+    await this.notificationsGateway.sendNotificationToUser(professionalId, notification);
+
     return this.findOne(order._id.toString());
   }
 
@@ -391,6 +407,20 @@ export class OrdersService {
 
     await this.setOrderStatus(id, OrderStatus.IN_PROGRESS);
 
+    // Send notification to professional that payment was confirmed
+    const notification = await this.notificationsService.create({
+      userId: order.professionalId,
+      type: NotificationType.PAYMENT_CONFIRMATION,
+      title: 'Payment Confirmed',
+      message: `Payment of $${order.totalPrice.toFixed(2)} confirmed for your order`,
+      data: { orderId: order._id.toString(), amount: order.totalPrice },
+    });
+
+    await this.notificationsGateway.sendNotificationToUser(
+      order.professionalId.toString(),
+      notification,
+    );
+
     return this.findOne(id);
   }
 
@@ -409,6 +439,20 @@ export class OrdersService {
     }
 
     await this.setOrderStatus(id, OrderStatus.READY);
+
+    // Send notification to client that order is ready for pickup
+    const notification = await this.notificationsService.create({
+      userId: order.clientId,
+      type: NotificationType.ORDER_READY,
+      title: 'Your cake is ready for pickup',
+      message: 'Your order is ready to pick up!',
+      data: { orderId: order._id.toString() },
+    });
+
+    await this.notificationsGateway.sendNotificationToUser(
+      order.clientId.toString(),
+      notification,
+    );
 
     return this.findOne(id);
   }
@@ -442,6 +486,20 @@ export class OrdersService {
       { runValidators: true },
     );
 
+    // Send notification to client that order was rejected
+    const notification = await this.notificationsService.create({
+      userId: order.clientId,
+      type: NotificationType.ORDER_REJECTED,
+      title: 'Order Rejected',
+      message: 'Unfortunately, your order has been rejected',
+      data: { orderId: order._id.toString() },
+    });
+
+    await this.notificationsGateway.sendNotificationToUser(
+      order.clientId.toString(),
+      notification,
+    );
+
     return this.findOne(id);
   }
 
@@ -455,6 +513,20 @@ export class OrdersService {
     }
 
     await this.setOrderStatus(id, OrderStatus.COMPLETED);
+
+    // Send notification to professional that order was completed
+    const notification = await this.notificationsService.create({
+      userId: order.professionalId,
+      type: NotificationType.ORDER_COMPLETED,
+      title: 'Order Completed',
+      message: 'Your order has been completed by the customer',
+      data: { orderId: order._id.toString() },
+    });
+
+    await this.notificationsGateway.sendNotificationToUser(
+      order.professionalId.toString(),
+      notification,
+    );
 
     if (order.requestId) {
       await this.requestModel.findByIdAndUpdate(
