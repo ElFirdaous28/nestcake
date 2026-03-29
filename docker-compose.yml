@@ -1,5 +1,6 @@
 services:
   api:
+    container_name: nestcake-api
     build:
       context: .
       dockerfile: apps/api/Dockerfile
@@ -11,6 +12,7 @@ services:
       - ./apps/api/public/uploads:/app/apps/api/public/uploads
 
   web:
+    container_name: nestcake-web
     build:
       context: .
       dockerfile: apps/web/Dockerfile
