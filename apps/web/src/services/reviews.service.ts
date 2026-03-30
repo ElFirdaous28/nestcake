@@ -64,7 +64,7 @@ export type CreateReviewPayload = {
 };
 
 const getApiOrigin = () => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
   return apiUrl.replace(/\/api\/?$/, '');
 };
 

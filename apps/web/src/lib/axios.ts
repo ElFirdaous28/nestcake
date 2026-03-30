@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getUserFriendlyErrorMessage } from '@/src/lib/error-message';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 console.log('NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL);
 
 export const apiClient = axios.create({
