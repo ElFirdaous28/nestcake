@@ -4,6 +4,7 @@ import { UserRole } from '@shared-types';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuth } from '@/src/hooks/useAuth';
+import { getDashboardPathForRole } from '@/src/lib/auth-redirect';
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
@@ -25,7 +26,7 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     }
 
     if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-      router.replace('/');
+      router.replace(getDashboardPathForRole(user.role));
     }
   }, [allowedRoles, isAuthenticated, isLoading, pathname, router, user]);
 

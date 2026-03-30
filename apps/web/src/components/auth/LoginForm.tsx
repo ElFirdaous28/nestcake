@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useEffect } from 'react';
 import { useAuth } from '@/src/hooks/useAuth';
+import { getPostAuthRedirectPath } from '@/src/lib/auth-redirect';
 import { loginSchema, type LoginFormValues } from '@/src/lib/validation/authSchemas';
 import { AppAlert } from '@/src/components/common/AppAlert';
 
@@ -33,9 +34,10 @@ export function LoginForm() {
   }, [clearError]);
 
   const onSubmit = async (values: LoginFormValues) => {
-    const ok = await login(values);
-    if (ok) {
-      router.push('/');
+    const authedUser = await login(values);
+    if (authedUser) {
+      const nextPath = new URLSearchParams(window.location.search).get('next');
+      router.push(getPostAuthRedirectPath({ role: authedUser.role, nextPath }));
     }
   };
 

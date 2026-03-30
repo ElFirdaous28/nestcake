@@ -1,18 +1,33 @@
-import { ProductCatalogClient } from '@/src/components/Products/ProductCatalogClient';
+import { PublicProductsClient } from '@/src/components/Products/PublicProductsClient';
+import { productsService, type ProductsResponse } from '@/src/services/products.service';
 
-export default function ProductsPage() {
+const PAGE_SIZE = 12;
+
+export default async function ProductsPage() {
+  let initialProducts: Awaited<ReturnType<typeof productsService.getAllForClient>>['data'] = [];
+  let initialPagination: ProductsResponse['pagination'] = {
+    page: 1,
+    limit: PAGE_SIZE,
+    total: 0,
+    pages: 0,
+  };
+
+  try {
+    const response = await productsService.getAllForClient({ page: 1, limit: PAGE_SIZE });
+    initialProducts = response.data;
+    initialPagination = response.pagination;
+  } catch {
+    // Keep rendering with an empty list if server-side fetch fails.
+  }
+
   return (
-    <main className="min-h-screen bg-brand-cream px-4 py-8 sm:px-6 lg:px-8">
-      <ProductCatalogClient
-        scope="client"
-        title="Browse Products"
-        description="Discover ready-to-order and custom cake options from verified professionals."
-        containerClassName="mx-auto max-w-6xl space-y-6"
-        titleClassName="text-3xl font-bold text-brand-ink"
-        emptyStateClassName="rounded-xl border border-dashed border-brand-line bg-white py-14 text-center text-brand-ink-soft"
-        gridClassName="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        searchPlaceholder="Search by product name or description"
-      />
+    <main className="min-h-screen bg-linear-to-b from-brand-cream via-brand-cream-soft to-brand-cream px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <PublicProductsClient
+          initialProducts={initialProducts}
+          initialPagination={initialPagination}
+        />
+      </div>
     </main>
   );
 }

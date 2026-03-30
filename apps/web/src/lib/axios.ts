@@ -2,7 +2,6 @@ import axios from 'axios';
 import { getUserFriendlyErrorMessage } from '@/src/lib/error-message';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
-console.log('NEXT_PUBLIC_API_URL', process.env.NEXT_PUBLIC_API_URL);
 
 export const apiClient = axios.create({
   baseURL: API_URL,
@@ -11,7 +10,7 @@ export const apiClient = axios.create({
 
 // Add token to requests
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

@@ -4,6 +4,12 @@ type JwtPayload = {
   role?: 'CLIENT' | 'PROFESSIONAL' | 'ADMIN';
 };
 
+const ROLE_DASHBOARD_PATHS: Record<NonNullable<JwtPayload['role']>, string> = {
+  CLIENT: '/client/dashboard',
+  PROFESSIONAL: '/professional/dashboard',
+  ADMIN: '/admin/dashboard',
+};
+
 const AUTH_ROUTES = ['/login', '/register'];
 const PROTECTED_PREFIXES = [
   '/dashboard',
@@ -50,9 +56,12 @@ export function proxy(request: NextRequest) {
 
   const isAuthRoute = matchesPrefix(pathname, AUTH_ROUTES);
   const isProtectedRoute = matchesPrefix(pathname, PROTECTED_PREFIXES);
+  const accessTokenPayload = decodeJwtPayload(accessToken);
 
   if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/', request.url));
+    const redirectPath =
+      (accessTokenPayload?.role && ROLE_DASHBOARD_PATHS[accessTokenPayload.role]) || '/';
+    return NextResponse.redirect(new URL(redirectPath, request.url));
   }
 
   if (isProtectedRoute && !isAuthenticated) {
@@ -62,8 +71,7 @@ export function proxy(request: NextRequest) {
   }
 
   if (isProtectedRoute && accessToken) {
-    const payload = decodeJwtPayload(accessToken);
-    const role = payload?.role;
+    const role = accessTokenPayload?.role;
 
     if (role === 'CLIENT' && matchesPrefix(pathname, ROLE_PREFIXES.PROFESSIONAL)) {
       return NextResponse.redirect(new URL('/', request.url));

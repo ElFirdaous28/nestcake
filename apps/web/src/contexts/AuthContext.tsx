@@ -17,9 +17,9 @@ type AuthContextValue = {
   isLoading: boolean;
   error: string | null;
   clearError: () => void;
-  login: (payload: LoginPayload) => Promise<boolean>;
-  registerUser: (payload: RegisterUserPayload) => Promise<boolean>;
-  registerProfessional: (payload: RegisterProfessionalPayload) => Promise<boolean>;
+  login: (payload: LoginPayload) => Promise<AuthUser | null>;
+  registerUser: (payload: RegisterUserPayload) => Promise<AuthUser | null>;
+  registerProfessional: (payload: RegisterProfessionalPayload) => Promise<AuthUser | null>;
   logout: () => Promise<void>;
 };
 
@@ -41,10 +41,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const auth = await authService.login(payload);
       setUser(auth.user);
-      return true;
+      return auth.user;
     } catch (e) {
       setError(getErrorMessage(e));
-      return false;
+      return null;
     }
   }, []);
 
@@ -53,10 +53,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const auth = await authService.registerUser(payload);
       setUser(auth.user);
-      return true;
+      return auth.user;
     } catch (e) {
       setError(getErrorMessage(e));
-      return false;
+      return null;
     }
   }, []);
 
@@ -65,10 +65,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const auth = await authService.registerProfessional(payload);
       setUser(auth.user);
-      return true;
+      return auth.user;
     } catch (e) {
       setError(getErrorMessage(e));
-      return false;
+      return null;
     }
   }, []);
 

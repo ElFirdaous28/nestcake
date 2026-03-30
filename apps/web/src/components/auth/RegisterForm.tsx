@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useAuth } from '@/src/hooks/useAuth';
+import { getPostAuthRedirectPath } from '@/src/lib/auth-redirect';
 import { registerSchema, type RegisterFormValues } from '@/src/lib/validation/authSchemas';
 import { AppAlert } from '@/src/components/common/AppAlert';
 
@@ -58,10 +59,10 @@ export function RegisterForm() {
       phone: values.phone?.trim() ? values.phone.trim() : undefined,
     };
 
-    let ok = false;
+    let authedUser = null;
 
     if (values.role === UserRole.PROFESSIONAL) {
-      ok = await registerProfessional({
+      authedUser = await registerProfessional({
         ...basePayload,
         businessName: values.businessName?.trim() ?? '',
         description: values.description?.trim() ? values.description.trim() : undefined,
@@ -71,11 +72,12 @@ export function RegisterForm() {
         },
       });
     } else {
-      ok = await registerUser(basePayload);
+      authedUser = await registerUser(basePayload);
     }
 
-    if (ok) {
-      router.push('/');
+    if (authedUser) {
+      const nextPath = new URLSearchParams(window.location.search).get('next');
+      router.push(getPostAuthRedirectPath({ role: authedUser.role, nextPath }));
     }
   };
 
