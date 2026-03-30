@@ -94,6 +94,7 @@ export function useUnreadCount() {
         const response = await api.get('/notifications/unread-count');
         return response.data;
       } catch (err) {
+        console.error('Error fetching unread count:', err);
         return unreadCount;
       }
     },

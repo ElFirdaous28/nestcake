@@ -17,12 +17,7 @@ import { RegisterProfessionalDto } from './dto/register-professional.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthUser } from '@shared-types';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 const ACCESS_COOKIE_MAX_AGE = 15 * 60 * 1000; // 15 minutes
 const REFRESH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days

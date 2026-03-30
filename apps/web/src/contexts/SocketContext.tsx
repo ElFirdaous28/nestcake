@@ -30,9 +30,13 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     }
 
     if (!isAuthenticated || !user?.sub) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSocket(null);
+       
       setIsConnected(false);
+       
       setNotifications([]);
+       
       setUnreadCount(0);
       return;
     }
@@ -86,6 +90,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       console.error('❌ Socket error:', error);
     });
 
+     
     setSocket(newSocket);
 
     return () => {

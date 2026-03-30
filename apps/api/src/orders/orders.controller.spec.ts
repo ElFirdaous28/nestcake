@@ -69,7 +69,10 @@ describe('OrdersController', () => {
 
   it('findAll: should call service with query', async () => {
     const query = { page: 1, limit: 20 } as any;
-    const response = { data: [], pagination: { page: 1, limit: 20, total: 0, pages: 0 } };
+    const response = {
+      data: [],
+      pagination: { page: 1, limit: 20, total: 0, pages: 0 },
+    };
 
     ordersServiceMock.findAll.mockResolvedValue(response);
 
@@ -84,13 +87,19 @@ describe('OrdersController', () => {
       user: { sub: 'c2', email: 'c2@test.com', role: UserRole.CLIENT },
     } as any;
     const query = { status: 'AWAITING_PAYMENT' } as any;
-    const response = { data: [{ _id: 'o2' }], pagination: { page: 1, limit: 20, total: 1, pages: 1 } };
+    const response = {
+      data: [{ _id: 'o2' }],
+      pagination: { page: 1, limit: 20, total: 1, pages: 1 },
+    };
 
     ordersServiceMock.findClientOrders.mockResolvedValue(response);
 
     const result = await controller.findClientOrders(req, query);
 
-    expect(ordersServiceMock.findClientOrders).toHaveBeenCalledWith(req.user, query);
+    expect(ordersServiceMock.findClientOrders).toHaveBeenCalledWith(
+      req.user,
+      query,
+    );
     expect(result).toEqual(response);
   });
 
@@ -99,13 +108,19 @@ describe('OrdersController', () => {
       user: { sub: 'p1', email: 'p1@test.com', role: UserRole.PROFESSIONAL },
     } as any;
     const query = { page: 2, limit: 10 } as any;
-    const response = { data: [{ _id: 'o3' }], pagination: { page: 2, limit: 10, total: 1, pages: 1 } };
+    const response = {
+      data: [{ _id: 'o3' }],
+      pagination: { page: 2, limit: 10, total: 1, pages: 1 },
+    };
 
     ordersServiceMock.findProfessionalOrders.mockResolvedValue(response);
 
     const result = await controller.findProfessionalOrders(req, query);
 
-    expect(ordersServiceMock.findProfessionalOrders).toHaveBeenCalledWith(req.user, query);
+    expect(ordersServiceMock.findProfessionalOrders).toHaveBeenCalledWith(
+      req.user,
+      query,
+    );
     expect(result).toEqual(response);
   });
 
@@ -124,7 +139,9 @@ describe('OrdersController', () => {
   it('findOne: should throw when service throws not found', async () => {
     const id = '507f1f77bcf86cd799439699';
 
-    ordersServiceMock.findOne.mockRejectedValue(new NotFoundException('Order not found'));
+    ordersServiceMock.findOne.mockRejectedValue(
+      new NotFoundException('Order not found'),
+    );
 
     await expect(controller.findOne(id)).rejects.toThrow(NotFoundException);
     expect(ordersServiceMock.findOne).toHaveBeenCalledWith(id);
@@ -157,7 +174,11 @@ describe('OrdersController', () => {
 
     const result = await controller.removeItem(req, id, productId);
 
-    expect(ordersServiceMock.removeItem).toHaveBeenCalledWith(id, productId, req.user);
+    expect(ordersServiceMock.removeItem).toHaveBeenCalledWith(
+      id,
+      productId,
+      req.user,
+    );
     expect(result).toEqual(order);
   });
 
@@ -231,7 +252,9 @@ describe('OrdersController', () => {
       new BadRequestException('Only ready orders can be completed'),
     );
 
-    await expect(controller.complete(req, id)).rejects.toThrow(BadRequestException);
+    await expect(controller.complete(req, id)).rejects.toThrow(
+      BadRequestException,
+    );
     expect(ordersServiceMock.complete).toHaveBeenCalledWith(id, req.user);
   });
 });

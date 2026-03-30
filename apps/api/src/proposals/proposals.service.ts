@@ -84,8 +84,8 @@ export class ProposalsService {
       type: NotificationType.NEW_PROPOSAL,
       title: 'New Proposal Received',
       message: `${professional.businessName} responded to your request`,
-      data: { 
-        proposalId: proposal._id.toString(), 
+      data: {
+        proposalId: proposal._id.toString(),
         professionalName: professional.businessName,
         price: proposal.price,
       },
@@ -235,7 +235,7 @@ export class ProposalsService {
         type: NotificationType.ORDER_ACCEPTED,
         title: 'Proposal Accepted!',
         message: `Your proposal worth $${proposal.price.toFixed(2)} has been accepted`,
-        data: { 
+        data: {
           orderId: order._id.toString(),
           proposalId: proposal._id.toString(),
           price: proposal.price,

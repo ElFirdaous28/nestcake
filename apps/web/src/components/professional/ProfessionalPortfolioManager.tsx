@@ -239,6 +239,7 @@ export function ProfessionalPortfolioManager() {
 
               return (
                 <article key={`${itemTitle}-${index}`} className="overflow-hidden rounded-xl border border-brand-line bg-white">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={image}
                     alt={itemTitle}

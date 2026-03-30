@@ -17,7 +17,8 @@ export function NotificationToast() {
     if (notifications.length > 0) {
       const latestNotification = notifications[0];
       const toastId = `${latestNotification._id}-${Date.now()}`;
-      
+
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisplayedToasts((prev) => [
         {
           ...latestNotification,

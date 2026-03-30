@@ -258,7 +258,10 @@ export class OrdersService {
       data: { orderId: order._id.toString(), totalPrice },
     });
 
-    await this.notificationsGateway.sendNotificationToUser(professionalId, notification);
+    await this.notificationsGateway.sendNotificationToUser(
+      professionalId,
+      notification,
+    );
 
     return this.findOne(order._id.toString());
   }
@@ -346,7 +349,9 @@ export class OrdersService {
     this.ensureClientOwnsOrder(order.clientId, authUser, 'update');
 
     if (order.type !== OrderType.DIRECT) {
-      throw new BadRequestException('You can only remove items from direct orders');
+      throw new BadRequestException(
+        'You can only remove items from direct orders',
+      );
     }
 
     if (order.status !== OrderStatus.AWAITING_PAYMENT) {

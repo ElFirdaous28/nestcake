@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable @next/next/no-img-element */
+
 import { Star } from 'lucide-react';
 import { type ReviewItem } from '@/src/services/reviews.service';
 

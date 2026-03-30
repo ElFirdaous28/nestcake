@@ -182,7 +182,9 @@ describe('UsersController', () => {
 
     usersServiceMock.deleteMe.mockRejectedValue(error);
 
-    await expect(controller.deleteMe(req, res)).rejects.toThrow(NotFoundException);
+    await expect(controller.deleteMe(req, res)).rejects.toThrow(
+      NotFoundException,
+    );
     expect(res.clearCookie).not.toHaveBeenCalled();
   });
 });

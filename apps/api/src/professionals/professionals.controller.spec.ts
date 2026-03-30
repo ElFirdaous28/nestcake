@@ -95,7 +95,10 @@ describe('ProfessionalsController', () => {
 
     const result = await controller.updateMe(req, dto);
 
-    expect(professionalsServiceMock.updateMe).toHaveBeenCalledWith(req.user, dto);
+    expect(professionalsServiceMock.updateMe).toHaveBeenCalledWith(
+      req.user,
+      dto,
+    );
     expect(result).toEqual(updated);
   });
 
@@ -109,7 +112,10 @@ describe('ProfessionalsController', () => {
     } as any;
     const file = { filename: 'work.jpg' } as Express.Multer.File;
     const dto = { title: 'Wedding cake' } as any;
-    const updated = { _id: 'prof-3', portfolio: [{ images: ['/uploads/portfolio/work.jpg'] }] };
+    const updated = {
+      _id: 'prof-3',
+      portfolio: [{ images: ['/uploads/portfolio/work.jpg'] }],
+    };
 
     professionalsServiceMock.addPortfolioItem.mockResolvedValue(updated);
 
@@ -150,7 +156,10 @@ describe('ProfessionalsController', () => {
     const dto = {
       verificationStatus: ProfessionalVerificationStatus.VERIFIED,
     } as any;
-    const updated = { _id: professionalId, verificationStatus: dto.verificationStatus };
+    const updated = {
+      _id: professionalId,
+      verificationStatus: dto.verificationStatus,
+    };
 
     professionalsServiceMock.updateVerification.mockResolvedValue(updated);
 

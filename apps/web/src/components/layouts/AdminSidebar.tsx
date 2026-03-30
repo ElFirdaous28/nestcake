@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ShieldCheck, Users, Menu, X, Tags, HeartPlus, Package } from 'lucide-react';
+import { LayoutDashboard, Users, Menu, X, Tags, HeartPlus, Package } from 'lucide-react';
 import { useAuth } from '@/src/hooks/useAuth';
 import { Logo } from '@/src/components/common/Logo';
 import { SidebarAccountSection } from '@/src/components/layouts/SidebarAccountSection';

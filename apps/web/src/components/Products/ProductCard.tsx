@@ -7,14 +7,13 @@ type ProductCardProps = {
   actions?: React.ReactNode;
 };
 
-const prettyLabel = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
-
 export function ProductCard({ product, detailsHref, actions }: ProductCardProps) {
   const href = detailsHref ?? `/products/${product.id}`;
 
   return (
     <article className="overflow-hidden rounded-2xl border border-brand-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <Link href={href} className="block">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={product.image}
           alt={product.name}

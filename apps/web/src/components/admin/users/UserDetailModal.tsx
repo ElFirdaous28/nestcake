@@ -42,6 +42,7 @@ export function UserDetailModal({ user, isOpen, onClose }: UserDetailModalProps)
             {/* Avatar */}
             {user.avatar && (
               <div className="flex justify-center mb-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`${process.env.NEXT_PUBLIC_API_URL}${user.avatar}`}
                   alt={`${user.firstName} ${user.lastName}`}

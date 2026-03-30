@@ -71,13 +71,20 @@ describe('ProductsController', () => {
 
     const result = await controller.create(req, dto, file);
 
-    expect(productsServiceMock.create).toHaveBeenCalledWith(req.user, dto, file);
+    expect(productsServiceMock.create).toHaveBeenCalledWith(
+      req.user,
+      dto,
+      file,
+    );
     expect(result).toEqual(created);
   });
 
   it('findAllForClient: should call service with client scope', async () => {
     const query = { page: 1, limit: 20, search: 'cake' } as any;
-    const list = { data: [], pagination: { page: 1, limit: 20, total: 0, pages: 0 } };
+    const list = {
+      data: [],
+      pagination: { page: 1, limit: 20, total: 0, pages: 0 },
+    };
 
     productsServiceMock.findProducts.mockResolvedValue(list);
 
@@ -99,7 +106,10 @@ describe('ProductsController', () => {
       },
     } as any;
     const query = { page: 2, limit: 10 } as any;
-    const list = { data: [{ _id: 'p1' }], pagination: { page: 2, limit: 10, total: 1, pages: 1 } };
+    const list = {
+      data: [{ _id: 'p1' }],
+      pagination: { page: 2, limit: 10, total: 1, pages: 1 },
+    };
 
     productsServiceMock.findProducts.mockResolvedValue(list);
 
@@ -115,7 +125,10 @@ describe('ProductsController', () => {
 
   it('findAllForAdmin: should call service with admin scope', async () => {
     const query = { page: 1, limit: 50 } as any;
-    const list = { data: [{ _id: 'p1' }], pagination: { page: 1, limit: 50, total: 1, pages: 1 } };
+    const list = {
+      data: [{ _id: 'p1' }],
+      pagination: { page: 1, limit: 50, total: 1, pages: 1 },
+    };
 
     productsServiceMock.findProducts.mockResolvedValue(list);
 
@@ -167,7 +180,12 @@ describe('ProductsController', () => {
 
     const result = await controller.update(req, id, dto, file);
 
-    expect(productsServiceMock.update).toHaveBeenCalledWith(id, req.user, dto, file);
+    expect(productsServiceMock.update).toHaveBeenCalledWith(
+      id,
+      req.user,
+      dto,
+      file,
+    );
     expect(result).toEqual(updated);
   });
 
@@ -199,11 +217,15 @@ describe('ProductsController', () => {
       },
     } as any;
     const id = '507f1f77bcf86cd799439134';
-    const error = new ForbiddenException('You can only manage your own products');
+    const error = new ForbiddenException(
+      'You can only manage your own products',
+    );
 
     productsServiceMock.remove.mockRejectedValue(error);
 
-    await expect(controller.remove(req, id)).rejects.toThrow(ForbiddenException);
+    await expect(controller.remove(req, id)).rejects.toThrow(
+      ForbiddenException,
+    );
     expect(productsServiceMock.remove).toHaveBeenCalledWith(id, req.user);
   });
 
@@ -245,7 +267,9 @@ describe('ProductsController', () => {
 
     const result = await controller.publishAll(req);
 
-    expect(productsServiceMock.publishAllProducts).toHaveBeenCalledWith(req.user);
+    expect(productsServiceMock.publishAllProducts).toHaveBeenCalledWith(
+      req.user,
+    );
     expect(result).toEqual(response);
   });
 
@@ -257,11 +281,17 @@ describe('ProductsController', () => {
         role: UserRole.PROFESSIONAL,
       },
     } as any;
-    const error = new ForbiddenException('Only verified professionals can publish products');
+    const error = new ForbiddenException(
+      'Only verified professionals can publish products',
+    );
 
     productsServiceMock.publishAllProducts.mockRejectedValue(error);
 
-    await expect(controller.publishAll(req)).rejects.toThrow(ForbiddenException);
-    expect(productsServiceMock.publishAllProducts).toHaveBeenCalledWith(req.user);
+    await expect(controller.publishAll(req)).rejects.toThrow(
+      ForbiddenException,
+    );
+    expect(productsServiceMock.publishAllProducts).toHaveBeenCalledWith(
+      req.user,
+    );
   });
 });

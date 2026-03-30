@@ -86,7 +86,11 @@ export class ProductsController {
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 20 })
   @ApiQuery({ name: 'search', required: false, example: 'vanilla' })
-  @ApiQuery({ name: 'categoryId', required: false, example: '65f0c7e8f9697f3c69312345' })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    example: '65f0c7e8f9697f3c69312345',
+  })
   @Get()
   findAllForClient(@Query() query: FindProductsQueryDto) {
     return this.productsService.findProducts({

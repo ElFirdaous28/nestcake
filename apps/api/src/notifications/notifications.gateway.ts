@@ -35,7 +35,7 @@ export class NotificationsGateway
 
   handleConnection(client: Socket, ...args: any[]) {
     const userId = client.handshake.query.userId as string;
-    
+
     if (userId) {
       if (!this.userSockets.has(userId)) {
         this.userSockets.set(userId, new Set());
@@ -47,11 +47,11 @@ export class NotificationsGateway
 
   handleDisconnect(client: Socket) {
     const userId = client.handshake.query.userId as string;
-    
+
     if (userId && this.userSockets.has(userId)) {
       const userSocketIds = this.userSockets.get(userId);
       userSocketIds.delete(client.id);
-      
+
       if (userSocketIds.size === 0) {
         this.userSockets.delete(userId);
       }
@@ -71,7 +71,10 @@ export class NotificationsGateway
     notification: NotificationDocument,
   ) {
     const userIdStr = userId.toString();
-    console.log(`📨 Sending notification to user ${userIdStr}:`, notification.type);
+    console.log(
+      `📨 Sending notification to user ${userIdStr}:`,
+      notification.type,
+    );
     this.server.to(`user-${userIdStr}`).emit('notification', {
       _id: notification._id?.toString() || notification._id,
       type: notification.type,
@@ -103,13 +106,18 @@ export class NotificationsGateway
   // Broadcast unread count update
   async updateUnreadCount(userId: string | Types.ObjectId) {
     const userIdStr = userId.toString();
-    const unreadCount = await this.notificationsService.getUnreadCount(userIdStr);
-    this.server.to(`user-${userIdStr}`).emit('notification:unread-count', { count: unreadCount });
+    const unreadCount =
+      await this.notificationsService.getUnreadCount(userIdStr);
+    this.server
+      .to(`user-${userIdStr}`)
+      .emit('notification:unread-count', { count: unreadCount });
   }
 
   // Mark notification as read (real-time)
   async notifyRead(userId: string | Types.ObjectId, notificationId: string) {
     const userIdStr = userId.toString();
-    this.server.to(`user-${userIdStr}`).emit('notification:read', { notificationId });
+    this.server
+      .to(`user-${userIdStr}`)
+      .emit('notification:read', { notificationId });
   }
 }

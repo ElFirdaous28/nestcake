@@ -145,6 +145,7 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
           </div>
         ) : (
           <article className="grid overflow-hidden rounded-2xl border border-brand-line bg-white shadow-sm lg:grid-cols-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={product.image} alt={product.name} className="h-full min-h-80 w-full object-cover" />
 
             <div className="space-y-5 p-6">

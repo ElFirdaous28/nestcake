@@ -28,7 +28,9 @@ describe('ProposalsController', () => {
   const setup = async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProposalsController],
-      providers: [{ provide: ProposalsService, useValue: proposalsServiceMock }],
+      providers: [
+        { provide: ProposalsService, useValue: proposalsServiceMock },
+      ],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue(jwtAuthGuardMock)
@@ -71,7 +73,11 @@ describe('ProposalsController', () => {
 
   it('findMy: should call service with professional user', async () => {
     const req = {
-      user: { sub: 'pro2', email: 'pro2@test.com', role: UserRole.PROFESSIONAL },
+      user: {
+        sub: 'pro2',
+        email: 'pro2@test.com',
+        role: UserRole.PROFESSIONAL,
+      },
     } as any;
     const list = [{ _id: 'pp3' }];
 
@@ -94,7 +100,10 @@ describe('ProposalsController', () => {
 
     const result = await controller.findByRequest(req, requestId);
 
-    expect(proposalsServiceMock.findByRequest).toHaveBeenCalledWith(req.user, requestId);
+    expect(proposalsServiceMock.findByRequest).toHaveBeenCalledWith(
+      req.user,
+      requestId,
+    );
     expect(result).toEqual(list);
   });
 
@@ -105,13 +114,18 @@ describe('ProposalsController', () => {
     const requestId = '507f1f77bcf86cd799439599';
 
     proposalsServiceMock.findByRequest.mockRejectedValue(
-      new ForbiddenException('You can only view proposals for your own requests'),
+      new ForbiddenException(
+        'You can only view proposals for your own requests',
+      ),
     );
 
     await expect(controller.findByRequest(req, requestId)).rejects.toThrow(
       ForbiddenException,
     );
-    expect(proposalsServiceMock.findByRequest).toHaveBeenCalledWith(req.user, requestId);
+    expect(proposalsServiceMock.findByRequest).toHaveBeenCalledWith(
+      req.user,
+      requestId,
+    );
   });
 
   it('accept: should call service with user and proposal id', async () => {

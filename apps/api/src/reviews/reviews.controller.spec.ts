@@ -73,7 +73,9 @@ describe('ReviewsController', () => {
       new BadRequestException('You have already reviewed this order'),
     );
 
-    await expect(controller.create(req, dto)).rejects.toThrow(BadRequestException);
+    await expect(controller.create(req, dto)).rejects.toThrow(
+      BadRequestException,
+    );
     expect(reviewsServiceMock.create).toHaveBeenCalledWith(req.user, dto);
   });
 
@@ -112,7 +114,10 @@ describe('ReviewsController', () => {
 
     const result = await controller.findMyReviews(req, query);
 
-    expect(reviewsServiceMock.findMyReviews).toHaveBeenCalledWith(req.user, query);
+    expect(reviewsServiceMock.findMyReviews).toHaveBeenCalledWith(
+      req.user,
+      query,
+    );
     expect(result).toEqual(response);
   });
 
@@ -133,7 +138,10 @@ describe('ReviewsController', () => {
     await expect(controller.findMyReviews(req, query)).rejects.toThrow(
       NotFoundException,
     );
-    expect(reviewsServiceMock.findMyReviews).toHaveBeenCalledWith(req.user, query);
+    expect(reviewsServiceMock.findMyReviews).toHaveBeenCalledWith(
+      req.user,
+      query,
+    );
   });
 
   it('findByProfessional: should call service with professional id and query', async () => {

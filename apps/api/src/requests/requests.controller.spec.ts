@@ -58,12 +58,19 @@ describe('RequestsController', () => {
 
     const result = await controller.create(req, dto, file);
 
-    expect(requestsServiceMock.create).toHaveBeenCalledWith(req.user, dto, file);
+    expect(requestsServiceMock.create).toHaveBeenCalledWith(
+      req.user,
+      dto,
+      file,
+    );
     expect(result).toEqual(created);
   });
 
   it('findAll: should call service with pagination and search', async () => {
-    const response = { data: [], pagination: { page: 1, limit: 20, total: 0, pages: 0 } };
+    const response = {
+      data: [],
+      pagination: { page: 1, limit: 20, total: 0, pages: 0 },
+    };
     requestsServiceMock.findAll.mockResolvedValue(response);
 
     const result = await controller.findAll(1, 20, 'cake');
@@ -76,13 +83,20 @@ describe('RequestsController', () => {
     const req = {
       user: { sub: 'u2', email: 'c2@test.com', role: UserRole.CLIENT },
     } as any;
-    const response = { data: [{ _id: 'r1' }], pagination: { page: 2, limit: 10, total: 1, pages: 1 } };
+    const response = {
+      data: [{ _id: 'r1' }],
+      pagination: { page: 2, limit: 10, total: 1, pages: 1 },
+    };
 
     requestsServiceMock.findMyRequests.mockResolvedValue(response);
 
     const result = await controller.findMyRequests(req, 2, 10);
 
-    expect(requestsServiceMock.findMyRequests).toHaveBeenCalledWith(req.user, 2, 10);
+    expect(requestsServiceMock.findMyRequests).toHaveBeenCalledWith(
+      req.user,
+      2,
+      10,
+    );
     expect(result).toEqual(response);
   });
 
@@ -120,7 +134,12 @@ describe('RequestsController', () => {
 
     const result = await controller.update(req, id, dto, file);
 
-    expect(requestsServiceMock.update).toHaveBeenCalledWith(id, req.user, dto, file);
+    expect(requestsServiceMock.update).toHaveBeenCalledWith(
+      id,
+      req.user,
+      dto,
+      file,
+    );
     expect(result).toEqual(updated);
   });
 
@@ -148,7 +167,9 @@ describe('RequestsController', () => {
       new ForbiddenException('You can only delete your own requests'),
     );
 
-    await expect(controller.remove(req, id)).rejects.toThrow(ForbiddenException);
+    await expect(controller.remove(req, id)).rejects.toThrow(
+      ForbiddenException,
+    );
     expect(requestsServiceMock.remove).toHaveBeenCalledWith(id, req.user);
   });
 
@@ -161,7 +182,11 @@ describe('RequestsController', () => {
 
     requestsServiceMock.updateStatus.mockResolvedValue(response);
 
-    const result = await controller.updateStatus(req, id, RequestStatus.CANCELLED);
+    const result = await controller.updateStatus(
+      req,
+      id,
+      RequestStatus.CANCELLED,
+    );
 
     expect(requestsServiceMock.updateStatus).toHaveBeenCalledWith(
       id,
