@@ -16,10 +16,10 @@ Built as a fullstack JavaScript project (2025–2026 program).
 
 | Resource | URL |
 |---|---|
-| 🌐 Frontend (deployed) | `YOUR_FRONTEND_URL` |
-| ⚙️ Backend API (deployed) | `YOUR_BACKEND_URL` |
-| 🎨 Figma Design | `YOUR_FIGMA_URL` |
-| 🖼️ Canva Presentation | `YOUR_CANVA_URL` |
+| 🌐 Frontend (deployed) | `https://nestcake-web.onrender.com` |
+| ⚙️ Backend API (deployed) | `https://nestcake-api.onrender.com` |
+| 🎨 Figma Design | `https://www.figma.com/design/l7MeTAhrvVLYa0gCScerfh/Fil-Rouge-2?t=DnJ4ZoBzBU5lclV9-0` |
+| 🖼️ Canva Presentation | `https://www.canva.com/design/DAHDubbHUiM/sgo__DrdvwKZMEHZO7QbRg` |
 
 ---
 
