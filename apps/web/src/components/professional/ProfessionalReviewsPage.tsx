@@ -47,14 +47,18 @@ export function ProfessionalReviewsPage() {
     <section className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold text-brand-ink">My Reviews</h1>
-        <p className="text-sm text-brand-ink-soft">Track feedback from clients and improve your service.</p>
+        <p className="text-sm text-brand-ink-soft">
+          Track feedback from clients and improve your service.
+        </p>
       </header>
 
       <AppAlert message={error} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <article className="rounded-xl border border-brand-line bg-brand-cream-soft p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">Average rating</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">
+            Average rating
+          </p>
           <div className="mt-2 inline-flex items-center gap-2 text-brand-ink">
             <Star className="h-5 w-5 fill-amber-500 text-amber-500" />
             <span className="text-xl font-bold">{summary.averageRating.toFixed(1)}</span>
@@ -62,7 +66,9 @@ export function ProfessionalReviewsPage() {
         </article>
 
         <article className="rounded-xl border border-brand-line bg-brand-cream-soft p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">Total reviews</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">
+            Total reviews
+          </p>
           <p className="mt-2 text-xl font-bold text-brand-ink">{summary.totalReviews}</p>
         </article>
       </div>

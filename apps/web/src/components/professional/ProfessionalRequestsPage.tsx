@@ -255,7 +255,10 @@ export function ProfessionalRequestsPage() {
         <div className="space-y-3">
           {filteredRequests.map((request) => {
             return (
-              <article key={request.id} className="rounded-xl border border-brand-line bg-white p-4">
+              <article
+                key={request.id}
+                className="rounded-xl border border-brand-line bg-white p-4"
+              >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <h3 className="text-sm font-semibold text-brand-ink">{request.title}</h3>
@@ -292,7 +295,9 @@ export function ProfessionalRequestsPage() {
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-brand-ink">Create Proposal</h2>
-                <p className="text-xs text-brand-ink-soft">Set your offer, optional delivery date, and message.</p>
+                <p className="text-xs text-brand-ink-soft">
+                  Set your offer, optional delivery date, and message.
+                </p>
               </div>
               <button
                 type="button"
@@ -307,7 +312,9 @@ export function ProfessionalRequestsPage() {
             <form className="space-y-3" onSubmit={handleSubmitProposal}>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="space-y-1">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-brand-ink-soft">Price</span>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-brand-ink-soft">
+                    Price
+                  </span>
                   <input
                     type="number"
                     min="0"
@@ -323,7 +330,9 @@ export function ProfessionalRequestsPage() {
                 </label>
 
                 <label className="space-y-1">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-brand-ink-soft">Delivery date (optional)</span>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-brand-ink-soft">
+                    Delivery date (optional)
+                  </span>
                   <input
                     type="datetime-local"
                     value={proposalDateTime}
@@ -337,7 +346,9 @@ export function ProfessionalRequestsPage() {
                 </label>
 
                 <label className="space-y-1 sm:col-span-2">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-brand-ink-soft">Message (optional)</span>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-brand-ink-soft">
+                    Message (optional)
+                  </span>
                   <textarea
                     rows={3}
                     value={proposalMessage}

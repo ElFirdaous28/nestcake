@@ -12,7 +12,11 @@ import { AppAlert } from '@/src/components/common/AppAlert';
 type Mode = 'create' | 'edit';
 
 const allergyFormSchema = z.object({
-  name: z.string().trim().min(1, 'Allergy name is required.').max(80, 'Allergy name must be 80 characters or less.'),
+  name: z
+    .string()
+    .trim()
+    .min(1, 'Allergy name is required.')
+    .max(80, 'Allergy name must be 80 characters or less.'),
 });
 
 export function AllergiesManagementClient() {
@@ -132,7 +136,9 @@ export function AllergiesManagementClient() {
       <header className="flex flex-col justify-between gap-4 border-b border-brand-line pb-6 md:flex-row md:items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-brand-ink">Allergies</h1>
-          <p className="text-brand-ink-soft">Manage allergy labels available for products and requests.</p>
+          <p className="text-brand-ink-soft">
+            Manage allergy labels available for products and requests.
+          </p>
         </div>
       </header>
 

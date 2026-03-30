@@ -18,7 +18,11 @@ type ProductDetailsPageProps = {
 
 const directOrderSchema = z.object({
   productId: z.string().trim().min(1, 'Product id is required.'),
-  quantity: z.coerce.number().int().min(1, 'Quantity must be at least 1.').max(50, 'Quantity cannot exceed 50.'),
+  quantity: z.coerce
+    .number()
+    .int()
+    .min(1, 'Quantity must be at least 1.')
+    .max(50, 'Quantity cannot exceed 50.'),
 });
 
 export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
@@ -132,7 +136,10 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
   return (
     <main className="min-h-screen bg-brand-cream px-4 py-8 sm:px-6 lg:px-8">
       <section className="mx-auto max-w-5xl space-y-4">
-        <Link href="/products" className="inline-flex text-sm font-medium text-brand-ink-soft hover:text-brand-ink">
+        <Link
+          href="/products"
+          className="inline-flex text-sm font-medium text-brand-ink-soft hover:text-brand-ink"
+        >
           Back to products
         </Link>
 
@@ -146,7 +153,11 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
         ) : (
           <article className="grid overflow-hidden rounded-2xl border border-brand-line bg-white shadow-sm lg:grid-cols-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={product.image} alt={product.name} className="h-full min-h-80 w-full object-cover" />
+            <img
+              src={product.image}
+              alt={product.name}
+              className="h-full min-h-80 w-full object-cover"
+            />
 
             <div className="space-y-5 p-6">
               <header className="space-y-2">
@@ -177,7 +188,9 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
                 <p className="text-sm font-semibold text-brand-ink">Direct order</p>
 
                 <label className="block space-y-1">
-                  <span className="text-xs font-semibold uppercase tracking-widest text-brand-ink-soft">Quantity</span>
+                  <span className="text-xs font-semibold uppercase tracking-widest text-brand-ink-soft">
+                    Quantity
+                  </span>
                   <input
                     type="number"
                     min="1"
@@ -194,17 +207,27 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
                 </label>
 
                 {!isAuthLoading && !isAuthenticated ? (
-                  <p className="text-xs text-brand-ink-soft">Sign in as a client to place a direct order.</p>
+                  <p className="text-xs text-brand-ink-soft">
+                    Sign in as a client to place a direct order.
+                  </p>
                 ) : null}
 
                 {!isAuthLoading && isAuthenticated && !isClient ? (
-                  <p className="text-xs text-brand-ink-soft">Only client accounts can place direct orders.</p>
+                  <p className="text-xs text-brand-ink-soft">
+                    Only client accounts can place direct orders.
+                  </p>
                 ) : null}
 
                 <button
                   type="button"
                   onClick={() => void createDirectOrder()}
-                  disabled={isCreatingOrder || isAuthLoading || !product.isAvailable || product.status !== ProductStatus.PUBLISHED || (isAuthenticated && !isClient)}
+                  disabled={
+                    isCreatingOrder ||
+                    isAuthLoading ||
+                    !product.isAvailable ||
+                    product.status !== ProductStatus.PUBLISHED ||
+                    (isAuthenticated && !isClient)
+                  }
                   className="rounded-lg bg-brand-rose px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-rose/90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isCreatingOrder ? 'Creating order...' : 'Order Now'}
@@ -213,7 +236,6 @@ export function ProductDetailsPage({ productId }: ProductDetailsPageProps) {
             </div>
           </article>
         )}
-
       </section>
     </main>
   );

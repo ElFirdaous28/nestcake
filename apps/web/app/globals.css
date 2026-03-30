@@ -1,57 +1,57 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   /* Primary Colors */
   /* Warm cream/vanilla - soft, inviting bakery feel for backgrounds */
-  --color-cream-primary: #FFFBF5;
-  --color-cream-secondary: #FFF8F0;
+  --color-cream-primary: #fffbf5;
+  --color-cream-secondary: #fff8f0;
 
   /* Deep chocolate brown - trust, premium quality, main text and headers */
-  --color-brown-primary: #3D2817;
-  --color-brown-secondary: #2C1810;
+  --color-brown-primary: #3d2817;
+  --color-brown-secondary: #2c1810;
 
   /* Rose gold/blush - elegant, celebratory, primary CTAs and accents */
-  --color-rose-primary: #E8A087;
-  --color-rose-secondary: #D4926F;
+  --color-rose-primary: #e8a087;
+  --color-rose-secondary: #d4926f;
 
   /* Accent Colors */
   /* Soft pink - playful, warm for birthday events and accents */
-  --color-pink: #F4A6C1;
-  --color-pink-light: #FFB6C1;
+  --color-pink: #f4a6c1;
+  --color-pink-light: #ffb6c1;
 
   /* Sage green - natural, fresh for verified badges and success states */
-  --color-sage: #A8B89F;
-  --color-sage-dark: #9CAF8F;
+  --color-sage: #a8b89f;
+  --color-sage-dark: #9caf8f;
 
   /* Gold - premium feel, luxury indicator for ratings and badges */
-  --color-gold: #D4AF37;
+  --color-gold: #d4af37;
 
   /* Neutral Colors */
   /* Almost black - primary text color for readability */
-  --color-text-dark: #2C2C2C;
+  --color-text-dark: #2c2c2c;
 
   /* Muted brown - secondary text, descriptions */
-  --color-text-muted: #6B5344;
+  --color-text-muted: #6b5344;
 
   /* Light gray - backgrounds, subtle surfaces */
-  --color-bg-light: #F5F5F5;
+  --color-bg-light: #f5f5f5;
 
   /* Border color */
-  --color-border: #E0E0E0;
+  --color-border: #e0e0e0;
 
   /* Semantic Colors */
   /* Success state - positive actions and confirmations */
-  --color-success: #A8B89F;
+  --color-success: #a8b89f;
 
   /* Error/danger state - warnings and deletions */
-  --color-danger: #E85D75;
+  --color-danger: #e85d75;
 
   /* Info/warning state - notifications and alerts */
-  --color-warning: #F4A6C1;
+  --color-warning: #f4a6c1;
 
   /* Legacy compatibility */
-  --background: #FFFBF5;
-  --foreground: #3D2817;
+  --background: #fffbf5;
+  --foreground: #3d2817;
 }
 
 @theme inline {

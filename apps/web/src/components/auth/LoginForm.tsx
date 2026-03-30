@@ -45,18 +45,14 @@ export function LoginForm() {
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-brand-rose">
           NestCake
         </p>
-        <h1 className="mt-3 text-3xl font-bold text-brand-ink">
-          Welcome Back
-        </h1>
+        <h1 className="mt-3 text-3xl font-bold text-brand-ink">Welcome Back</h1>
         <p className="mt-2 text-sm text-brand-ink-soft">
           Sign in to manage your requests, orders, and favorites.
         </p>
 
         <form className="mt-8 space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-ink">
-              Email
-            </label>
+            <label className="mb-2 block text-sm font-medium text-brand-ink">Email</label>
             <input
               type="email"
               placeholder="you@example.com"
@@ -69,9 +65,7 @@ export function LoginForm() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-ink">
-              Password
-            </label>
+            <label className="mb-2 block text-sm font-medium text-brand-ink">Password</label>
             <input
               type="password"
               placeholder="At least 6 characters"

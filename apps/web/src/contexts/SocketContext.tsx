@@ -32,11 +32,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     if (!isAuthenticated || !user?.sub) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSocket(null);
-       
+
       setIsConnected(false);
-       
+
       setNotifications([]);
-       
+
       setUnreadCount(0);
       return;
     }
@@ -45,7 +45,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const socketUrl = apiBaseUrl.replace(/\/api\/?$/, '');
-    
+
     const newSocket = io(socketUrl, {
       query: { userId },
       reconnection: true,
@@ -79,9 +79,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     newSocket.on('notification:read', (data: { notificationId: string }) => {
       console.log('✅ Notification marked as read:', data.notificationId);
       setNotifications((prev) =>
-        prev.map((notif) =>
-          notif._id === data.notificationId ? { ...notif, read: true } : notif,
-        ),
+        prev.map((notif) => (notif._id === data.notificationId ? { ...notif, read: true } : notif)),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     });
@@ -90,7 +88,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       console.error('❌ Socket error:', error);
     });
 
-     
     setSocket(newSocket);
 
     return () => {
@@ -107,9 +104,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
   const markAsRead = useCallback((notificationId: string) => {
     setNotifications((prev) =>
-      prev.map((notif) =>
-        notif._id === notificationId ? { ...notif, read: true } : notif,
-      ),
+      prev.map((notif) => (notif._id === notificationId ? { ...notif, read: true } : notif)),
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
   }, []);

@@ -12,7 +12,9 @@ export default function ProfessionalLayout({
       <div className="min-h-screen bg-brand-cream flex">
         <ProfessionalSidebar />
         <main className="flex-1 p-6 pt-16 md:pt-6 mt-12">
-          <div className="mt-16 rounded-2xl border border-brand-line bg-white p-6 shadow-sm md:mt-0">{children}</div>
+          <div className="mt-16 rounded-2xl border border-brand-line bg-white p-6 shadow-sm md:mt-0">
+            {children}
+          </div>
         </main>
       </div>
     </ProtectedRoute>

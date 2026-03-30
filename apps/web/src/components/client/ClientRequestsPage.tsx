@@ -102,7 +102,10 @@ export function ClientRequestsPage() {
         ) : (
           <div className="space-y-3">
             {requests.map((request) => (
-              <article key={request.id} className="rounded-xl border border-brand-line bg-white p-4">
+              <article
+                key={request.id}
+                className="rounded-xl border border-brand-line bg-white p-4"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-sm font-semibold text-brand-ink">{request.title}</h3>
                   <span className="rounded-full bg-brand-cream-soft px-2.5 py-1 text-xs font-semibold text-brand-ink-soft">
@@ -110,9 +113,14 @@ export function ClientRequestsPage() {
                   </span>
                 </div>
 
-                <p className="mt-1 text-sm text-brand-ink-soft">Due {formatDate(request.deliveryDateTime)} • Budget {formatCurrency(request.budget)}</p>
+                <p className="mt-1 text-sm text-brand-ink-soft">
+                  Due {formatDate(request.deliveryDateTime)} • Budget{' '}
+                  {formatCurrency(request.budget)}
+                </p>
 
-                <p className="mt-2 text-sm text-brand-ink-soft line-clamp-2">{request.description}</p>
+                <p className="mt-2 text-sm text-brand-ink-soft line-clamp-2">
+                  {request.description}
+                </p>
 
                 <div className="mt-3">
                   <Link
@@ -139,7 +147,9 @@ export function ClientRequestsPage() {
             Previous
           </button>
 
-          <span className="text-sm text-brand-ink-soft">Page {pagination.page} of {Math.max(1, pagination.pages)}</span>
+          <span className="text-sm text-brand-ink-soft">
+            Page {pagination.page} of {Math.max(1, pagination.pages)}
+          </span>
 
           <button
             type="button"

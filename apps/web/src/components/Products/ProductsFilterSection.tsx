@@ -13,9 +13,7 @@ type ProductsFilterSectionProps = {
   showAvailabilityFilter?: boolean;
   onSearchQueryChange: (value: string) => void;
   onStatusFilterChange: (value: ProductStatus | 'all') => void;
-  onAvailabilityFilterChange: (
-    value: 'all' | 'available' | 'unavailable',
-  ) => void;
+  onAvailabilityFilterChange: (value: 'all' | 'available' | 'unavailable') => void;
   onSearchSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
 
@@ -51,7 +49,9 @@ export function ProductsFilterSection({
               >
                 <option value="all">All</option>
                 <option value={ProductStatus.DRAFT}>{prettyLabel(ProductStatus.DRAFT)}</option>
-                <option value={ProductStatus.PUBLISHED}>{prettyLabel(ProductStatus.PUBLISHED)}</option>
+                <option value={ProductStatus.PUBLISHED}>
+                  {prettyLabel(ProductStatus.PUBLISHED)}
+                </option>
               </select>
             </label>
           )}

@@ -32,16 +32,13 @@ export function ProductCard({ product, detailsHref, actions }: ProductCardProps)
               <p className="mt-1 line-clamp-2 text-sm text-brand-ink-soft">{product.description}</p>
             )}
           </div>
-
         </div>
 
         <div className="flex items-center justify-between">
           <p className="text-lg font-bold text-brand-ink">${product.price.toFixed(2)}</p>
           <span
             className={`rounded-full px-2 py-1 text-xs font-medium ${
-              product.isAvailable
-                ? 'bg-emerald-100 text-emerald-700'
-                : 'bg-rose-100 text-rose-700'
+              product.isAvailable ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
             }`}
           >
             {product.isAvailable ? 'Available' : 'Unavailable'}

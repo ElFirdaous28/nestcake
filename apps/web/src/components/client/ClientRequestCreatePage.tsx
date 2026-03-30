@@ -126,9 +126,7 @@ export function ClientRequestCreatePage() {
 
     const values = parsed.data;
     const normalizedBudget =
-      values.budget && values.budget.length > 0
-        ? Number(values.budget)
-        : undefined;
+      values.budget && values.budget.length > 0 ? Number(values.budget) : undefined;
 
     setIsSubmitting(true);
     clearErrors();
@@ -140,13 +138,12 @@ export function ClientRequestCreatePage() {
         title: values.title,
         description: values.description,
         eventType: values.eventType || undefined,
-        budget: Number.isFinite(normalizedBudget as number)
-          ? normalizedBudget
-          : undefined,
+        budget: Number.isFinite(normalizedBudget as number) ? normalizedBudget : undefined,
         deliveryDateTime: new Date(values.deliveryDateTime).toISOString(),
         deliveryType: values.deliveryType,
         location: values.deliveryType === DeliveryType.DELIVERY ? values.location : undefined,
-        allergyIds: values.allergyIds && values.allergyIds.length > 0 ? values.allergyIds : undefined,
+        allergyIds:
+          values.allergyIds && values.allergyIds.length > 0 ? values.allergyIds : undefined,
         imageFile: imageFile ?? undefined,
       });
 
@@ -162,7 +159,10 @@ export function ClientRequestCreatePage() {
   return (
     <section className="space-y-6">
       <header className="space-y-2">
-        <Link href="/client/requests" className="text-sm font-semibold text-brand-ink-soft hover:text-brand-ink">
+        <Link
+          href="/client/requests"
+          className="text-sm font-semibold text-brand-ink-soft hover:text-brand-ink"
+        >
           ← Back to requests
         </Link>
 
@@ -175,7 +175,10 @@ export function ClientRequestCreatePage() {
       <AppAlert message={error} />
       <AppAlert message={success} variant="success" />
 
-      <form onSubmit={handleCreate} className="rounded-2xl border border-brand-line bg-white p-5 shadow-sm">
+      <form
+        onSubmit={handleCreate}
+        className="rounded-2xl border border-brand-line bg-white p-5 shadow-sm"
+      >
         <div className="flex items-center gap-2">
           <Plus className="h-4 w-4 text-brand-ink-soft" />
           <h2 className="text-base font-semibold text-brand-ink">Request details</h2>

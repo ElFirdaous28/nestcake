@@ -1,17 +1,9 @@
 import { z } from 'zod';
 
-const requiredText = (label: string) =>
-  z
-    .string()
-    .trim()
-    .min(1, `${label} is required`);
+const requiredText = (label: string) => z.string().trim().min(1, `${label} is required`);
 
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+  email: z.string().trim().min(1, 'Email is required').email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
@@ -32,8 +24,9 @@ export const registerSchema = z
       .trim()
       .optional()
       .refine(
-        (val) => !val || /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(val),
-        'Please enter a valid phone number'
+        (val) =>
+          !val || /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/.test(val),
+        'Please enter a valid phone number',
       ),
     businessName: z.string().trim().optional(),
     description: z.string().trim().optional(),

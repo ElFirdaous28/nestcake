@@ -246,7 +246,9 @@ export function ClientOrdersPage() {
     <section className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold text-brand-ink">My Orders</h1>
-        <p className="text-sm text-brand-ink-soft">Track escrow payment, production, delivery readiness, and completion.</p>
+        <p className="text-sm text-brand-ink-soft">
+          Track escrow payment, production, delivery readiness, and completion.
+        </p>
       </header>
 
       <AppAlert message={error} />
@@ -255,7 +257,8 @@ export function ClientOrdersPage() {
       <article className="rounded-xl border border-brand-line bg-brand-cream-soft p-4 text-sm text-brand-ink-soft">
         <p className="font-semibold text-brand-ink">Workflow steps</p>
         <p className="mt-1">
-          1) Accept proposal creates order, 2) Pay 100% escrow, 3) Professional marks READY, 4) Confirm reception to release payment.
+          1) Accept proposal creates order, 2) Pay 100% escrow, 3) Professional marks READY, 4)
+          Confirm reception to release payment.
         </p>
       </article>
 
@@ -296,14 +299,15 @@ export function ClientOrdersPage() {
             const canReview = order.status === OrderStatus.COMPLETED;
             const canCancelOrder = order.status === OrderStatus.AWAITING_PAYMENT;
             const canRemoveItems =
-              order.status === OrderStatus.AWAITING_PAYMENT &&
-              order.type === OrderType.DIRECT;
+              order.status === OrderStatus.AWAITING_PAYMENT && order.type === OrderType.DIRECT;
 
             return (
               <article key={order.id} className="rounded-xl border border-brand-line bg-white p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h2 className="text-sm font-semibold text-brand-ink">{professionalName(order)}</h2>
+                    <h2 className="text-sm font-semibold text-brand-ink">
+                      {professionalName(order)}
+                    </h2>
                     <p className="text-xs text-brand-ink-soft">{formatDate(order.createdAt)}</p>
                   </div>
 
@@ -315,11 +319,13 @@ export function ClientOrdersPage() {
                 <div className="mt-3 space-y-2">
                   {order.items.map((item, index) => {
                     const currentProductId = productIdValue(item.productId);
-                    const isRemovingItem =
-                      loadingItemKey === `${order.id}:${currentProductId}`;
+                    const isRemovingItem = loadingItemKey === `${order.id}:${currentProductId}`;
 
                     return (
-                      <div key={`${order.id}-item-${index}`} className="flex items-center justify-between gap-2">
+                      <div
+                        key={`${order.id}-item-${index}`}
+                        className="flex items-center justify-between gap-2"
+                      >
                         <p className="text-sm text-brand-ink-soft">
                           {item.quantity} x {productLabel(item.productId)}
                         </p>
@@ -327,9 +333,7 @@ export function ClientOrdersPage() {
                         {canRemoveItems ? (
                           <button
                             type="button"
-                            onClick={() =>
-                              void handleRemoveItem(order.id, currentProductId)
-                            }
+                            onClick={() => void handleRemoveItem(order.id, currentProductId)}
                             disabled={isRemovingItem || isRowLoading}
                             className="rounded-lg border border-brand-line px-2.5 py-1 text-xs font-semibold text-brand-ink-soft transition hover:bg-brand-cream-soft disabled:cursor-not-allowed disabled:opacity-60"
                           >
@@ -342,7 +346,9 @@ export function ClientOrdersPage() {
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-brand-ink">Total: {formatCurrency(order.totalPrice)}</p>
+                  <p className="text-sm font-semibold text-brand-ink">
+                    Total: {formatCurrency(order.totalPrice)}
+                  </p>
 
                   <div className="flex flex-wrap gap-2">
                     {canPay ? (
@@ -409,7 +415,9 @@ export function ClientOrdersPage() {
                   </div>
                 </div>
 
-                <p className="mt-2 text-xs text-brand-ink-soft">{workflowHintByStatus[order.status]}</p>
+                <p className="mt-2 text-xs text-brand-ink-soft">
+                  {workflowHintByStatus[order.status]}
+                </p>
               </article>
             );
           })}
@@ -453,7 +461,8 @@ export function ClientOrdersPage() {
           >
             <h2 className="text-lg font-semibold text-brand-ink">Leave Review</h2>
             <p className="mt-1 text-sm text-brand-ink-soft">
-              Share your feedback for {reviewOrder ? professionalName(reviewOrder) : 'this professional'}.
+              Share your feedback for{' '}
+              {reviewOrder ? professionalName(reviewOrder) : 'this professional'}.
             </p>
 
             <form className="mt-4 space-y-4" onSubmit={handleSubmitReview}>

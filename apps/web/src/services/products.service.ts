@@ -164,9 +164,7 @@ export const productsService = {
     if (params?.search) query.append('search', params.search);
 
     const suffix = query.toString();
-    const endpoint = suffix
-      ? `/products/professional?${suffix}`
-      : '/products/professional';
+    const endpoint = suffix ? `/products/professional?${suffix}` : '/products/professional';
 
     const { data } = await apiClient.get<{
       data: ProductApi[];

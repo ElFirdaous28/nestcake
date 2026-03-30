@@ -8,19 +8,16 @@ type AllergyListItemProps = {
   onDelete: (allergy: Allergy) => void;
 };
 
-export function AllergyListItem({
-  allergy,
-  isEditing,
-  onEdit,
-  onDelete,
-}: AllergyListItemProps) {
+export function AllergyListItem({ allergy, isEditing, onEdit, onDelete }: AllergyListItemProps) {
   return (
     <li
       className={`group flex items-center justify-between gap-4 px-5 py-4 transition-colors ${
         isEditing ? 'bg-brand-rose/5' : 'hover:bg-gray-50'
       }`}
     >
-      <span className={`font-medium transition-colors ${isEditing ? 'text-brand-rose' : 'text-brand-ink'}`}>
+      <span
+        className={`font-medium transition-colors ${isEditing ? 'text-brand-rose' : 'text-brand-ink'}`}
+      >
         {allergy.name}
       </span>
 

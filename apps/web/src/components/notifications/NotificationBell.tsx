@@ -65,7 +65,9 @@ export function NotificationBell() {
                     <div className="flex-1">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="text-sm font-medium text-brand-ink">{notification.title}</h4>
+                          <h4 className="text-sm font-medium text-brand-ink">
+                            {notification.title}
+                          </h4>
                           <p className="mt-1 text-xs text-brand-ink-soft">{notification.message}</p>
                         </div>
                         {!notification.read && (
@@ -73,7 +75,9 @@ export function NotificationBell() {
                         )}
                       </div>
                       <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-brand-ink-soft">{formatTime(notification.createdAt)}</span>
+                        <span className="text-xs text-brand-ink-soft">
+                          {formatTime(notification.createdAt)}
+                        </span>
                         <div className="flex gap-1">
                           {!notification.read && (
                             <button

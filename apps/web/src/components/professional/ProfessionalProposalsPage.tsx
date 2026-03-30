@@ -178,7 +178,9 @@ export function ProfessionalProposalsPage() {
     <section className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold text-brand-ink">My Proposals</h1>
-        <p className="text-sm text-brand-ink-soft">Track proposal outcomes and manage paid orders awaiting READY.</p>
+        <p className="text-sm text-brand-ink-soft">
+          Track proposal outcomes and manage paid orders awaiting READY.
+        </p>
       </header>
 
       <ProfessionalFiltersBar
@@ -213,7 +215,10 @@ export function ProfessionalProposalsPage() {
         ) : (
           <div className="space-y-3">
             {filteredProposals.map((proposal) => (
-              <article key={proposal.id} className="rounded-xl border border-brand-line bg-white p-4">
+              <article
+                key={proposal.id}
+                className="rounded-xl border border-brand-line bg-white p-4"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-sm font-semibold text-brand-ink">{requestTitle(proposal)}</h3>
                   <span className="rounded-full bg-brand-cream-soft px-2.5 py-1 text-xs font-semibold text-brand-ink-soft">
@@ -221,14 +226,22 @@ export function ProfessionalProposalsPage() {
                   </span>
                 </div>
 
-                <p className="mt-1 text-sm font-semibold text-brand-ink">Offer: {formatCurrency(proposal.price)}</p>
-                <p className="mt-1 text-xs text-brand-ink-soft">Delivery: {formatDate(proposal.deliveryDateTime)}</p>
+                <p className="mt-1 text-sm font-semibold text-brand-ink">
+                  Offer: {formatCurrency(proposal.price)}
+                </p>
+                <p className="mt-1 text-xs text-brand-ink-soft">
+                  Delivery: {formatDate(proposal.deliveryDateTime)}
+                </p>
 
                 {requestDescription(proposal) ? (
-                  <p className="mt-2 text-sm text-brand-ink-soft line-clamp-2">{requestDescription(proposal)}</p>
+                  <p className="mt-2 text-sm text-brand-ink-soft line-clamp-2">
+                    {requestDescription(proposal)}
+                  </p>
                 ) : null}
 
-                <p className="mt-2 text-sm text-brand-ink-soft">{proposal.message?.trim() || 'No additional message.'}</p>
+                <p className="mt-2 text-sm text-brand-ink-soft">
+                  {proposal.message?.trim() || 'No additional message.'}
+                </p>
               </article>
             ))}
           </div>
@@ -248,13 +261,22 @@ export function ProfessionalProposalsPage() {
               const isUpdating = loadingOrderId === order.id;
 
               return (
-                <article key={order.id} className="rounded-xl border border-brand-line bg-white p-4">
+                <article
+                  key={order.id}
+                  className="rounded-xl border border-brand-line bg-white p-4"
+                >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <h3 className="text-sm font-semibold text-brand-ink">Order #{order.id.slice(-6).toUpperCase()}</h3>
-                      <p className="text-xs text-brand-ink-soft">Paid in escrow • currently in progress</p>
+                      <h3 className="text-sm font-semibold text-brand-ink">
+                        Order #{order.id.slice(-6).toUpperCase()}
+                      </h3>
+                      <p className="text-xs text-brand-ink-soft">
+                        Paid in escrow • currently in progress
+                      </p>
                     </div>
-                    <span className="text-sm font-semibold text-brand-ink">{formatCurrency(order.totalPrice)}</span>
+                    <span className="text-sm font-semibold text-brand-ink">
+                      {formatCurrency(order.totalPrice)}
+                    </span>
                   </div>
 
                   <button
@@ -273,7 +295,9 @@ export function ProfessionalProposalsPage() {
         )}
 
         {readyOrders.length > 0 ? (
-          <p className="text-xs text-brand-ink-soft">{readyOrders.length} order(s) already marked READY and waiting for client confirmation.</p>
+          <p className="text-xs text-brand-ink-soft">
+            {readyOrders.length} order(s) already marked READY and waiting for client confirmation.
+          </p>
         ) : null}
       </section>
     </section>

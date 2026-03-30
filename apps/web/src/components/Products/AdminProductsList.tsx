@@ -26,7 +26,9 @@ export function AdminProductsList({ products, onDeleteClick }: AdminProductsList
               <th className="px-6 py-3 text-left text-sm font-semibold text-brand-ink">Name</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-brand-ink">Price</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-brand-ink">Status</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-brand-ink">Available</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-brand-ink">
+                Available
+              </th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-brand-ink">Created</th>
               <th className="px-6 py-3 text-left text-sm font-semibold text-brand-ink">Actions</th>
             </tr>
@@ -37,7 +39,9 @@ export function AdminProductsList({ products, onDeleteClick }: AdminProductsList
                 <td className="px-6 py-4">
                   <p className="text-sm font-medium text-brand-ink">{product.name}</p>
                   {product.description && (
-                    <p className="mt-1 max-w-md truncate text-xs text-brand-ink-soft">{product.description}</p>
+                    <p className="mt-1 max-w-md truncate text-xs text-brand-ink-soft">
+                      {product.description}
+                    </p>
                   )}
                 </td>
                 <td className="px-6 py-4 text-sm text-brand-ink">${product.price.toFixed(2)}</td>
@@ -48,7 +52,9 @@ export function AdminProductsList({ products, onDeleteClick }: AdminProductsList
                     {prettyLabel(product.status)}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-brand-ink">{product.isAvailable ? 'Yes' : 'No'}</td>
+                <td className="px-6 py-4 text-sm text-brand-ink">
+                  {product.isAvailable ? 'Yes' : 'No'}
+                </td>
                 <td className="px-6 py-4 text-sm text-brand-ink-soft">
                   {product.createdAt ? new Date(product.createdAt).toLocaleDateString() : '-'}
                 </td>

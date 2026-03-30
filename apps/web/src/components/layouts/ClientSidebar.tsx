@@ -3,15 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Heart,
-  LayoutDashboard,
-  ListChecks,
-  Menu,
-  Package,
-  ShoppingBag,
-  X,
-} from 'lucide-react';
+import { Heart, LayoutDashboard, ListChecks, Menu, Package, ShoppingBag, X } from 'lucide-react';
 import { useAuth } from '@/src/hooks/useAuth';
 import { Logo } from '@/src/components/common/Logo';
 import { SidebarAccountSection } from '@/src/components/layouts/SidebarAccountSection';
@@ -54,45 +46,47 @@ export function ClientSidebar() {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 z-40 h-screen w-64 border-r border-brand-line bg-white flex flex-col overflow-hidden transition-transform md:sticky md:top-0 md:h-screen md:transition-none ${
-        mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-      }`}>
+      <aside
+        className={`fixed top-0 left-0 z-40 h-screen w-64 border-r border-brand-line bg-white flex flex-col overflow-hidden transition-transform md:sticky md:top-0 md:h-screen md:transition-none ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
+      >
         <div className="p-6 border-b border-brand-line bg-linear-to-br from-white to-brand-cream/50">
           <Logo />
           <h2 className="mt-3 text-lg font-bold text-brand-ink">Client Portal</h2>
         </div>
 
-      <nav className="flex-1 min-h-0 overflow-y-auto p-3">
-        <ul className="space-y-2">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const active = isActivePath(pathname, link.href);
+        <nav className="flex-1 min-h-0 overflow-y-auto p-3">
+          <ul className="space-y-2">
+            {links.map((link) => {
+              const Icon = link.icon;
+              const active = isActivePath(pathname, link.href);
 
-            return (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition ${
-                    active
-                      ? 'bg-brand-rose text-brand-ink'
-                      : 'text-brand-ink-soft hover:bg-brand-cream-soft hover:text-brand-ink'
-                  }`}
-                >
-                  <Icon className="h-5 w-5 shrink-0" />
-                  <span>{link.label}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition ${
+                      active
+                        ? 'bg-brand-rose text-brand-ink'
+                        : 'text-brand-ink-soft hover:bg-brand-cream-soft hover:text-brand-ink'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5 shrink-0" />
+                    <span>{link.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-      <SidebarAccountSection
-        email={user?.email}
-        avatar={user?.avatar}
-        profileHref="/profile"
-        fallbackInitial="C"
-      />
+        <SidebarAccountSection
+          email={user?.email}
+          avatar={user?.avatar}
+          profileHref="/profile"
+          fallbackInitial="C"
+        />
       </aside>
     </>
   );

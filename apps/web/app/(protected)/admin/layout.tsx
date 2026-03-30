@@ -12,7 +12,9 @@ export default function AdminLayout({
       <div className="min-h-screen bg-brand-cream flex">
         <AdminSidebar />
         <main className="flex-1 p-6 pt-16 md:pt-6 mt-12">
-          <div className="rounded-2xl border border-brand-line bg-white p-6 shadow-sm md:mt-0">{children}</div>
+          <div className="rounded-2xl border border-brand-line bg-white p-6 shadow-sm md:mt-0">
+            {children}
+          </div>
         </main>
       </div>
     </ProtectedRoute>

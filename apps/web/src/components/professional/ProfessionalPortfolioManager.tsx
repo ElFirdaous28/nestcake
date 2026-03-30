@@ -6,10 +6,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
-import {
-  professionalsService,
-  type ProfessionalItem,
-} from '@/src/services/professionals.service';
+import { professionalsService, type ProfessionalItem } from '@/src/services/professionals.service';
 
 type PortfolioDeleteTarget = {
   id: string;
@@ -158,7 +155,10 @@ export function ProfessionalPortfolioManager() {
       <AppAlert message={error} />
       <AppAlert message={success} variant="success" />
 
-      <form onSubmit={handleSubmit} className="rounded-2xl border border-brand-line bg-white p-5 shadow-sm">
+      <form
+        onSubmit={handleSubmit}
+        className="rounded-2xl border border-brand-line bg-white p-5 shadow-sm"
+      >
         <div className="flex items-center gap-2">
           <ImagePlus className="h-5 w-5 text-brand-ink-soft" />
           <h2 className="text-base font-semibold text-brand-ink">Add portfolio item</h2>
@@ -238,16 +238,17 @@ export function ProfessionalPortfolioManager() {
               const image = item.images?.[0] || FALLBACK_IMAGE;
 
               return (
-                <article key={`${itemTitle}-${index}`} className="overflow-hidden rounded-xl border border-brand-line bg-white">
+                <article
+                  key={`${itemTitle}-${index}`}
+                  className="overflow-hidden rounded-xl border border-brand-line bg-white"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={image}
-                    alt={itemTitle}
-                    className="h-44 w-full object-cover"
-                  />
+                  <img src={image} alt={itemTitle} className="h-44 w-full object-cover" />
 
                   <div className="space-y-2 p-4">
-                    <h3 className="line-clamp-1 text-sm font-semibold text-brand-ink">{itemTitle}</h3>
+                    <h3 className="line-clamp-1 text-sm font-semibold text-brand-ink">
+                      {itemTitle}
+                    </h3>
                     <p className="line-clamp-3 text-sm text-brand-ink-soft">
                       {item.description?.trim() || 'No description provided.'}
                     </p>

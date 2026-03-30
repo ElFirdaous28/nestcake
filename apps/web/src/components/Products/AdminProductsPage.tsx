@@ -19,7 +19,9 @@ export function AdminProductsPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProductStatus | 'all'>('all');
-  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'unavailable'>('all');
+  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'unavailable'>(
+    'all',
+  );
 
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, limit: PAGE_SIZE, total: 0, pages: 0 });
@@ -146,10 +148,7 @@ export function AdminProductsPage() {
           No products found
         </div>
       ) : (
-        <AdminProductsList
-          products={visibleProducts}
-          onDeleteClick={setDeleteTarget}
-        />
+        <AdminProductsList products={visibleProducts} onDeleteClick={setDeleteTarget} />
       )}
 
       {pagination.pages > 1 && (

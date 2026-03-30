@@ -17,8 +17,12 @@ const usersSearchFormSchema = z.object({
 export function UsersManagementClient() {
   const searchParams = useSearchParams();
   const [users, setUsers] = useState<User[]>([]);
-  const [professionalByUserId, setProfessionalByUserId] = useState<Record<string, ProfessionalItem>>({});
-  const [isSavingVerificationByUserId, setIsSavingVerificationByUserId] = useState<Record<string, boolean>>({});
+  const [professionalByUserId, setProfessionalByUserId] = useState<
+    Record<string, ProfessionalItem>
+  >({});
+  const [isSavingVerificationByUserId, setIsSavingVerificationByUserId] = useState<
+    Record<string, boolean>
+  >({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,7 +32,11 @@ export function UsersManagementClient() {
   const initialRole = useMemo<UserRole | ''>(() => {
     const roleParam = searchParams.get('role');
 
-    if (roleParam === UserRole.CLIENT || roleParam === UserRole.PROFESSIONAL || roleParam === UserRole.ADMIN) {
+    if (
+      roleParam === UserRole.CLIENT ||
+      roleParam === UserRole.PROFESSIONAL ||
+      roleParam === UserRole.ADMIN
+    ) {
       return roleParam;
     }
 
@@ -49,10 +57,13 @@ export function UsersManagementClient() {
         professionalsService.getAll(),
       ]);
 
-      const professionalMap = professionals.reduce<Record<string, ProfessionalItem>>((acc, item) => {
-        acc[item.userId] = item;
-        return acc;
-      }, {});
+      const professionalMap = professionals.reduce<Record<string, ProfessionalItem>>(
+        (acc, item) => {
+          acc[item.userId] = item;
+          return acc;
+        },
+        {},
+      );
 
       setUsers(
         response.data.map((user) => ({
@@ -63,11 +74,7 @@ export function UsersManagementClient() {
       setProfessionalByUserId(professionalMap);
       setPagination(response.pagination);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Failed to load users',
-      );
+      setError(err instanceof Error ? err.message : 'Failed to load users');
     } finally {
       setIsLoading(false);
     }
@@ -190,8 +197,9 @@ export function UsersManagementClient() {
       {/* Results info */}
       <div className="flex items-center justify-between text-sm text-brand-ink-soft">
         <div>
-          Showing {pagination.skip + 1} to {Math.min(pagination.skip + pagination.limit, pagination.total)} of{' '}
-          {pagination.total} users
+          Showing {pagination.skip + 1} to{' '}
+          {Math.min(pagination.skip + pagination.limit, pagination.total)} of {pagination.total}{' '}
+          users
         </div>
       </div>
 

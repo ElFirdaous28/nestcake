@@ -9,7 +9,11 @@ import { ProductCard } from '@/src/components/Products/ProductCard';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ConfirmDialog } from '@/src/components/common/ConfirmDialog';
 import { ProductsFilterSection } from '@/src/components/Products/ProductsFilterSection';
-import { productsService, type ProductItem, type ProductsResponse } from '@/src/services/products.service';
+import {
+  productsService,
+  type ProductItem,
+  type ProductsResponse,
+} from '@/src/services/products.service';
 import { categoriesService, type Category } from '@/src/services/categories.service';
 
 type ProductCatalogScope = 'client' | 'professional';
@@ -28,34 +32,39 @@ type ProductCatalogClientProps = {
 
 const PAGE_SIZE = 12;
 
-const productFormSchema = z.object({
-  name: z.string().trim().min(1, 'Product name is required.'),
-  descriptionText: z.string().trim().optional(),
-  price: z.coerce.number().min(0, 'Price must be a valid non-negative number.'),
-  selectedCategoryIds: z.array(z.string().trim()).min(1, 'Please select at least one category.'),
-  isAvailable: z.boolean(),
-  status: z.nativeEnum(ProductStatus),
-  imageFile: z.instanceof(File).optional(),
-  isEditing: z.boolean(),
-}).superRefine((values, ctx) => {
-  if (!values.isEditing && !values.imageFile) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Please upload a product image.',
-      path: ['imageFile'],
-    });
-  }
-});
+const productFormSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Product name is required.'),
+    descriptionText: z.string().trim().optional(),
+    price: z.coerce.number().min(0, 'Price must be a valid non-negative number.'),
+    selectedCategoryIds: z.array(z.string().trim()).min(1, 'Please select at least one category.'),
+    isAvailable: z.boolean(),
+    status: z.nativeEnum(ProductStatus),
+    imageFile: z.instanceof(File).optional(),
+    isEditing: z.boolean(),
+  })
+  .superRefine((values, ctx) => {
+    if (!values.isEditing && !values.imageFile) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Please upload a product image.',
+        path: ['imageFile'],
+      });
+    }
+  });
 
 const productSearchSchema = z.object({
   query: z.string().trim().max(120, 'Search query must be 120 characters or less.'),
 });
 
-const getProductsByScope = (scope: ProductCatalogScope, params: {
-  page?: number;
-  limit?: number;
-  search?: string;
-}): Promise<ProductsResponse> => {
+const getProductsByScope = (
+  scope: ProductCatalogScope,
+  params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  },
+): Promise<ProductsResponse> => {
   if (scope === 'professional') {
     return productsService.getAllForProfessional(params);
   }
@@ -78,7 +87,9 @@ export function ProductCatalogClient({
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProductStatus | 'all'>('all');
-  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'unavailable'>('all');
+  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'unavailable'>(
+    'all',
+  );
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -108,25 +119,28 @@ export function ProductCatalogClient({
   const [status, setStatus] = useState<ProductStatus>(ProductStatus.DRAFT);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const loadProducts = useCallback(async (nextPage = 1, query = '') => {
-    setIsLoading(true);
-    setError(null);
+  const loadProducts = useCallback(
+    async (nextPage = 1, query = '') => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const response = await getProductsByScope(scope, {
-        page: nextPage,
-        limit: PAGE_SIZE,
-        search: query,
-      });
+      try {
+        const response = await getProductsByScope(scope, {
+          page: nextPage,
+          limit: PAGE_SIZE,
+          search: query,
+        });
 
-      setProducts(response.data);
-      setPagination(response.pagination);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load products');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [scope]);
+        setProducts(response.data);
+        setPagination(response.pagination);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load products');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [scope],
+  );
 
   useEffect(() => {
     void loadProducts(1, '');
@@ -258,9 +272,7 @@ export function ProductCatalogClient({
 
   const handleToggleStatus = async (product: ProductItem) => {
     const nextStatus =
-      product.status === ProductStatus.PUBLISHED
-        ? ProductStatus.DRAFT
-        : ProductStatus.PUBLISHED;
+      product.status === ProductStatus.PUBLISHED ? ProductStatus.DRAFT : ProductStatus.PUBLISHED;
 
     setStatusUpdatingId(product.id);
     setError(null);

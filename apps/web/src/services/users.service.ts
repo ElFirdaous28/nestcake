@@ -37,9 +37,7 @@ export const usersService = {
     if (params?.skip !== undefined) queryParams.append('skip', String(params.skip));
     if (params?.limit !== undefined) queryParams.append('limit', String(params.limit));
 
-    const { data } = await apiClient.get<UsersResponse>(
-      `/users?${queryParams.toString()}`,
-    );
+    const { data } = await apiClient.get<UsersResponse>(`/users?${queryParams.toString()}`);
 
     return {
       ...data,

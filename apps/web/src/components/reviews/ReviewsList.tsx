@@ -93,7 +93,9 @@ export function ReviewsList({ reviews, emptyMessage = 'No reviews yet.' }: Revie
             {review.comment ? (
               <p className="mt-3 text-sm leading-relaxed text-brand-ink-soft">{review.comment}</p>
             ) : (
-              <p className="mt-3 text-sm italic text-brand-ink-soft">No written feedback provided.</p>
+              <p className="mt-3 text-sm italic text-brand-ink-soft">
+                No written feedback provided.
+              </p>
             )}
           </article>
         );

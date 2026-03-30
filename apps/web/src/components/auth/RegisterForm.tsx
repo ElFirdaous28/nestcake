@@ -7,10 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useAuth } from '@/src/hooks/useAuth';
-import {
-  registerSchema,
-  type RegisterFormValues,
-} from '@/src/lib/validation/authSchemas';
+import { registerSchema, type RegisterFormValues } from '@/src/lib/validation/authSchemas';
 import { AppAlert } from '@/src/components/common/AppAlert';
 
 const inputClassName =
@@ -18,13 +15,7 @@ const inputClassName =
 
 export function RegisterForm() {
   const router = useRouter();
-  const {
-    registerUser,
-    registerProfessional,
-    error,
-    clearError,
-    isLoading,
-  } = useAuth();
+  const { registerUser, registerProfessional, error, clearError, isLoading } = useAuth();
 
   const {
     register,
@@ -76,10 +67,7 @@ export function RegisterForm() {
         description: values.description?.trim() ? values.description.trim() : undefined,
         location: {
           type: 'Point',
-          coordinates: [
-            Number(values.longitude),
-            Number(values.latitude),
-          ],
+          coordinates: [Number(values.longitude), Number(values.latitude)],
         },
       });
     } else {
@@ -97,9 +85,7 @@ export function RegisterForm() {
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-brand-rose">
           NestCake
         </p>
-        <h1 className="mt-3 text-3xl font-bold text-brand-ink">
-          Create Your Account
-        </h1>
+        <h1 className="mt-3 text-3xl font-bold text-brand-ink">Create Your Account</h1>
         <p className="mt-2 text-sm text-brand-ink-soft">
           Join as a client or as a professional baker.
         </p>
@@ -108,16 +94,20 @@ export function RegisterForm() {
           <button
             type="button"
             onClick={() => setValue('role', UserRole.CLIENT)}
-            className={`rounded-xl px-3 py-2 text-sm font-semibold text-brand-ink transition ${selectedRole === UserRole.CLIENT ? 'bg-brand-rose' : 'bg-transparent hover:bg-white'
-              }`}
+            className={`rounded-xl px-3 py-2 text-sm font-semibold text-brand-ink transition ${
+              selectedRole === UserRole.CLIENT ? 'bg-brand-rose' : 'bg-transparent hover:bg-white'
+            }`}
           >
             Client
           </button>
           <button
             type="button"
             onClick={() => setValue('role', UserRole.PROFESSIONAL)}
-            className={`rounded-xl px-3 py-2 text-sm font-semibold text-brand-ink transition ${selectedRole === UserRole.PROFESSIONAL ? 'bg-brand-rose' : 'bg-transparent hover:bg-white'
-              }`}
+            className={`rounded-xl px-3 py-2 text-sm font-semibold text-brand-ink transition ${
+              selectedRole === UserRole.PROFESSIONAL
+                ? 'bg-brand-rose'
+                : 'bg-transparent hover:bg-white'
+            }`}
           >
             Professional
           </button>
@@ -127,9 +117,7 @@ export function RegisterForm() {
           <input type="hidden" {...register('role')} />
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-ink">
-              First name
-            </label>
+            <label className="mb-2 block text-sm font-medium text-brand-ink">First name</label>
             <input className={inputClassName} {...register('firstName')} />
             <div className="mt-1">
               <AppAlert message={errors.firstName?.message} />
@@ -137,9 +125,7 @@ export function RegisterForm() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-ink">
-              Last name
-            </label>
+            <label className="mb-2 block text-sm font-medium text-brand-ink">Last name</label>
             <input className={inputClassName} {...register('lastName')} />
             <div className="mt-1">
               <AppAlert message={errors.lastName?.message} />
@@ -147,9 +133,7 @@ export function RegisterForm() {
           </div>
 
           <div className="sm:col-span-2">
-            <label className="mb-2 block text-sm font-medium text-brand-ink">
-              Email
-            </label>
+            <label className="mb-2 block text-sm font-medium text-brand-ink">Email</label>
             <input type="email" className={inputClassName} {...register('email')} />
             <div className="mt-1">
               <AppAlert message={errors.email?.message} />
@@ -157,9 +141,7 @@ export function RegisterForm() {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-brand-ink">
-              Password
-            </label>
+            <label className="mb-2 block text-sm font-medium text-brand-ink">Password</label>
             <input type="password" className={inputClassName} {...register('password')} />
             <div className="mt-1">
               <AppAlert message={errors.password?.message} />
@@ -206,20 +188,24 @@ export function RegisterForm() {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-brand-ink">
-                  Latitude
-                </label>
-                <input className={inputClassName} placeholder="e.g. 25.2048" {...register('latitude')} />
+                <label className="mb-2 block text-sm font-medium text-brand-ink">Latitude</label>
+                <input
+                  className={inputClassName}
+                  placeholder="e.g. 25.2048"
+                  {...register('latitude')}
+                />
                 <div className="mt-1">
                   <AppAlert message={errors.latitude?.message} />
                 </div>
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-brand-ink">
-                  Longitude
-                </label>
-                <input className={inputClassName} placeholder="e.g. 55.2708" {...register('longitude')} />
+                <label className="mb-2 block text-sm font-medium text-brand-ink">Longitude</label>
+                <input
+                  className={inputClassName}
+                  placeholder="e.g. 55.2708"
+                  {...register('longitude')}
+                />
                 <div className="mt-1">
                   <AppAlert message={errors.longitude?.message} />
                 </div>

@@ -8,14 +8,13 @@ export function HomeHero() {
 
   return (
     <div className="overflow-hidden rounded-3xl border border-brand-line bg-linear-to-br from-brand-cream-soft via-brand-cream to-white p-8 shadow-xl">
-      <p className="text-xs font-bold uppercase tracking-[0.3em] text-brand-rose">
-        NestCake
-      </p>
+      <p className="text-xs font-bold uppercase tracking-[0.3em] text-brand-rose">NestCake</p>
       <h1 className="mt-3 text-4xl font-bold leading-tight text-brand-ink">
         Handmade celebration cakes, custom to every moment.
       </h1>
       <p className="mt-4 max-w-2xl text-base text-brand-ink-soft">
-        Browse professionals, send requests, and manage your orders from one warm, bakery-inspired workspace.
+        Browse professionals, send requests, and manage your orders from one warm, bakery-inspired
+        workspace.
       </p>
 
       <div className="mt-6 rounded-xl border border-brand-line px-4 py-3 text-sm">

@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from 'next/font/google';
 import { AuthProvider } from '@/src/contexts/AuthContext';
 import { SocketProvider } from '@/src/contexts/SocketContext';
 import { NotificationBell, NotificationToast } from '@/src/components/notifications';
 import { useAuth } from '@/src/hooks/useAuth';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/src/lib/queryClient';
-import "./globals.css";
+import './globals.css';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 function AuthenticatedNotifications() {
@@ -43,14 +43,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <SocketProvider>
               <AuthenticatedNotifications />
-                {children}
+              {children}
             </SocketProvider>
           </AuthProvider>
         </QueryClientProvider>

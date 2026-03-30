@@ -83,7 +83,9 @@ export const proposalsService = {
   },
 
   async accept(proposalId: string): Promise<AcceptedProposalOrder> {
-    const { data } = await apiClient.patch<AcceptedProposalOrder>(`/proposals/${proposalId}/accept`);
+    const { data } = await apiClient.patch<AcceptedProposalOrder>(
+      `/proposals/${proposalId}/accept`,
+    );
     return data;
   },
 };

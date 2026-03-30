@@ -15,10 +15,7 @@ export function UserDetailModal({ user, isOpen, onClose }: UserDetailModalProps)
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-50 bg-black/45"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-50 bg-black/45" onClick={onClose} />
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -54,7 +51,9 @@ export function UserDetailModal({ user, isOpen, onClose }: UserDetailModalProps)
             {/* Details */}
             <div>
               <label className="text-sm font-semibold text-brand-ink-soft">Name</label>
-              <p className="mt-1 text-brand-ink">{user.firstName} {user.lastName}</p>
+              <p className="mt-1 text-brand-ink">
+                {user.firstName} {user.lastName}
+              </p>
             </div>
 
             <div>
@@ -72,13 +71,15 @@ export function UserDetailModal({ user, isOpen, onClose }: UserDetailModalProps)
             <div>
               <label className="text-sm font-semibold text-brand-ink-soft">Role</label>
               <div className="mt-1">
-                <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  user.role === 'ADMIN'
-                    ? 'bg-rose-100 text-rose-700'
-                    : user.role === 'PROFESSIONAL'
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-sky-100 text-sky-700'
-                }`}>
+                <span
+                  className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    user.role === 'ADMIN'
+                      ? 'bg-rose-100 text-rose-700'
+                      : user.role === 'PROFESSIONAL'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-sky-100 text-sky-700'
+                  }`}
+                >
                   {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                 </span>
               </div>

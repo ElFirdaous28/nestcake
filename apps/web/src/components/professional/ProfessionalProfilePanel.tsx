@@ -7,16 +7,21 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { AppAlert } from '@/src/components/common/AppAlert';
 import { ReviewsList } from '@/src/components/reviews/ReviewsList';
-import {
-  professionalsService,
-  type ProfessionalItem,
-} from '@/src/services/professionals.service';
+import { professionalsService, type ProfessionalItem } from '@/src/services/professionals.service';
 import { reviewsService, type ReviewItem } from '@/src/services/reviews.service';
 
 const profileFormSchema = z.object({
   businessName: z.string().trim().min(1, 'Business name is required.'),
-  description: z.string().trim().max(2000, 'Description must be 2000 characters or less').optional(),
-  address: z.string().trim().min(1, 'Address is required.').max(200, 'Address must be 200 characters or less'),
+  description: z
+    .string()
+    .trim()
+    .max(2000, 'Description must be 2000 characters or less')
+    .optional(),
+  address: z
+    .string()
+    .trim()
+    .min(1, 'Address is required.')
+    .max(200, 'Address must be 200 characters or less'),
   longitude: z.coerce.number(),
   latitude: z.coerce.number(),
 });
@@ -189,7 +194,9 @@ export function ProfessionalProfilePanel() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <article className="rounded-xl border border-brand-line bg-brand-cream-soft p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">Rating</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">
+            Rating
+          </p>
           <div className="mt-2 inline-flex items-center gap-2 text-brand-ink">
             <Star className="h-5 w-5 fill-amber-500 text-amber-500" />
             <span className="text-xl font-bold">{averageRating.toFixed(1)}</span>
@@ -198,13 +205,17 @@ export function ProfessionalProfilePanel() {
         </article>
 
         <article className="rounded-xl border border-brand-line bg-brand-cream-soft p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">Portfolio items</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">
+            Portfolio items
+          </p>
           <p className="mt-2 text-xl font-bold text-brand-ink">{professional.portfolio.length}</p>
           <p className="mt-1 text-sm text-brand-ink-soft">Showcase pieces in your public profile</p>
         </article>
 
         <article className="rounded-xl border border-brand-line bg-brand-cream-soft p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">Business</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">
+            Business
+          </p>
           <p className="mt-2 text-xl font-bold text-brand-ink">{professional.businessName}</p>
           <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-brand-ink-soft">
             <MapPin className="h-4 w-4" />
@@ -213,7 +224,10 @@ export function ProfessionalProfilePanel() {
         </article>
       </div>
 
-      <form onSubmit={handleSubmit} className="rounded-2xl border border-brand-line bg-white p-5 shadow-sm">
+      <form
+        onSubmit={handleSubmit}
+        className="rounded-2xl border border-brand-line bg-white p-5 shadow-sm"
+      >
         <div className="flex items-center gap-2">
           <Pencil className="h-4 w-4 text-brand-ink-soft" />
           <h2 className="text-base font-semibold text-brand-ink">Edit profile details</h2>

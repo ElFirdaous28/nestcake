@@ -161,7 +161,9 @@ export function ProfessionalOrdersPage() {
     <section className="space-y-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold text-brand-ink">Orders</h1>
-        <p className="text-sm text-brand-ink-soft">Manage direct and custom request orders from one place.</p>
+        <p className="text-sm text-brand-ink-soft">
+          Manage direct and custom request orders from one place.
+        </p>
       </header>
 
       <ProfessionalFiltersBar
@@ -204,9 +206,12 @@ export function ProfessionalOrdersPage() {
               <article key={order.id} className="rounded-xl border border-brand-line bg-white p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h2 className="text-sm font-semibold text-brand-ink">Order #{order.id.slice(-6).toUpperCase()}</h2>
+                    <h2 className="text-sm font-semibold text-brand-ink">
+                      Order #{order.id.slice(-6).toUpperCase()}
+                    </h2>
                     <p className="text-xs text-brand-ink-soft">
-                      {order.type === OrderType.DIRECT ? 'Direct order' : 'Custom request'} • {formatDate(order.createdAt)}
+                      {order.type === OrderType.DIRECT ? 'Direct order' : 'Custom request'} •{' '}
+                      {formatDate(order.createdAt)}
                     </p>
                   </div>
                   <span className="rounded-full bg-brand-cream-soft px-2.5 py-1 text-xs font-semibold text-brand-ink-soft">
@@ -223,7 +228,9 @@ export function ProfessionalOrdersPage() {
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-brand-ink">Total: {formatCurrency(order.totalPrice)}</p>
+                  <p className="text-sm font-semibold text-brand-ink">
+                    Total: {formatCurrency(order.totalPrice)}
+                  </p>
 
                   <div className="flex flex-wrap gap-2">
                     {canMarkReady ? (

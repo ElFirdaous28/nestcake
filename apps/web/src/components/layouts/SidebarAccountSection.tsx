@@ -38,19 +38,19 @@ export function SidebarAccountSection({
         className="w-full px-6 py-4 flex items-center gap-3 text-left hover:bg-brand-cream-soft transition"
       >
         {avatar ? (
-          <img
-            src={avatar}
-            alt="Avatar"
-            className="h-10 w-10 rounded-full object-cover shrink-0"
-          />
+          <img src={avatar} alt="Avatar" className="h-10 w-10 rounded-full object-cover shrink-0" />
         ) : (
           <div className="h-10 w-10 rounded-full bg-brand-rose flex items-center justify-center shrink-0">
-            <span className="text-xs font-bold text-white">{getInitials(email, fallbackInitial)}</span>
+            <span className="text-xs font-bold text-white">
+              {getInitials(email, fallbackInitial)}
+            </span>
           </div>
         )}
 
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">Account</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-ink-soft">
+            Account
+          </p>
           <p className="mt-1 text-sm font-semibold text-brand-ink truncate">{email ?? 'user'}</p>
         </div>
 
