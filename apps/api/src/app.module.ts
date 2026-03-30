@@ -23,9 +23,7 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       envFilePath: '.env.local',
     }),
-    MongooseModule.forRoot(
-      process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/nestcake',
-    ),
+    MongooseModule.forRoot(process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/nestcake'),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),
       serveStaticOptions: { index: false },

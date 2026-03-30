@@ -28,9 +28,7 @@ describe('ProposalsController', () => {
   const setup = async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProposalsController],
-      providers: [
-        { provide: ProposalsService, useValue: proposalsServiceMock },
-      ],
+      providers: [{ provide: ProposalsService, useValue: proposalsServiceMock }],
     })
       .overrideGuard(JwtAuthGuard)
       .useValue(jwtAuthGuardMock)
@@ -100,10 +98,7 @@ describe('ProposalsController', () => {
 
     const result = await controller.findByRequest(req, requestId);
 
-    expect(proposalsServiceMock.findByRequest).toHaveBeenCalledWith(
-      req.user,
-      requestId,
-    );
+    expect(proposalsServiceMock.findByRequest).toHaveBeenCalledWith(req.user, requestId);
     expect(result).toEqual(list);
   });
 
@@ -114,18 +109,11 @@ describe('ProposalsController', () => {
     const requestId = '507f1f77bcf86cd799439599';
 
     proposalsServiceMock.findByRequest.mockRejectedValue(
-      new ForbiddenException(
-        'You can only view proposals for your own requests',
-      ),
+      new ForbiddenException('You can only view proposals for your own requests'),
     );
 
-    await expect(controller.findByRequest(req, requestId)).rejects.toThrow(
-      ForbiddenException,
-    );
-    expect(proposalsServiceMock.findByRequest).toHaveBeenCalledWith(
-      req.user,
-      requestId,
-    );
+    await expect(controller.findByRequest(req, requestId)).rejects.toThrow(ForbiddenException);
+    expect(proposalsServiceMock.findByRequest).toHaveBeenCalledWith(req.user, requestId);
   });
 
   it('accept: should call service with user and proposal id', async () => {
@@ -149,9 +137,7 @@ describe('ProposalsController', () => {
     } as any;
     const id = '507f1f77bcf86cd799439598';
 
-    proposalsServiceMock.accept.mockRejectedValue(
-      new NotFoundException('Proposal not found'),
-    );
+    proposalsServiceMock.accept.mockRejectedValue(new NotFoundException('Proposal not found'));
 
     await expect(controller.accept(req, id)).rejects.toThrow(NotFoundException);
     expect(proposalsServiceMock.accept).toHaveBeenCalledWith(req.user, id);

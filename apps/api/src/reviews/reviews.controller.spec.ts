@@ -73,9 +73,7 @@ describe('ReviewsController', () => {
       new BadRequestException('You have already reviewed this order'),
     );
 
-    await expect(controller.create(req, dto)).rejects.toThrow(
-      BadRequestException,
-    );
+    await expect(controller.create(req, dto)).rejects.toThrow(BadRequestException);
     expect(reviewsServiceMock.create).toHaveBeenCalledWith(req.user, dto);
   });
 
@@ -114,10 +112,7 @@ describe('ReviewsController', () => {
 
     const result = await controller.findMyReviews(req, query);
 
-    expect(reviewsServiceMock.findMyReviews).toHaveBeenCalledWith(
-      req.user,
-      query,
-    );
+    expect(reviewsServiceMock.findMyReviews).toHaveBeenCalledWith(req.user, query);
     expect(result).toEqual(response);
   });
 
@@ -135,13 +130,8 @@ describe('ReviewsController', () => {
       new NotFoundException('Professional profile not found'),
     );
 
-    await expect(controller.findMyReviews(req, query)).rejects.toThrow(
-      NotFoundException,
-    );
-    expect(reviewsServiceMock.findMyReviews).toHaveBeenCalledWith(
-      req.user,
-      query,
-    );
+    await expect(controller.findMyReviews(req, query)).rejects.toThrow(NotFoundException);
+    expect(reviewsServiceMock.findMyReviews).toHaveBeenCalledWith(req.user, query);
   });
 
   it('findByProfessional: should call service with professional id and query', async () => {
@@ -157,10 +147,7 @@ describe('ReviewsController', () => {
 
     const result = await controller.findByProfessional(professionalId, query);
 
-    expect(reviewsServiceMock.findByProfessional).toHaveBeenCalledWith(
-      professionalId,
-      query,
-    );
+    expect(reviewsServiceMock.findByProfessional).toHaveBeenCalledWith(professionalId, query);
     expect(result).toEqual(response);
   });
 
@@ -179,9 +166,7 @@ describe('ReviewsController', () => {
   it('findOne: should throw when service rejects not found', async () => {
     const id = '507f1f77bcf86cd799439799';
 
-    reviewsServiceMock.findOne.mockRejectedValue(
-      new NotFoundException('Review not found'),
-    );
+    reviewsServiceMock.findOne.mockRejectedValue(new NotFoundException('Review not found'));
 
     await expect(controller.findOne(id)).rejects.toThrow(NotFoundException);
     expect(reviewsServiceMock.findOne).toHaveBeenCalledWith(id);

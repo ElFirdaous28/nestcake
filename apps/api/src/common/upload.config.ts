@@ -7,12 +7,7 @@ export type UploadFolder = 'avatars' | 'portfolio' | 'requests' | 'products';
 export function multerDiskConfig(folder: UploadFolder) {
   const dest = join(process.cwd(), 'public', 'uploads', folder);
   mkdirSync(dest, { recursive: true });
-  const allowedMimeTypes = new Set([
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/webp',
-  ]);
+  const allowedMimeTypes = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
 
   return {
     storage: diskStorage({

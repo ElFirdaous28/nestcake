@@ -13,13 +13,7 @@ import {
 import { NotificationsService } from './notifications.service';
 import { NotificationDocument } from './schemas/notification.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('notifications')
 @ApiBearerAuth()
@@ -38,11 +32,7 @@ export class NotificationsController {
     @Query('skip') skip: string = '0',
   ) {
     const userId = req.user?.sub;
-    return this.notificationsService.getUserNotifications(
-      userId,
-      parseInt(limit),
-      parseInt(skip),
-    );
+    return this.notificationsService.getUserNotifications(userId, parseInt(limit), parseInt(skip));
   }
 
   @ApiOperation({ summary: 'Get unread notification count' })
@@ -55,9 +45,7 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Mark a notification as read' })
   @ApiParam({ name: 'id', example: '65f0c7e8f9697f3c69312345' })
   @Put(':id/read')
-  async markAsRead(
-    @Param('id') notificationId: string,
-  ): Promise<NotificationDocument> {
+  async markAsRead(@Param('id') notificationId: string): Promise<NotificationDocument> {
     return this.notificationsService.markAsRead(notificationId);
   }
 
@@ -71,9 +59,7 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Delete a notification' })
   @ApiParam({ name: 'id', example: '65f0c7e8f9697f3c69312345' })
   @Delete(':id')
-  async deleteNotification(
-    @Param('id') notificationId: string,
-  ): Promise<NotificationDocument> {
+  async deleteNotification(@Param('id') notificationId: string): Promise<NotificationDocument> {
     return this.notificationsService.deleteNotification(notificationId);
   }
 

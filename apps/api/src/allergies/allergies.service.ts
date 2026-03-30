@@ -12,9 +12,7 @@ import { Allergy } from './schemas/allergy.schema';
 
 @Injectable()
 export class AllergiesService {
-  constructor(
-    @InjectModel(Allergy.name) private readonly allergyModel: Model<Allergy>,
-  ) {}
+  constructor(@InjectModel(Allergy.name) private readonly allergyModel: Model<Allergy>) {}
 
   async create(createAllergyDto: CreateAllergyDto) {
     const normalizedName = createAllergyDto.name.trim();
@@ -56,9 +54,7 @@ export class AllergiesService {
 
   async update(id: string, updateAllergyDto: UpdateAllergyDto) {
     const updateData = Object.fromEntries(
-      Object.entries(updateAllergyDto).filter(
-        ([, value]) => value !== undefined,
-      ),
+      Object.entries(updateAllergyDto).filter(([, value]) => value !== undefined),
     );
 
     if (updateData.name) {

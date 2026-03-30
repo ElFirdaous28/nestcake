@@ -95,10 +95,7 @@ describe('ProfessionalsController', () => {
 
     const result = await controller.updateMe(req, dto);
 
-    expect(professionalsServiceMock.updateMe).toHaveBeenCalledWith(
-      req.user,
-      dto,
-    );
+    expect(professionalsServiceMock.updateMe).toHaveBeenCalledWith(req.user, dto);
     expect(result).toEqual(updated);
   });
 
@@ -121,11 +118,7 @@ describe('ProfessionalsController', () => {
 
     const result = await controller.addPortfolioItem(req, file, dto);
 
-    expect(professionalsServiceMock.addPortfolioItem).toHaveBeenCalledWith(
-      req.user,
-      file,
-      dto,
-    );
+    expect(professionalsServiceMock.addPortfolioItem).toHaveBeenCalledWith(req.user, file, dto);
     expect(result).toEqual(updated);
   });
 
@@ -165,10 +158,7 @@ describe('ProfessionalsController', () => {
 
     const result = await controller.updateVerification(professionalId, dto);
 
-    expect(professionalsServiceMock.updateVerification).toHaveBeenCalledWith(
-      professionalId,
-      dto,
-    );
+    expect(professionalsServiceMock.updateVerification).toHaveBeenCalledWith(professionalId, dto);
     expect(result).toEqual(updated);
   });
 
@@ -203,12 +193,9 @@ describe('ProfessionalsController', () => {
 
     professionalsServiceMock.updateVerification.mockRejectedValue(error);
 
-    await expect(
-      controller.updateVerification(professionalId, dto),
-    ).rejects.toThrow(NotFoundException);
-    expect(professionalsServiceMock.updateVerification).toHaveBeenCalledWith(
-      professionalId,
-      dto,
+    await expect(controller.updateVerification(professionalId, dto)).rejects.toThrow(
+      NotFoundException,
     );
+    expect(professionalsServiceMock.updateVerification).toHaveBeenCalledWith(professionalId, dto);
   });
 });

@@ -5,12 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  AuthUser,
-  ProductStatus,
-  ProfessionalVerificationStatus,
-  UserRole,
-} from '@shared-types';
+import { AuthUser, ProductStatus, ProfessionalVerificationStatus, UserRole } from '@shared-types';
 import { Model, Types } from 'mongoose';
 import { Category } from '../categories/schemas/category.schema';
 import { Professional } from '../professionals/schemas/professional.schema';
@@ -51,10 +46,7 @@ export class ProductsService {
     return professional;
   }
 
-  private ensureOwnership(
-    productProfessionalId: string,
-    myProfessionalId: string,
-  ) {
+  private ensureOwnership(productProfessionalId: string, myProfessionalId: string) {
     if (productProfessionalId !== myProfessionalId) {
       throw new ForbiddenException('You can only manage your own products');
     }
@@ -76,11 +68,7 @@ export class ProductsService {
 
   // ---------- CRUD ----------
 
-  async create(
-    authUser: AuthUser,
-    dto: CreateProductDto,
-    file: Express.Multer.File,
-  ) {
+  async create(authUser: AuthUser, dto: CreateProductDto, file: Express.Multer.File) {
     const professional = await this.getProfessional(authUser);
 
     const categoryIds = this.normalizeCategoryIds(dto.categoryIds);
@@ -108,10 +96,7 @@ export class ProductsService {
     const { scope, options = {}, authUser } = params;
 
     if (scope === 'client') {
-      return this.findAllByFilter(
-        { status: ProductStatus.PUBLISHED, isAvailable: true },
-        options,
-      );
+      return this.findAllByFilter({ status: ProductStatus.PUBLISHED, isAvailable: true }, options);
     }
 
     if (scope === 'admin') {
@@ -150,13 +135,7 @@ export class ProductsService {
     }
 
     const [data, total] = await Promise.all([
-      this.productModel
-        .find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean()
-        .exec(),
+      this.productModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean().exec(),
       this.productModel.countDocuments(filter),
     ]);
 
@@ -181,25 +160,15 @@ export class ProductsService {
     return product;
   }
 
-  async update(
-    id: string,
-    authUser: AuthUser,
-    dto: UpdateProductDto,
-    file?: Express.Multer.File,
-  ) {
+  async update(id: string, authUser: AuthUser, dto: UpdateProductDto, file?: Express.Multer.File) {
     const professional = await this.getProfessional(authUser);
 
     const product = await this.productModel.findById(id).lean().exec();
     if (!product) throw new NotFoundException('Product not found');
 
-    this.ensureOwnership(
-      product.professionalId.toString(),
-      professional._id.toString(),
-    );
+    this.ensureOwnership(product.professionalId.toString(), professional._id.toString());
 
-    const updateData = Object.fromEntries(
-      Object.entries(dto).filter(([, v]) => v !== undefined),
-    );
+    const updateData = Object.fromEntries(Object.entries(dto).filter(([, v]) => v !== undefined));
 
     if (updateData.name) updateData.name = updateData.name.trim();
     if (typeof updateData.description === 'string') {
@@ -235,10 +204,7 @@ export class ProductsService {
     if (authUser.role === UserRole.PROFESSIONAL) {
       const professional = await this.getProfessional(authUser);
 
-      this.ensureOwnership(
-        product.professionalId.toString(),
-        professional._id.toString(),
-      );
+      this.ensureOwnership(product.professionalId.toString(), professional._id.toString());
     }
 
     await this.productModel.findByIdAndDelete(id);
@@ -246,50 +212,31 @@ export class ProductsService {
     return { message: 'Product deleted successfully' };
   }
 
-  async updateProductStatus(
-    id: string,
-    authUser: AuthUser,
-    status: ProductStatus,
-  ) {
+  async updateProductStatus(id: string, authUser: AuthUser, status: ProductStatus) {
     const professional = await this.getProfessional(authUser);
 
     if (
       status === ProductStatus.PUBLISHED &&
-      professional.verificationStatus !==
-        ProfessionalVerificationStatus.VERIFIED
+      professional.verificationStatus !== ProfessionalVerificationStatus.VERIFIED
     ) {
-      throw new ForbiddenException(
-        'Only verified professionals can publish products',
-      );
+      throw new ForbiddenException('Only verified professionals can publish products');
     }
 
     const product = await this.productModel.findById(id).lean().exec();
     if (!product) throw new NotFoundException('Product not found');
 
-    this.ensureOwnership(
-      product.professionalId.toString(),
-      professional._id.toString(),
-    );
+    this.ensureOwnership(product.professionalId.toString(), professional._id.toString());
 
     return this.productModel
-      .findByIdAndUpdate(
-        id,
-        { status },
-        { returnDocument: 'after', runValidators: true },
-      )
+      .findByIdAndUpdate(id, { status }, { returnDocument: 'after', runValidators: true })
       .lean();
   }
 
   async publishAllProducts(authUser: AuthUser) {
     const professional = await this.getProfessional(authUser);
 
-    if (
-      professional.verificationStatus !==
-      ProfessionalVerificationStatus.VERIFIED
-    ) {
-      throw new ForbiddenException(
-        'Only verified professionals can publish products',
-      );
+    if (professional.verificationStatus !== ProfessionalVerificationStatus.VERIFIED) {
+      throw new ForbiddenException('Only verified professionals can publish products');
     }
 
     const result = await this.productModel.updateMany(

@@ -87,10 +87,7 @@ export class UsersController {
   })
   @UseGuards(JwtAuthGuard)
   @Patch('me')
-  updateMe(
-    @Req() req: Request & { user: AuthUser },
-    @Body() dto: UpdateProfileDto,
-  ) {
+  updateMe(@Req() req: Request & { user: AuthUser }, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateMe(req.user, dto);
   }
 
@@ -137,10 +134,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Patch('me/password')
   @HttpCode(HttpStatus.OK)
-  changePassword(
-    @Req() req: Request & { user: AuthUser },
-    @Body() dto: ChangePasswordDto,
-  ) {
+  changePassword(@Req() req: Request & { user: AuthUser }, @Body() dto: ChangePasswordDto) {
     return this.usersService.changePassword(req.user, dto);
   }
 

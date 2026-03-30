@@ -6,10 +6,7 @@ import { Allergy, AllergySchema } from './schemas/allergy.schema';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Allergy.name, schema: AllergySchema }]),
-    AuthModule,
-  ],
+  imports: [MongooseModule.forFeature([{ name: Allergy.name, schema: AllergySchema }]), AuthModule],
 
   controllers: [AllergiesController],
   providers: [AllergiesService],

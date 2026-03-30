@@ -75,10 +75,7 @@ export class ProfessionalsController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.PROFESSIONAL)
   @Patch('me')
-  updateMe(
-    @Req() req: Request & { user: AuthUser },
-    @Body() dto: UpdateMyProfessionalDto,
-  ) {
+  updateMe(@Req() req: Request & { user: AuthUser }, @Body() dto: UpdateMyProfessionalDto) {
     return this.professionalsService.updateMe(req.user, dto);
   }
 
@@ -126,10 +123,7 @@ export class ProfessionalsController {
     @Req() req: Request & { user: AuthUser },
     @Param('id', ParseObjectIdPipe) portfolioItemId: string,
   ) {
-    return this.professionalsService.removePortfolioItem(
-      req.user,
-      portfolioItemId,
-    );
+    return this.professionalsService.removePortfolioItem(req.user, portfolioItemId);
   }
 
   @ApiBearerAuth()

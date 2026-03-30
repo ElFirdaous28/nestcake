@@ -22,11 +22,7 @@ export class UsersService {
   ) {}
 
   async getMe(authUser: AuthUser) {
-    const user = await this.userModel
-      .findById(authUser.sub)
-      .select('-password')
-      .lean()
-      .exec();
+    const user = await this.userModel.findById(authUser.sub).select('-password').lean().exec();
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -36,9 +32,7 @@ export class UsersService {
   }
 
   async updateMe(authUser: AuthUser, dto: UpdateProfileDto) {
-    const updateData = Object.fromEntries(
-      Object.entries(dto).filter(([, v]) => v !== undefined),
-    );
+    const updateData = Object.fromEntries(Object.entries(dto).filter(([, v]) => v !== undefined));
 
     const user = await this.userModel
       .findByIdAndUpdate(authUser.sub, updateData, {
@@ -87,19 +81,14 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    const currentPasswordOk = await bcrypt.compare(
-      dto.currentPassword,
-      user.password,
-    );
+    const currentPasswordOk = await bcrypt.compare(dto.currentPassword, user.password);
     if (!currentPasswordOk) {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
     const samePassword = await bcrypt.compare(dto.newPassword, user.password);
     if (samePassword) {
-      throw new BadRequestException(
-        'New password must be different from current password',
-      );
+      throw new BadRequestException('New password must be different from current password');
     }
 
     user.password = await bcrypt.hash(dto.newPassword, 10);
@@ -112,10 +101,7 @@ export class UsersService {
   }
 
   async deleteMe(authUser: AuthUser) {
-    const deleted = await this.userModel
-      .findByIdAndDelete(authUser.sub)
-      .lean()
-      .exec();
+    const deleted = await this.userModel.findByIdAndDelete(authUser.sub).lean().exec();
 
     if (!deleted) {
       throw new NotFoundException('User not found');

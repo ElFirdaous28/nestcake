@@ -164,10 +164,7 @@ export class RequestsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   @Delete(':id')
-  remove(
-    @Req() req: Request & { user: AuthUser },
-    @Param('id', ParseObjectIdPipe) id: string,
-  ) {
+  remove(@Req() req: Request & { user: AuthUser }, @Param('id', ParseObjectIdPipe) id: string) {
     return this.requestsService.remove(id, req.user);
   }
 

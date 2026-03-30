@@ -1,13 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsMongoId,
-  IsNumber,
-  IsOptional,
-  IsString,
-  MaxLength,
-  Min,
-} from 'class-validator';
+import { IsDate, IsMongoId, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 export class CreateProposalDto {
   @IsMongoId()

@@ -1,12 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  ArrayNotEmpty,
-  IsArray,
-  IsInt,
-  IsMongoId,
-  Min,
-  ValidateNested,
-} from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsInt, IsMongoId, Min, ValidateNested } from 'class-validator';
 
 class CreateOrderItemDto {
   @IsMongoId()

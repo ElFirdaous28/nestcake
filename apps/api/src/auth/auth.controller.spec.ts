@@ -95,9 +95,7 @@ describe('AuthController', () => {
 
     authServiceMock.registerUser.mockRejectedValue(new Error('DB error'));
 
-    await expect(controller.registerUser(dto, res as any)).rejects.toThrow(
-      'DB error',
-    );
+    await expect(controller.registerUser(dto, res as any)).rejects.toThrow('DB error');
 
     expect(res.cookie).not.toHaveBeenCalled();
   });
@@ -126,9 +124,7 @@ describe('AuthController', () => {
 
     authServiceMock.registerProfessional.mockRejectedValue(new Error('fail'));
 
-    await expect(
-      controller.registerProfessional(dto, res as any),
-    ).rejects.toThrow('fail');
+    await expect(controller.registerProfessional(dto, res as any)).rejects.toThrow('fail');
 
     expect(res.cookie).not.toHaveBeenCalled();
   });
@@ -152,13 +148,9 @@ describe('AuthController', () => {
     const dto = { email: 'wrong@test.com', password: 'bad' } as any;
     const res = createResponse();
 
-    authServiceMock.login.mockRejectedValue(
-      new UnauthorizedException('Invalid credentials'),
-    );
+    authServiceMock.login.mockRejectedValue(new UnauthorizedException('Invalid credentials'));
 
-    await expect(controller.login(dto, res as any)).rejects.toThrow(
-      UnauthorizedException,
-    );
+    await expect(controller.login(dto, res as any)).rejects.toThrow(UnauthorizedException);
 
     expect(res.cookie).not.toHaveBeenCalled();
   });
@@ -168,9 +160,7 @@ describe('AuthController', () => {
     const req = { cookies: {} };
     const res = createResponse();
 
-    await expect(controller.refresh(req as any, res as any)).rejects.toThrow(
-      UnauthorizedException,
-    );
+    await expect(controller.refresh(req as any, res as any)).rejects.toThrow(UnauthorizedException);
 
     expect(authServiceMock.refresh).not.toHaveBeenCalled();
   });
@@ -193,13 +183,9 @@ describe('AuthController', () => {
     const req = { cookies: { refresh_token: 'bad-token' } };
     const res = createResponse();
 
-    authServiceMock.refresh.mockRejectedValue(
-      new UnauthorizedException('Invalid token'),
-    );
+    authServiceMock.refresh.mockRejectedValue(new UnauthorizedException('Invalid token'));
 
-    await expect(controller.refresh(req as any, res as any)).rejects.toThrow(
-      UnauthorizedException,
-    );
+    await expect(controller.refresh(req as any, res as any)).rejects.toThrow(UnauthorizedException);
 
     expect(res.cookie).not.toHaveBeenCalled();
   });
@@ -226,9 +212,7 @@ describe('AuthController', () => {
 
     authServiceMock.logout.mockRejectedValue(new Error('fail'));
 
-    await expect(controller.logout(req as any, res as any)).rejects.toThrow(
-      'fail',
-    );
+    await expect(controller.logout(req as any, res as any)).rejects.toThrow('fail');
 
     expect(res.clearCookie).not.toHaveBeenCalled();
   });
@@ -251,8 +235,6 @@ describe('AuthController', () => {
 
     authServiceMock.getMe.mockRejectedValue(new Error('User not found'));
 
-    await expect(controller.getMe(req as any)).rejects.toThrow(
-      'User not found',
-    );
+    await expect(controller.getMe(req as any)).rejects.toThrow('User not found');
   });
 });

@@ -12,9 +12,7 @@ import { Category } from './schemas/category.schema';
 
 @Injectable()
 export class CategoriesService {
-  constructor(
-    @InjectModel(Category.name) private readonly categoryModel: Model<Category>,
-  ) {}
+  constructor(@InjectModel(Category.name) private readonly categoryModel: Model<Category>) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
     const normalizedName = createCategoryDto.name.trim();
@@ -56,9 +54,7 @@ export class CategoriesService {
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     const updateData = Object.fromEntries(
-      Object.entries(updateCategoryDto).filter(
-        ([, value]) => value !== undefined,
-      ),
+      Object.entries(updateCategoryDto).filter(([, value]) => value !== undefined),
     );
 
     if (updateData.name) {
@@ -102,10 +98,7 @@ export class CategoriesService {
   }
 
   async remove(id: string) {
-    const deleted = await this.categoryModel
-      .findByIdAndDelete(id)
-      .lean()
-      .exec();
+    const deleted = await this.categoryModel.findByIdAndDelete(id).lean().exec();
 
     if (!deleted) {
       throw new NotFoundException('Category not found');

@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthUser, UserRole } from '@shared-types';
 import { Request } from 'express';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -17,14 +8,7 @@ import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { FindReviewsQueryDto } from './dto/find-reviews-query.dto';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('reviews')
 @Controller('reviews')
@@ -48,10 +32,7 @@ export class ReviewsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   @Post()
-  create(
-    @Req() req: Request & { user: AuthUser },
-    @Body() createReviewDto: CreateReviewDto,
-  ) {
+  create(@Req() req: Request & { user: AuthUser }, @Body() createReviewDto: CreateReviewDto) {
     return this.reviewsService.create(req.user, createReviewDto);
   }
 
@@ -71,10 +52,7 @@ export class ReviewsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.PROFESSIONAL)
   @Get('my-reviews')
-  findMyReviews(
-    @Req() req: Request & { user: AuthUser },
-    @Query() query: FindReviewsQueryDto,
-  ) {
+  findMyReviews(@Req() req: Request & { user: AuthUser }, @Query() query: FindReviewsQueryDto) {
     return this.reviewsService.findMyReviews(req.user, query);
   }
 

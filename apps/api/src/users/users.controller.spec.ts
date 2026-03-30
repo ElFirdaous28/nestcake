@@ -65,13 +65,7 @@ describe('UsersController', () => {
 
     usersServiceMock.findAllForAdmin.mockResolvedValue(response);
 
-    const result = await controller.findAllForAdmin(
-      req,
-      'john',
-      'CLIENT',
-      '5',
-      '10',
-    );
+    const result = await controller.findAllForAdmin(req, 'john', 'CLIENT', '5', '10');
 
     expect(usersServiceMock.findAllForAdmin).toHaveBeenCalledWith(req.user, {
       search: 'john',
@@ -182,9 +176,7 @@ describe('UsersController', () => {
 
     usersServiceMock.deleteMe.mockRejectedValue(error);
 
-    await expect(controller.deleteMe(req, res)).rejects.toThrow(
-      NotFoundException,
-    );
+    await expect(controller.deleteMe(req, res)).rejects.toThrow(NotFoundException);
     expect(res.clearCookie).not.toHaveBeenCalled();
   });
 });

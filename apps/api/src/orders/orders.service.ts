@@ -54,11 +54,7 @@ export class OrdersService {
     return order;
   }
 
-  private ensureClientOwnsOrder(
-    orderClientId: Types.ObjectId,
-    authUser: AuthUser,
-    action: string,
-  ) {
+  private ensureClientOwnsOrder(orderClientId: Types.ObjectId, authUser: AuthUser, action: string) {
     if (orderClientId.toString() !== authUser.sub) {
       throw new BadRequestException(`You can only ${action} your own orders`);
     }
@@ -78,17 +74,10 @@ export class OrdersService {
   }
 
   private async setOrderStatus(id: string, status: OrderStatus) {
-    await this.orderModel.findByIdAndUpdate(
-      id,
-      { status },
-      { runValidators: true },
-    );
+    await this.orderModel.findByIdAndUpdate(id, { status }, { runValidators: true });
   }
 
-  private async listOrdersByFilter(
-    filter: Record<string, unknown>,
-    query: FindOrdersQueryDto,
-  ) {
+  private async listOrdersByFilter(filter: Record<string, unknown>, query: FindOrdersQueryDto) {
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
     const skip = (page - 1) * limit;
@@ -128,9 +117,7 @@ export class OrdersService {
     const uniqueProductIds = [...new Set(productIds)];
 
     if (uniqueProductIds.length !== productIds.length) {
-      throw new BadRequestException(
-        'Duplicate products are not allowed in one order',
-      );
+      throw new BadRequestException('Duplicate products are not allowed in one order');
     }
 
     const products = await this.productModel
@@ -143,9 +130,7 @@ export class OrdersService {
       .exec();
 
     if (products.length !== uniqueProductIds.length) {
-      throw new BadRequestException(
-        'One or more products are unavailable or unpublished',
-      );
+      throw new BadRequestException('One or more products are unavailable or unpublished');
     }
 
     const professionalIds = [
@@ -153,16 +138,12 @@ export class OrdersService {
     ];
 
     if (professionalIds.length !== 1) {
-      throw new BadRequestException(
-        'All order items must belong to the same professional',
-      );
+      throw new BadRequestException('All order items must belong to the same professional');
     }
 
     const professionalId = professionalIds[0];
 
-    const productById = new Map(
-      products.map((product) => [product._id.toString(), product]),
-    );
+    const productById = new Map(products.map((product) => [product._id.toString(), product]));
 
     const orderItems = createOrderDto.items.map((item) => {
       const product = productById.get(item.productId);
@@ -177,10 +158,7 @@ export class OrdersService {
       };
     });
 
-    const totalPrice = orderItems.reduce(
-      (sum, item) => sum + item.quantity * item.unitPrice,
-      0,
-    );
+    const totalPrice = orderItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
 
     const existingAwaitingPaymentOrder = await this.orderModel
       .findOne({
@@ -258,10 +236,7 @@ export class OrdersService {
       data: { orderId: order._id.toString(), totalPrice },
     });
 
-    await this.notificationsGateway.sendNotificationToUser(
-      professionalId,
-      notification,
-    );
+    await this.notificationsGateway.sendNotificationToUser(professionalId, notification);
 
     return this.findOne(order._id.toString());
   }
@@ -313,10 +288,7 @@ export class OrdersService {
       throw new NotFoundException('Order not found');
     }
 
-    if (
-      authUser.role !== UserRole.ADMIN &&
-      order.clientId.toString() !== authUser.sub
-    ) {
+    if (authUser.role !== UserRole.ADMIN && order.clientId.toString() !== authUser.sub) {
       throw new BadRequestException('You can only delete your own orders');
     }
 
@@ -349,20 +321,14 @@ export class OrdersService {
     this.ensureClientOwnsOrder(order.clientId, authUser, 'update');
 
     if (order.type !== OrderType.DIRECT) {
-      throw new BadRequestException(
-        'You can only remove items from direct orders',
-      );
+      throw new BadRequestException('You can only remove items from direct orders');
     }
 
     if (order.status !== OrderStatus.AWAITING_PAYMENT) {
-      throw new BadRequestException(
-        'You can only remove items from orders awaiting payment',
-      );
+      throw new BadRequestException('You can only remove items from orders awaiting payment');
     }
 
-    const remainingItems = order.items.filter(
-      (item) => item.productId.toString() !== productId,
-    );
+    const remainingItems = order.items.filter((item) => item.productId.toString() !== productId);
 
     if (remainingItems.length === order.items.length) {
       throw new NotFoundException('Item not found in this order');
@@ -438,9 +404,7 @@ export class OrdersService {
     }
 
     if (order.status !== OrderStatus.IN_PROGRESS) {
-      throw new BadRequestException(
-        'Only in-progress orders can be marked ready',
-      );
+      throw new BadRequestException('Only in-progress orders can be marked ready');
     }
 
     await this.setOrderStatus(id, OrderStatus.READY);
@@ -454,10 +418,7 @@ export class OrdersService {
       data: { orderId: order._id.toString() },
     });
 
-    await this.notificationsGateway.sendNotificationToUser(
-      order.clientId.toString(),
-      notification,
-    );
+    await this.notificationsGateway.sendNotificationToUser(order.clientId.toString(), notification);
 
     return this.findOne(id);
   }
@@ -474,13 +435,8 @@ export class OrdersService {
       throw new BadRequestException('Only direct orders can be rejected');
     }
 
-    if (
-      order.status !== OrderStatus.AWAITING_PAYMENT &&
-      order.status !== OrderStatus.IN_PROGRESS
-    ) {
-      throw new BadRequestException(
-        'Only awaiting payment or in-progress orders can be rejected',
-      );
+    if (order.status !== OrderStatus.AWAITING_PAYMENT && order.status !== OrderStatus.IN_PROGRESS) {
+      throw new BadRequestException('Only awaiting payment or in-progress orders can be rejected');
     }
 
     await this.orderModel.findByIdAndUpdate(
@@ -500,10 +456,7 @@ export class OrdersService {
       data: { orderId: order._id.toString() },
     });
 
-    await this.notificationsGateway.sendNotificationToUser(
-      order.clientId.toString(),
-      notification,
-    );
+    await this.notificationsGateway.sendNotificationToUser(order.clientId.toString(), notification);
 
     return this.findOne(id);
   }

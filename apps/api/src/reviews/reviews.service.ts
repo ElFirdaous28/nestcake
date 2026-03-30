@@ -22,10 +22,7 @@ export class ReviewsService {
     private readonly professionalModel: Model<Professional>,
   ) {}
 
-  private async listByFilter(
-    filter: Record<string, unknown>,
-    query: FindReviewsQueryDto,
-  ) {
+  private async listByFilter(filter: Record<string, unknown>, query: FindReviewsQueryDto) {
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
     const skip = (page - 1) * limit;
@@ -70,31 +67,21 @@ export class ReviewsService {
   }
 
   async create(authUser: AuthUser, createReviewDto: CreateReviewDto) {
-    const order = await this.orderModel
-      .findById(createReviewDto.orderId)
-      .lean()
-      .exec();
+    const order = await this.orderModel.findById(createReviewDto.orderId).lean().exec();
 
     if (!order || order.isDeleted) {
       throw new NotFoundException('Order not found');
     }
 
     if (order.clientId.toString() !== authUser.sub) {
-      throw new ForbiddenException(
-        'You can only review your own completed orders',
-      );
+      throw new ForbiddenException('You can only review your own completed orders');
     }
 
     if (order.status !== OrderStatus.COMPLETED) {
-      throw new BadRequestException(
-        'Review is only allowed after order completion',
-      );
+      throw new BadRequestException('Review is only allowed after order completion');
     }
 
-    const existing = await this.reviewModel
-      .findOne({ orderId: order._id })
-      .lean()
-      .exec();
+    const existing = await this.reviewModel.findOne({ orderId: order._id }).lean().exec();
 
     if (existing) {
       throw new BadRequestException('You have already reviewed this order');
@@ -139,9 +126,6 @@ export class ReviewsService {
   }
 
   findByProfessional(professionalId: string, query: FindReviewsQueryDto) {
-    return this.listByFilter(
-      { professionalId: new Types.ObjectId(professionalId) },
-      query,
-    );
+    return this.listByFilter({ professionalId: new Types.ObjectId(professionalId) }, query);
   }
 }

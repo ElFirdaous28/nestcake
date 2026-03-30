@@ -1,15 +1,10 @@
 import { ProfessionalVerificationStatus, UserRole } from '@shared-types';
 import { Model } from 'mongoose';
 
-export async function seedProfessionals(
-  professionalModel: Model<any>,
-  users: any[],
-) {
+export async function seedProfessionals(professionalModel: Model<any>, users: any[]) {
   await professionalModel.deleteMany({});
 
-  const professionalUsers = users.filter(
-    (user) => user.role === UserRole.PROFESSIONAL,
-  );
+  const professionalUsers = users.filter((user) => user.role === UserRole.PROFESSIONAL);
 
   const professionals = professionalUsers.map((user, index) => ({
     userId: user._id,

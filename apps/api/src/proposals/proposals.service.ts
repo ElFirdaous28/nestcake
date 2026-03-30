@@ -45,10 +45,7 @@ export class ProposalsService {
       throw new NotFoundException('Professional profile not found');
     }
 
-    const request = await this.requestModel
-      .findById(createProposalDto.requestId)
-      .lean()
-      .exec();
+    const request = await this.requestModel.findById(createProposalDto.requestId).lean().exec();
 
     if (!request) {
       throw new NotFoundException('Request not found');
@@ -64,9 +61,7 @@ export class ProposalsService {
       .exec();
 
     if (existing && existing.status !== ProposalStatus.WITHDRAWN) {
-      throw new BadRequestException(
-        'You already submitted a proposal for this request',
-      );
+      throw new BadRequestException('You already submitted a proposal for this request');
     }
 
     const proposal = await this.proposalModel.create({
@@ -134,13 +129,8 @@ export class ProposalsService {
       throw new NotFoundException('Request not found');
     }
 
-    if (
-      authUser.role !== UserRole.ADMIN &&
-      request.clientId.toString() !== authUser.sub
-    ) {
-      throw new ForbiddenException(
-        'You can only view proposals for your own requests',
-      );
+    if (authUser.role !== UserRole.ADMIN && request.clientId.toString() !== authUser.sub) {
+      throw new ForbiddenException('You can only view proposals for your own requests');
     }
 
     return this.proposalModel
@@ -152,10 +142,7 @@ export class ProposalsService {
   }
 
   async accept(authUser: AuthUser, proposalId: string) {
-    const proposal = await this.proposalModel
-      .findById(proposalId)
-      .lean()
-      .exec();
+    const proposal = await this.proposalModel.findById(proposalId).lean().exec();
 
     if (!proposal) {
       throw new NotFoundException('Proposal not found');
@@ -165,25 +152,18 @@ export class ProposalsService {
       throw new BadRequestException('Only pending proposals can be accepted');
     }
 
-    const request = await this.requestModel
-      .findById(proposal.requestId)
-      .lean()
-      .exec();
+    const request = await this.requestModel.findById(proposal.requestId).lean().exec();
 
     if (!request) {
       throw new NotFoundException('Request not found');
     }
 
     if (request.clientId.toString() !== authUser.sub) {
-      throw new ForbiddenException(
-        'You can only accept proposals on your own requests',
-      );
+      throw new ForbiddenException('You can only accept proposals on your own requests');
     }
 
     if (request.status !== RequestStatus.OPEN) {
-      throw new BadRequestException(
-        'Request is not open for accepting proposals',
-      );
+      throw new BadRequestException('Request is not open for accepting proposals');
     }
 
     const existingOrder = await this.orderModel

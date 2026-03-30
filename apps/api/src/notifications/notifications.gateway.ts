@@ -71,10 +71,7 @@ export class NotificationsGateway
     notification: NotificationDocument,
   ) {
     const userIdStr = userId.toString();
-    console.log(
-      `📨 Sending notification to user ${userIdStr}:`,
-      notification.type,
-    );
+    console.log(`📨 Sending notification to user ${userIdStr}:`, notification.type);
     this.server.to(`user-${userIdStr}`).emit('notification', {
       _id: notification._id?.toString() || notification._id,
       type: notification.type,
@@ -106,18 +103,13 @@ export class NotificationsGateway
   // Broadcast unread count update
   async updateUnreadCount(userId: string | Types.ObjectId) {
     const userIdStr = userId.toString();
-    const unreadCount =
-      await this.notificationsService.getUnreadCount(userIdStr);
-    this.server
-      .to(`user-${userIdStr}`)
-      .emit('notification:unread-count', { count: unreadCount });
+    const unreadCount = await this.notificationsService.getUnreadCount(userIdStr);
+    this.server.to(`user-${userIdStr}`).emit('notification:unread-count', { count: unreadCount });
   }
 
   // Mark notification as read (real-time)
   async notifyRead(userId: string | Types.ObjectId, notificationId: string) {
     const userIdStr = userId.toString();
-    this.server
-      .to(`user-${userIdStr}`)
-      .emit('notification:read', { notificationId });
+    this.server.to(`user-${userIdStr}`).emit('notification:read', { notificationId });
   }
 }

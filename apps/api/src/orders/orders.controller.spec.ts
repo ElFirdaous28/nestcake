@@ -96,10 +96,7 @@ describe('OrdersController', () => {
 
     const result = await controller.findClientOrders(req, query);
 
-    expect(ordersServiceMock.findClientOrders).toHaveBeenCalledWith(
-      req.user,
-      query,
-    );
+    expect(ordersServiceMock.findClientOrders).toHaveBeenCalledWith(req.user, query);
     expect(result).toEqual(response);
   });
 
@@ -117,10 +114,7 @@ describe('OrdersController', () => {
 
     const result = await controller.findProfessionalOrders(req, query);
 
-    expect(ordersServiceMock.findProfessionalOrders).toHaveBeenCalledWith(
-      req.user,
-      query,
-    );
+    expect(ordersServiceMock.findProfessionalOrders).toHaveBeenCalledWith(req.user, query);
     expect(result).toEqual(response);
   });
 
@@ -139,9 +133,7 @@ describe('OrdersController', () => {
   it('findOne: should throw when service throws not found', async () => {
     const id = '507f1f77bcf86cd799439699';
 
-    ordersServiceMock.findOne.mockRejectedValue(
-      new NotFoundException('Order not found'),
-    );
+    ordersServiceMock.findOne.mockRejectedValue(new NotFoundException('Order not found'));
 
     await expect(controller.findOne(id)).rejects.toThrow(NotFoundException);
     expect(ordersServiceMock.findOne).toHaveBeenCalledWith(id);
@@ -174,11 +166,7 @@ describe('OrdersController', () => {
 
     const result = await controller.removeItem(req, id, productId);
 
-    expect(ordersServiceMock.removeItem).toHaveBeenCalledWith(
-      id,
-      productId,
-      req.user,
-    );
+    expect(ordersServiceMock.removeItem).toHaveBeenCalledWith(id, productId, req.user);
     expect(result).toEqual(order);
   });
 
@@ -252,9 +240,7 @@ describe('OrdersController', () => {
       new BadRequestException('Only ready orders can be completed'),
     );
 
-    await expect(controller.complete(req, id)).rejects.toThrow(
-      BadRequestException,
-    );
+    await expect(controller.complete(req, id)).rejects.toThrow(BadRequestException);
     expect(ordersServiceMock.complete).toHaveBeenCalledWith(id, req.user);
   });
 });

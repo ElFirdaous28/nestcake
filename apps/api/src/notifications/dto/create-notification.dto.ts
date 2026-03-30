@@ -1,11 +1,4 @@
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsString,
-  IsObject,
-  IsOptional,
-  IsBoolean,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString, IsObject, IsOptional, IsBoolean } from 'class-validator';
 import { NotificationType } from '@shared-types';
 import { Types } from 'mongoose';
 

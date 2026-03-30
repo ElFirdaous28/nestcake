@@ -58,11 +58,7 @@ describe('RequestsController', () => {
 
     const result = await controller.create(req, dto, file);
 
-    expect(requestsServiceMock.create).toHaveBeenCalledWith(
-      req.user,
-      dto,
-      file,
-    );
+    expect(requestsServiceMock.create).toHaveBeenCalledWith(req.user, dto, file);
     expect(result).toEqual(created);
   });
 
@@ -92,11 +88,7 @@ describe('RequestsController', () => {
 
     const result = await controller.findMyRequests(req, 2, 10);
 
-    expect(requestsServiceMock.findMyRequests).toHaveBeenCalledWith(
-      req.user,
-      2,
-      10,
-    );
+    expect(requestsServiceMock.findMyRequests).toHaveBeenCalledWith(req.user, 2, 10);
     expect(result).toEqual(response);
   });
 
@@ -113,9 +105,7 @@ describe('RequestsController', () => {
 
   it('findOne: should throw when service throws not found', async () => {
     const id = '507f1f77bcf86cd799439499';
-    requestsServiceMock.findOne.mockRejectedValue(
-      new NotFoundException('Request not found'),
-    );
+    requestsServiceMock.findOne.mockRejectedValue(new NotFoundException('Request not found'));
 
     await expect(controller.findOne(id)).rejects.toThrow(NotFoundException);
     expect(requestsServiceMock.findOne).toHaveBeenCalledWith(id);
@@ -134,12 +124,7 @@ describe('RequestsController', () => {
 
     const result = await controller.update(req, id, dto, file);
 
-    expect(requestsServiceMock.update).toHaveBeenCalledWith(
-      id,
-      req.user,
-      dto,
-      file,
-    );
+    expect(requestsServiceMock.update).toHaveBeenCalledWith(id, req.user, dto, file);
     expect(result).toEqual(updated);
   });
 
@@ -167,9 +152,7 @@ describe('RequestsController', () => {
       new ForbiddenException('You can only delete your own requests'),
     );
 
-    await expect(controller.remove(req, id)).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(controller.remove(req, id)).rejects.toThrow(ForbiddenException);
     expect(requestsServiceMock.remove).toHaveBeenCalledWith(id, req.user);
   });
 
@@ -182,11 +165,7 @@ describe('RequestsController', () => {
 
     requestsServiceMock.updateStatus.mockResolvedValue(response);
 
-    const result = await controller.updateStatus(
-      req,
-      id,
-      RequestStatus.CANCELLED,
-    );
+    const result = await controller.updateStatus(req, id, RequestStatus.CANCELLED);
 
     expect(requestsServiceMock.updateStatus).toHaveBeenCalledWith(
       id,

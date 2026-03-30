@@ -19,14 +19,7 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { FindOrdersQueryDto } from './dto/find-orders-query.dto';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -51,10 +44,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   @Post()
-  create(
-    @Req() req: Request & { user: AuthUser },
-    @Body() createOrderDto: CreateOrderDto,
-  ) {
+  create(@Req() req: Request & { user: AuthUser }, @Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(req.user, createOrderDto);
   }
 
@@ -75,10 +65,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   @Get('client')
-  findClientOrders(
-    @Req() req: Request & { user: AuthUser },
-    @Query() query: FindOrdersQueryDto,
-  ) {
+  findClientOrders(@Req() req: Request & { user: AuthUser }, @Query() query: FindOrdersQueryDto) {
     return this.ordersService.findClientOrders(req.user, query);
   }
 
@@ -107,10 +94,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT, UserRole.ADMIN)
   @Delete(':id')
-  remove(
-    @Req() req: Request & { user: AuthUser },
-    @Param('id', ParseObjectIdPipe) id: string,
-  ) {
+  remove(@Req() req: Request & { user: AuthUser }, @Param('id', ParseObjectIdPipe) id: string) {
     return this.ordersService.remove(id, req.user);
   }
 
@@ -135,10 +119,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   @Patch(':id/pay')
-  markPaid(
-    @Req() req: Request & { user: AuthUser },
-    @Param('id', ParseObjectIdPipe) id: string,
-  ) {
+  markPaid(@Req() req: Request & { user: AuthUser }, @Param('id', ParseObjectIdPipe) id: string) {
     return this.ordersService.markPaid(id, req.user);
   }
 
@@ -148,10 +129,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.PROFESSIONAL)
   @Patch(':id/ready')
-  markReady(
-    @Req() req: Request & { user: AuthUser },
-    @Param('id', ParseObjectIdPipe) id: string,
-  ) {
+  markReady(@Req() req: Request & { user: AuthUser }, @Param('id', ParseObjectIdPipe) id: string) {
     return this.ordersService.markReady(id, req.user);
   }
 
@@ -161,10 +139,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.PROFESSIONAL)
   @Patch(':id/reject')
-  reject(
-    @Req() req: Request & { user: AuthUser },
-    @Param('id', ParseObjectIdPipe) id: string,
-  ) {
+  reject(@Req() req: Request & { user: AuthUser }, @Param('id', ParseObjectIdPipe) id: string) {
     return this.ordersService.reject(id, req.user);
   }
 
@@ -174,10 +149,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CLIENT)
   @Patch(':id/complete')
-  complete(
-    @Req() req: Request & { user: AuthUser },
-    @Param('id', ParseObjectIdPipe) id: string,
-  ) {
+  complete(@Req() req: Request & { user: AuthUser }, @Param('id', ParseObjectIdPipe) id: string) {
     return this.ordersService.complete(id, req.user);
   }
 }

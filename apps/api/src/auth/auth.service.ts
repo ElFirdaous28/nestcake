@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { UserRole } from '@shared-types';
@@ -95,11 +91,7 @@ export class AuthService {
   }
 
   async getMe(authUser: AuthUser) {
-    const user = await this.userModel
-      .findById(authUser.sub)
-      .select('-password')
-      .lean()
-      .exec();
+    const user = await this.userModel.findById(authUser.sub).select('-password').lean().exec();
 
     if (!user) {
       throw new UnauthorizedException('User not found');
@@ -108,10 +100,7 @@ export class AuthService {
     return user;
   }
 
-  private async createUser(
-    dto: RegisterUserDto | RegisterProfessionalDto,
-    role: UserRole,
-  ) {
+  private async createUser(dto: RegisterUserDto | RegisterProfessionalDto, role: UserRole) {
     const email = this.normalizeEmail(dto.email);
 
     const existing = await this.userModel.findOne({ email }).lean().exec();

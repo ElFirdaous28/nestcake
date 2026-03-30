@@ -71,11 +71,7 @@ describe('ProductsController', () => {
 
     const result = await controller.create(req, dto, file);
 
-    expect(productsServiceMock.create).toHaveBeenCalledWith(
-      req.user,
-      dto,
-      file,
-    );
+    expect(productsServiceMock.create).toHaveBeenCalledWith(req.user, dto, file);
     expect(result).toEqual(created);
   });
 
@@ -180,12 +176,7 @@ describe('ProductsController', () => {
 
     const result = await controller.update(req, id, dto, file);
 
-    expect(productsServiceMock.update).toHaveBeenCalledWith(
-      id,
-      req.user,
-      dto,
-      file,
-    );
+    expect(productsServiceMock.update).toHaveBeenCalledWith(id, req.user, dto, file);
     expect(result).toEqual(updated);
   });
 
@@ -217,15 +208,11 @@ describe('ProductsController', () => {
       },
     } as any;
     const id = '507f1f77bcf86cd799439134';
-    const error = new ForbiddenException(
-      'You can only manage your own products',
-    );
+    const error = new ForbiddenException('You can only manage your own products');
 
     productsServiceMock.remove.mockRejectedValue(error);
 
-    await expect(controller.remove(req, id)).rejects.toThrow(
-      ForbiddenException,
-    );
+    await expect(controller.remove(req, id)).rejects.toThrow(ForbiddenException);
     expect(productsServiceMock.remove).toHaveBeenCalledWith(id, req.user);
   });
 
@@ -245,11 +232,7 @@ describe('ProductsController', () => {
 
     const result = await controller.updateStatus(req, id, status);
 
-    expect(productsServiceMock.updateProductStatus).toHaveBeenCalledWith(
-      id,
-      req.user,
-      status,
-    );
+    expect(productsServiceMock.updateProductStatus).toHaveBeenCalledWith(id, req.user, status);
     expect(result).toEqual(updated);
   });
 
@@ -267,9 +250,7 @@ describe('ProductsController', () => {
 
     const result = await controller.publishAll(req);
 
-    expect(productsServiceMock.publishAllProducts).toHaveBeenCalledWith(
-      req.user,
-    );
+    expect(productsServiceMock.publishAllProducts).toHaveBeenCalledWith(req.user);
     expect(result).toEqual(response);
   });
 
@@ -281,17 +262,11 @@ describe('ProductsController', () => {
         role: UserRole.PROFESSIONAL,
       },
     } as any;
-    const error = new ForbiddenException(
-      'Only verified professionals can publish products',
-    );
+    const error = new ForbiddenException('Only verified professionals can publish products');
 
     productsServiceMock.publishAllProducts.mockRejectedValue(error);
 
-    await expect(controller.publishAll(req)).rejects.toThrow(
-      ForbiddenException,
-    );
-    expect(productsServiceMock.publishAllProducts).toHaveBeenCalledWith(
-      req.user,
-    );
+    await expect(controller.publishAll(req)).rejects.toThrow(ForbiddenException);
+    expect(productsServiceMock.publishAllProducts).toHaveBeenCalledWith(req.user);
   });
 });

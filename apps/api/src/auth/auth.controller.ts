@@ -43,10 +43,7 @@ export class AuthController {
     },
   })
   @Post('register/user')
-  async registerUser(
-    @Body() dto: RegisterUserDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async registerUser(@Body() dto: RegisterUserDto, @Res({ passthrough: true }) res: Response) {
     const auth = await this.authService.registerUser(dto);
     this.setTokenCookies(res, auth.accessToken, auth.refreshToken);
     return { accessToken: auth.accessToken, user: auth.user };
@@ -97,10 +94,7 @@ export class AuthController {
   })
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(
-    @Body() dto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const auth = await this.authService.login(dto);
     this.setTokenCookies(res, auth.accessToken, auth.refreshToken);
     return { accessToken: auth.accessToken, user: auth.user };
@@ -142,11 +136,7 @@ export class AuthController {
     return this.authService.getMe(req.user);
   }
 
-  private setTokenCookies(
-    res: Response,
-    accessToken: string,
-    refreshToken: string,
-  ) {
+  private setTokenCookies(res: Response, accessToken: string, refreshToken: string) {
     const secure = process.env.NODE_ENV === 'production';
 
     res.cookie('access_token', accessToken, {

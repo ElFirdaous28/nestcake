@@ -20,10 +20,7 @@ export class ProfessionalsService {
   }
 
   async findOne(id: string) {
-    const professional = await this.professionalModel
-      .findById(id)
-      .lean()
-      .exec();
+    const professional = await this.professionalModel.findById(id).lean().exec();
     if (!professional) {
       throw new NotFoundException('Professional not found');
     }
@@ -45,19 +42,13 @@ export class ProfessionalsService {
   }
 
   async updateMe(authUser: AuthUser, dto: UpdateMyProfessionalDto) {
-    const updateData = Object.fromEntries(
-      Object.entries(dto).filter(([, v]) => v !== undefined),
-    );
+    const updateData = Object.fromEntries(Object.entries(dto).filter(([, v]) => v !== undefined));
 
     const updated = await this.professionalModel
-      .findOneAndUpdate(
-        { userId: new Types.ObjectId(authUser.sub) },
-        updateData,
-        {
-          returnDocument: 'after',
-          runValidators: true,
-        },
-      )
+      .findOneAndUpdate({ userId: new Types.ObjectId(authUser.sub) }, updateData, {
+        returnDocument: 'after',
+        runValidators: true,
+      })
       .lean()
       .exec();
 
@@ -128,17 +119,13 @@ export class ProfessionalsService {
     return updated;
   }
 
-  async updateVerification(
-    professionalId: string,
-    dto: UpdateProfessionalVerificationDto,
-  ) {
+  async updateVerification(professionalId: string, dto: UpdateProfessionalVerificationDto) {
     const updated = await this.professionalModel
       .findByIdAndUpdate(
         professionalId,
         {
           verificationStatus: dto.verificationStatus,
-          verified:
-            dto.verificationStatus === ProfessionalVerificationStatus.VERIFIED,
+          verified: dto.verificationStatus === ProfessionalVerificationStatus.VERIFIED,
         },
         { returnDocument: 'after', runValidators: true },
       )

@@ -177,10 +177,7 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.PROFESSIONAL, UserRole.ADMIN)
   @Delete(':id')
-  remove(
-    @Req() req: Request & { user: AuthUser },
-    @Param('id', ParseObjectIdPipe) id: string,
-  ) {
+  remove(@Req() req: Request & { user: AuthUser }, @Param('id', ParseObjectIdPipe) id: string) {
     return this.productsService.remove(id, req.user);
   }
 

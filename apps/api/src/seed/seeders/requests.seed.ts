@@ -1,11 +1,7 @@
 import { Model } from 'mongoose';
 import { UserRole } from '@shared-types';
 
-export async function seedRequests(
-  requestModel: Model<any>,
-  users: any[],
-  allergies: any[],
-) {
+export async function seedRequests(requestModel: Model<any>, users: any[], allergies: any[]) {
   await requestModel.deleteMany({});
 
   const clientUsers = users.filter((user) => user.role === UserRole.CLIENT);
