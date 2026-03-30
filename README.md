@@ -1,159 +1,184 @@
-# Turborepo starter
+# 🎂 NestCake
 
-This Turborepo starter is maintained by the Turborepo core team.
+> A platform connecting customers with local bakeries and independent cake creators for personalized cake orders.
 
-## Using this example
+---
 
-Run the following command:
+## 📌 Overview
 
-```sh
-npx create-turbo@latest
+NestCake solves a real gap: finding quality, personalized cakes nearby is hard for customers, and small cake businesses struggle to reach a local audience beyond social media. NestCake bridges that gap with a dedicated marketplace for custom cake orders — weddings, birthdays, events, and more.
+
+Built as a fullstack JavaScript project (2025–2026 program).
+
+---
+
+## 🔗 Links
+
+| Resource | URL |
+|---|---|
+| 🌐 Frontend (deployed) | `YOUR_FRONTEND_URL` |
+| ⚙️ Backend API (deployed) | `YOUR_BACKEND_URL` |
+| 🎨 Figma Design | `YOUR_FIGMA_URL` |
+| 🖼️ Canva Presentation | `YOUR_CANVA_URL` |
+
+---
+
+## ✨ Features
+
+### For Customers
+- Browse and search bakeries by event type, budget, location(futur feature), dietary needs
+- Submit open requests (multiple bakers can propose) or order directly from a profile
+- Secure online payment via Stripe(futur feature),
+- Leave reviews and save favorite bakeries
+
+### For Bakers & Cake Businesses
+- Create a verified professional profile with portfolio photos
+- Receive and manage incoming orders
+- Update availability and run promotions
+- View customer reviews
+
+### For Admins
+- Verify professional profiles and content
+- Manage users, orders, and payments
+
+---
+
+## 🔄 Order Workflow
+
+```
+Customer submits request
+       ↓
+Professionals send proposals
+       ↓
+Customer accepts → Order created (AWAITING_PAYMENT)
+       ↓
+Customer pays 100% (held in escrow) → Status: IN_PROGRESS
+       ↓
+Professional marks order READY
+       ↓
+Customer confirms reception
+       ↓
+Platform releases payment → (Optional) Customer leaves review
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## 🛠️ Tech Stack
 
-### Apps and Packages
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js (React) |
+| Backend | Node.js / NestJs|
+| Database | MongoDB + Mongoose |
+| Auth | JWT |
+| Payment | Stripe |
+| State Management | Context API |
+| Containerization | Docker |
+| CI/CD | GitHub Actions Pipeline |
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+---
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## 🚀 Getting Started
 
-### Utilities
+### Prerequisites
+- Node.js 18+
+- MongoDB
+- Docker (optional)
 
-This Turborepo has some additional tools already setup for you:
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+### Installation
 
-### Build
+```bash
+# Clone the repo
+git clone https://github.com/ElFirdaous28/nestcake
+cd nestcake
 
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+# Install all dependencies (monorepo — run from root)
+pnpm install
 ```
 
-Without global `turbo`, use your package manager:
+### Environment Variables
 
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env.local
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Then fill in your values in each file.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
 
-```sh
-turbo build --filter=docs
+### Run Locally
+
+```bash
+# Run both apps in parallel from the root
+pnpm dev
+
+# Or run individually
+pnpm --filter api start:dev       # NestJS API  → http://localhost:5000
+pnpm --filter web dev       # Next.js web → http://localhost:3000
 ```
 
-Without global `turbo`:
+### Seed the Database
 
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+```bash
+pnpm --filter api seed
 ```
 
-### Develop
+### Run with Docker
 
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
+```bash
+docker-compose up --build
 ```
 
-Without global `turbo`, use your package manager:
+---
 
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+## 🧪 Tests
+
+Unit tests cover every controller in the API.
+
+```bash
+# Run all tests
+pnpm --filter api test
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## 📁 Project Structure
 
-```sh
-turbo dev --filter=web
 ```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+nestcake/
+├── apps/
+│   ├── api/                        # NestJS backend
+│   │   └── src/
+│   │       ├── auth/               # JWT auth, guards, decorators
+│   │       ├── users/
+│   │       ├── professionals/      # Baker profiles & verification
+│   │       ├── products/           # Cake catalog
+│   │       ├── requests/           # Open customer requests
+│   │       ├── proposals/          # Baker proposals on requests
+│   │       ├── orders/
+│   │       ├── payments/           # Stripe integration
+│   │       ├── reviews/
+│   │       ├── notifications/      # WebSocket gateway
+│   │       ├── categories/
+│   │       ├── allergies/
+│   │       └── seed/               # Database seeders
+│   └── web/                        # Next.js frontend
+│       ├── app/
+│       │   ├── (auth)/             # Login, Register
+│       │   ├── (protected)/
+│       │   │   ├── admin/          # Admin dashboard
+│       │   │   ├── client/         # Customer dashboard
+│       │   │   └── professional/   # Baker dashboard
+│       │   └── products/           # Public catalog
+│       └── src/
+│           ├── components/
+│           ├── contexts/           # AuthContext, SocketContext
+│           ├── hooks/              # useOrders, useRequests, etc.
+│           └── services/           # API service layer
+├── packages/
+│   └── shared-types/               # Enums & types shared across apps
+├── docker-compose.yml
+├── turbo.json
+└── pnpm-workspace.yaml
 ```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
